@@ -6,8 +6,8 @@ clear
 clc
 close
 
-addpath('C:\Users\samue\Documents\Git\DynamixelSDK\realRobot')
-addpath('C:\Users\samue\Documents\Git\DynamixelSDK\simulatedRobot')
+addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\realRobot')
+addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\simulatedRobot')
 
 
 %% Setup Frames and Joints of the simulated robot
