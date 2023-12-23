@@ -1,4 +1,4 @@
-classdef SimulatedRobot < handle
+classdef VirtualRobot < handle
     % SimulatedRobot is a MATLAB class that represents a robot manipulator 
     % in a 3D environment. It provides methods for computing forward 
     % kinematics, Jacobian matrices and displaying the robot configuration 
@@ -17,9 +17,9 @@ classdef SimulatedRobot < handle
 
         workspaceResolution = 0.13;
         workspaceTolerance = 0.02;
-        joint_limits = [-pi/6, pi/6;  % Currently severly limited by shoulder joint stability
-                        -pi/6, pi/6; 
-                        -pi, pi; 
+        joint_limits = [-pi/4, pi/4;
+                        -pi/4, pi/4; 
+                        -2*pi, 2*pi; 
                         -(4/6)*pi, (4/6)*pi];
 
         % Workspace
@@ -28,14 +28,14 @@ classdef SimulatedRobot < handle
     end
 
     methods
-        function obj = SimulatedRobot()
+        function obj = VirtualRobot()
             %% Setup Frames and Joints of the simulated robot
             orig_frame = CustomFrame([0; 0; 0], [], 'Origin');
             joint1 = CustomJoint([0; 0; 83.51], orig_frame, 'Joint 1', 'y');
             joint2 = CustomJoint([0;0;0], joint1, 'Joint 2', 'x');
-            joint3 = CustomJoint([0;0;119.35], joint2, 'Joint 3', 'z');
-            joint4 = CustomJoint([0;0;163.99], joint3, 'Joint 4', 'x');
-            endeffector_frame = CustomFrame([0;0;218.86], joint4, 'Endeffector');
+            joint3 = CustomJoint([0;0;150.03], joint2, 'Joint 3', 'z');
+            joint4 = CustomJoint([0;0;157.90], joint3, 'Joint 4', 'x');
+            endeffector_frame = CustomFrame([0;0;220.40], joint4, 'Endeffector');
             
             %% Setup Links of the simulated robot
             numLinks = 5; % Number of links
@@ -128,7 +128,7 @@ classdef SimulatedRobot < handle
             % Compute positions for each sample
             parfor i = 1:numSamples
                 q = [Q1(i); Q2(i); Q3(i); Q4(i)];
-                workspace(:, i) = SimulatedRobot.forwardKinematicsNumeric(q);
+                workspace(:, i) = VirtualRobot.forwardKinematicsNumeric(q);
             end
 
 
@@ -191,7 +191,7 @@ classdef SimulatedRobot < handle
 
         function singularityBool = checkSingularity(q)
             % Check for singularity
-            J = SimulatedRobot.getJacobianNumeric(q);
+            J = VirtualRobot.getJacobianNumeric(q);
             pinvJ = pinv(J);
 
             if norm(J)*norm(pinvJ) > 25
@@ -209,7 +209,7 @@ classdef SimulatedRobot < handle
         end
 
         function [oxE] = forwardKinematicsNumeric(q)
-            R = {SimulatedRobot.roty(q(1)), SimulatedRobot.rotx(q(2)), SimulatedRobot.rotz(q(3)), SimulatedRobot.rotx(q(4))};
+            R = {VirtualRobot.roty(q(1)), VirtualRobot.rotx(q(2)), VirtualRobot.rotz(q(3)), VirtualRobot.rotx(q(4))};
             x = [    0         0         0         0         0
                      0         0         0         0         0
                 83.5100         0  119.3500  163.9900  218.8600];
@@ -236,10 +236,10 @@ classdef SimulatedRobot < handle
                 q_minus(i) = q_minus(i) - delta_q;
                 
                 % Compute forward kinematics for q_plus
-                oxE_plus = SimulatedRobot.forwardKinematicsNumeric(q_plus);
+                oxE_plus = VirtualRobot.forwardKinematicsNumeric(q_plus);
                 
                 % Compute forward kinematics for q_minus
-                oxE_minus = SimulatedRobot.forwardKinematicsNumeric(q_minus);
+                oxE_minus = VirtualRobot.forwardKinematicsNumeric(q_minus);
                 
                 % Compute derivative
                 J(:, i) = (oxE_plus - oxE_minus) / (2 * delta_q);

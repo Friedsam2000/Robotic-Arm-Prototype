@@ -208,7 +208,6 @@ classdef RealRobot < handle
 
             servoVelocities = [omega_1;omega_2;omega_3;omega_4];
 
-
         end
     end
 end

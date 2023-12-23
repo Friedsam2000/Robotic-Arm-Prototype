@@ -10,9 +10,9 @@ classdef PathPlanner2D < handle
     end
     
     methods
-        function obj = PathPlanner2D(simRobot, z)
+        function obj = PathPlanner2D(virtualRobot, z)
             % Constructor
-            obj.robot = simRobot;
+            obj.robot = virtualRobot;
             obj.height = z;
             obj.segments = obj.calculateWorkspaceSlice();
         end

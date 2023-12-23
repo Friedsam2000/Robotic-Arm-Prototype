@@ -1,19 +1,19 @@
-clearvars -except simulatedRobot
+clearvars -except virtualRobot
 clc
 close all
 
 addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\RealRobot\src')
-addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\SimulatedRobot\src')
+addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\VirtualRobot\src')
 
 %% Setup simulated robot, controller, planner, and trajectory generator
 
 % Initialize the robot
-if ~exist('simulatedRobot','var')
-    simulatedRobot = SimulatedRobot();
+if ~exist('virtualRobot','var')
+    virtualRobot = VirtualRobot();
 end
 
 % Initialize the controller
-controller = NullspaceController(simulatedRobot);
+controller = NullspaceController(virtualRobot);
 
 %% Connect real robot
 realRobot = RealRobot();
@@ -28,18 +28,18 @@ pause(1)
 realRobot.setJointVelocities([0,0,0,0]);
 
 % Set simulated Robot to same config as real robot
-simulatedRobot.setQ(realRobot.getQ);
+virtualRobot.setQ(realRobot.getQ);
 
 
 %% Create a static goal position
 x_desired = [200;200;400];
 % Plot the desired point
-simulatedRobot.draw(0)
+virtualRobot.draw(0)
 scatter3(x_desired(1),x_desired(2),x_desired(3), 30, 'filled', 'm');
-figure(simulatedRobot.fig);
+figure(virtualRobot.fig);
 
 % Plot the workspace
-simulatedRobot.visualizeWorkspace;
+virtualRobot.visualizeWorkspace;
 
 %% Control Loop
 % Init array for storing tcp positions
@@ -51,23 +51,23 @@ while 1
 
     % Update the simulated Robot
     q = realRobot.getQ;
-    simulatedRobot.setQ(q);
+    virtualRobot.setQ(q);
    
     % Compute q_dot with controller
-    q_dot = controller.computeDesiredJointVelocity(simulatedRobot, x_desired,  NaN , 0);
+    q_dot = controller.computeDesiredJointVelocity(virtualRobot, x_desired,  NaN , 0);
     
     % Set q_dot to real Robot
     realRobot.setJointVelocities(q_dot);
 
     % Display the robot
-    tcp_positions(:,step) = simulatedRobot.forwardKinematicsNumeric(q);
+    tcp_positions(:,step) = virtualRobot.forwardKinematicsNumeric(q);
     plot3(tcp_positions(1,1:step), tcp_positions(2,1:step), tcp_positions(3,1:step), 'k');
-    simulatedRobot.draw(0);
-    simulatedRobot.frames(end).draw;
+    virtualRobot.draw(0);
+    virtualRobot.frames(end).draw;
     drawnow limitrate
 
     % Print the distance to the goal
-    distance_to_goal = norm(x_desired-simulatedRobot.forwardKinematicsNumeric(q));
+    distance_to_goal = norm(x_desired-virtualRobot.forwardKinematicsNumeric(q));
     fprintf('Distance to goal: %.0f mm \n', distance_to_goal);
 
     step = step + 1;

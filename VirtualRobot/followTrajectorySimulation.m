@@ -1,20 +1,20 @@
-clearvars -except simulatedRobot
+clearvars -except virtualRobot
 clc
 close all
 
-addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\SimulatedRobot\src')
+addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\VirtualRobot\src')
 
 %% Setup simulated robot, controller, planner, and trajectory generator
 
-% Initialize the simulatedRobot
-if ~exist('simulatedRobot','var')
-    simulatedRobot = SimulatedRobot();
+% Initialize the virtualRobot
+if ~exist('virtualRobot','var')
+    virtualRobot = VirtualRobot();
 end
-% Set the simulatedRobot to a non-singularity position
-simulatedRobot.setQ([0.3; 0.3; 0.5; 0.5])
+% Set the virtualRobot to a non-singularity position
+virtualRobot.setQ([0.3; 0.3; 0.5; 0.5])
 
 % Initialize the controller
-controller = NullspaceController(simulatedRobot);
+controller = NullspaceController(virtualRobot);
  
 %% Create a trajectroy
 v_average = 50; %[mm/s]
@@ -22,23 +22,23 @@ dt = 0.15;
 traj_z = 300;
 
 % Initialize the planner
-planner = PathPlanner2D(simulatedRobot, traj_z);
+planner = PathPlanner2D(virtualRobot, traj_z);
 planner.drawPath;
 waypoint_list = planner.getPath;
 
 % Initialize the trajectory generator
-trajectoryGenerator = TrajectoryGenerator(simulatedRobot, waypoint_list, v_average,dt);
+trajectoryGenerator = TrajectoryGenerator(virtualRobot, waypoint_list, v_average,dt);
 [x_d, v_d, t] = trajectoryGenerator.getTrajectory;
 total_timesteps = ceil(t(end)/dt);
 
 % Plot the desired trajectory
-simulatedRobot.draw(0)
+virtualRobot.draw(0)
 plot3(x_d(1,:),x_d(2,:),x_d(3,:),'m');
 scatter3(waypoint_list(1,:),waypoint_list(2,:),waypoint_list(3,:), 30, 'filled', 'm');
-figure(simulatedRobot.fig);
+figure(virtualRobot.fig);
 
 % Plot the workspace
-simulatedRobot.visualizeWorkspace;
+virtualRobot.visualizeWorkspace;
 
 %% Control Loop
 
@@ -52,15 +52,15 @@ step = 1;
 while step < total_timesteps
 
     % Simulation
-    q = simulatedRobot.getQ;
-    q_dot = controller.computeDesiredJointVelocity(simulatedRobot, x_d(:,step),  NaN , v_d(:,step));
-    simulatedRobot.setQ(q + q_dot*dt)
+    q = virtualRobot.getQ;
+    q_dot = controller.computeDesiredJointVelocity(virtualRobot, x_d(:,step),  NaN , v_d(:,step));
+    virtualRobot.setQ(q + q_dot*dt)
 
-    % Display the simulatedRobot
-    tcp_positions(:,step) = simulatedRobot.forwardKinematicsNumeric(q);
+    % Display the virtualRobot
+    tcp_positions(:,step) = virtualRobot.forwardKinematicsNumeric(q);
     plot3(tcp_positions(1,1:step), tcp_positions(2,1:step), tcp_positions(3,1:step), 'k');
-    simulatedRobot.draw(0);
-    simulatedRobot.frames(end).draw;
+    virtualRobot.draw(0);
+    virtualRobot.frames(end).draw;
     drawnow limitrate
 
     % Wait if simulation is faster than real time
