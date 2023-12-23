@@ -126,7 +126,7 @@ classdef RealRobot < handle
 
                 % Check if joints converged
                 for i = 1:4
-                    if q(i) <= precision
+                    if abs(q(i)) <= precision
                         jointsConverged(i) = 1;
                     end
                 end
