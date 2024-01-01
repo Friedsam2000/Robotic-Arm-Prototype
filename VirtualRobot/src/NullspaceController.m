@@ -3,7 +3,7 @@ classdef NullspaceController < handle
         % Constants with default values
         Kp = 1;
         % Conifugre maximum absolut joint velocities % RAD/s
-        q_dot_max = [0.1;0.1;0.2;0.2];
+        q_dot_max = [0.1;0.1;0.2;0.2]*2;
 
         weight_z = 0;
         weight_preffered_config = 0.1;
@@ -51,7 +51,7 @@ classdef NullspaceController < handle
             num_joints = length(obj.q_dot_max);
             obj.delta_matrix = obj.delta_q_numeric_diff * eye(num_joints);
 
-            % Extract q_max, q_min from passed SimulatedRobot object
+            % Extract q_max, q_min from passed VirtualRobot object
             obj.q_max = robot.joint_limits(:,2);
             obj.q_min = robot.joint_limits(:,1);
 
@@ -62,7 +62,7 @@ classdef NullspaceController < handle
 
             % Get current end-effector position and robot configuration once
             q = sr.getQ;
-            x_current = SimulatedRobot.forwardKinematicsNumeric(q);
+            x_current = VirtualRobot.forwardKinematicsNumeric(q);
             
             % Compute desired effective workspace velocity
             v_d_eff = obj.computeEffectiveVelocity(x_desired, x_current, v_desired);
@@ -84,7 +84,7 @@ classdef NullspaceController < handle
             dHdQ = obj.weight_z * dHdQ_z + obj.weight_preffered_config*dHdQ_preferred_config + obj.weight_joint_limit * dHdQ_joint_limit;
 
             % Compute Jacobian
-            J = SimulatedRobot.getJacobianNumeric(q);
+            J = VirtualRobot.getJacobianNumeric(q);
 
             % Compute q_dot
             if obj.use_nakamura
@@ -136,7 +136,7 @@ classdef NullspaceController < handle
         function H = H_z_desired(~, q, z_desired)
 
             z_desired_normalized = z_desired/norm(z_desired);
-            g_A_tcp = SimulatedRobot.roty(q(1)) * SimulatedRobot.rotx(q(2)) * SimulatedRobot.rotz(q(3)) * SimulatedRobot.rotx(q(4));
+            g_A_tcp = VirtualRobot.roty(q(1)) * VirtualRobot.rotx(q(2)) * VirtualRobot.rotz(q(3)) * VirtualRobot.rotx(q(4));
             z_q = g_A_tcp * [0;0;1];
             z_q_normalized = z_q/norm(z_q);
             % H = 1/2 * (z(q) - z_desired)^2 
