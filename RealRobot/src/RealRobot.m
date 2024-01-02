@@ -2,7 +2,12 @@ classdef RealRobot < handle
 
     properties
         
-        ServoZeroPositions = [-inf; -inf; -inf; -inf]; % RAD
+        ServoZeroPositions = [1.04004341168609
+;4.27675668404250
+;3.24898517101937
+;2.79032295849114];
+        
+        % RAD
         % [0] ShoulderServoOne --> located in x-direction  (front)
         % [1] ShoulderServoTwo (back)
         % [2] YawServo
@@ -76,10 +81,9 @@ classdef RealRobot < handle
 
         end
 
-        function goToZeroPosition(obj)
-            % Uses a PID controller for the servo position to return to the previously stored zero
-            % position.
-
+        function setQ(obj, q_desired)
+            % Uses a PID controller for the servo position to return to a
+            % position
 
             % Check if Zero Position has been set
             if isinf(sum(obj.ServoZeroPositions))
@@ -87,7 +91,7 @@ classdef RealRobot < handle
                 return
             end
 
-            disp("Returning to zero Position...")
+            disp("Approaching Position...")
 
             % Use a default precision of 1 °
             precision_deg = 0.3;
@@ -112,18 +116,18 @@ classdef RealRobot < handle
                 q = obj.getQ;
    
                 % Calculate remaining errors
-                currentError = q; % As they should become 0
+                currentError = q_desired-q; % As they should become 0
                 integralError = integralError + currentError;
                 derivativeError = currentError - prevError;
                 prevError = currentError;
                
                 %Set velocites
                 PID_velocities = P_Gain * currentError + I_Gain * integralError + D_Gain * derivativeError;
-                obj.setJointVelocities(-PID_velocities);
+                obj.setJointVelocities(PID_velocities);
 
                 % Check if joints converged
                 for i = 1:4
-                    if abs(q(i)) <= precision
+                    if abs(currentError(i)) <= precision
                         jointsConverged(i) = 1;
                     end
                 end
@@ -131,11 +135,14 @@ classdef RealRobot < handle
                 % If all joints converged disable the torque and return
                 if sum(jointsConverged) == 4
                     obj.setJointVelocities([0;0;0;0])
-                    obj.torqueEnableDisable(0)
-                    fprintf("All joints reset to zero pos. \n")
+                    fprintf("All joints converged \n")
                     break
                 end
             end
+        end
+
+        function goToZeroPosition(obj)
+           obj.setQ([0;0;0;0]);
         end
 
         function setJointVelocities(obj,jointVelocities)
@@ -173,7 +180,7 @@ classdef RealRobot < handle
             delta_phi_1 = phi_1_0 - phi_1;
             delta_phi_2 = phi_2_0 - phi_2;
             q_1 = (delta_phi_1 - delta_phi_2)/obj.i_shoulder;
-            q_2 = (delta_phi_1 + delta_phi_2)/obj.i_shoulder;
+            q_2 = -(delta_phi_1 + delta_phi_2)/obj.i_shoulder;
 
             q_3 = phi_3 - phi_3_0;
             q_4 = (phi_4 - phi_4_0)/obj.i_elbow;
@@ -193,8 +200,8 @@ classdef RealRobot < handle
             omega_3 = q_3_dot;
             omega_4 = q_4_dot*obj.i_elbow;
 
-            omega_1 = -0.5*(q_1_dot+q_2_dot) * obj.i_shoulder;
-            omega_2 = +0.5*(q_1_dot-q_2_dot) * obj.i_shoulder;
+            omega_1 = 0.5*(q_2_dot-q_1_dot) * obj.i_shoulder;
+            omega_2 = +0.5*(q_2_dot+q_1_dot) * obj.i_shoulder;
 
             servoVelocities = [omega_1;omega_2;omega_3;omega_4];
 

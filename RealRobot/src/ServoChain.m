@@ -212,7 +212,7 @@ classdef ServoChain < handle
             % VELOCITY_VAL is a value in 4 byte (256^4) continuous range
             % A value of (256^4) / 2 is zero, values bigger are positive,
             % values smaller are negative.
-            maxrange = 4294967295; % 4-byte
+            maxrange = 256^4; % 4-byte
             if VELOCITY_VAL < 0
                 VELOCITY_VAL = maxrange+VELOCITY_VAL;
             end
