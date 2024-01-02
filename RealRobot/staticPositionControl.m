@@ -52,6 +52,11 @@ while 1
     % Update the simulated Robot
     q = realRobot.getQ;
     virtualRobot.setQ(q);
+    tcp_positions(:,step) = virtualRobot.getEndeffectorPos;
+    plot3(tcp_positions(1,1:step), tcp_positions(2,1:step), tcp_positions(3,1:step), 'k');
+    virtualRobot.draw(0);
+    virtualRobot.frames(end).draw;
+    drawnow limitrate
    
     % Compute q_dot with controller
     q_dot = controller.computeDesiredJointVelocity(virtualRobot, x_desired,  NaN , 0);
@@ -59,16 +64,15 @@ while 1
     % Set q_dot to real Robot
     realRobot.setJointVelocities(q_dot);
 
-    % Display the robot
-    tcp_positions(:,step) = virtualRobot.forwardKinematicsNumeric(q);
-    plot3(tcp_positions(1,1:step), tcp_positions(2,1:step), tcp_positions(3,1:step), 'k');
-    virtualRobot.draw(0);
-    virtualRobot.frames(end).draw;
-    drawnow limitrate
-
     % Print the distance to the goal
-    distance_to_goal = norm(x_desired-virtualRobot.forwardKinematicsNumeric(q));
+    distance_to_goal = norm(x_desired-virtualRobot.getEndeffectorPos);
     fprintf('Distance to goal: %.0f mm \n', distance_to_goal);
+
+    if distance_to_goal < 2
+        realRobot.goToZeroPosition;
+        break
+    end
 
     step = step + 1;
 end
+

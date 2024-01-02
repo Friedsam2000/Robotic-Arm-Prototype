@@ -8,6 +8,8 @@ classdef NullspaceController < handle
         exponential_factor_joint_limit = 0;
         weight_joint_limit = 0;
 
+        limit_endeffector_speed = 10; % mm/s
+
         delta_q_numeric_diff = 0.001;
 
         use_nakamura = false;
@@ -31,6 +33,8 @@ classdef NullspaceController < handle
             addParameter(p, 'weight_preffered_config', obj.weight_preffered_config);
             addParameter(p, 'exponential_factor_joint_limit', obj.exponential_factor_joint_limit);
             addParameter(p, 'weight_joint_limit', obj.weight_joint_limit);
+            addParameter(p, 'limit_endeffector_speed', obj.limit_endeffector_speed)
+
 
             parse(p, varargin{:});
             
@@ -42,6 +46,7 @@ classdef NullspaceController < handle
             obj.weight_preffered_config = p.Results.weight_preffered_config;
             obj.exponential_factor_joint_limit = p.Results.exponential_factor_joint_limit;
             obj.weight_joint_limit = p.Results.weight_joint_limit;
+            obj.limit_endeffector_speed = p.Results.limit_endeffector_speed
 
             % Pre-compute and store the perturbation matrix
             num_joints = 4;
@@ -126,6 +131,12 @@ classdef NullspaceController < handle
             
             % Compute effective workspace velocity
             v_d_eff = error * obj.Kp + v_desired;
+
+            % Limit endeffector speed
+            speed_magnitude = norm(v_d_eff);
+            if speed_magnitude > obj.limit_endeffector_speed
+                v_d_eff = v_d_eff * (obj.limit_endeffector_speed / speed_magnitude);
+            end
             
         end
         
@@ -226,5 +237,6 @@ classdef NullspaceController < handle
             end
         end
 
+        
     end
 end
