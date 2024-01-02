@@ -1,6 +1,6 @@
 classdef PathPlanner2D < handle
     properties (Access = private)
-        robot         % Instance of SimulatedRobot
+        virtualRobot  % Instance of VirtualRobot
         height        % Given height z for the 2D slice
         pathX         % X coordinates of the drawn path
         pathY         % Y coordinates of the drawn path
@@ -12,9 +12,9 @@ classdef PathPlanner2D < handle
     methods
         function obj = PathPlanner2D(virtualRobot, z)
             % Constructor
-            obj.robot = virtualRobot;
+            obj.virtualRobot = virtualRobot;
             obj.height = z;
-            obj.segments = obj.calculateWorkspaceSlice();
+            obj.segments = obj.calculateWorkspaceSlice;
         end
         
         function waypoint_list = getPath(obj)
@@ -29,7 +29,6 @@ classdef PathPlanner2D < handle
             z = obj.pathZ';
 
             waypoint_list = [x;y; z];
-
 
         end
 
@@ -65,8 +64,8 @@ classdef PathPlanner2D < handle
                 plot(seg(:, 1), seg(:, 2), 'g-', 'LineWidth', 2);
             end
 
-             % Get current robot position in the XY-plane
-            currentPosition = obj.robot.forwardKinematicsNumeric(obj.robot.getQ);
+             % Get current virtualRobot position in the XY-plane
+            currentPosition = obj.virtualRobot.getEndeffectorPos;
             currentX = currentPosition(1);
             currentY = currentPosition(2);
         
@@ -118,8 +117,8 @@ classdef PathPlanner2D < handle
             % Calculate the intersection of the robot's workspace with the plane defined by z
 
             segments = {};
-            for i = 1:size(obj.robot.boundaryK, 1)
-                tri = obj.robot.boundaryVertices(obj.robot.boundaryK(i, :), :);  % Extract triangle vertices
+            for i = 1:size(obj.virtualRobot.boundaryK, 1)
+                tri = obj.virtualRobot.boundaryVertices(obj.virtualRobot.boundaryK(i, :), :);  % Extract triangle vertices
                 
                 % Check if the triangle intersects the plane
                 isAbove = tri(:, 3) > obj.height;

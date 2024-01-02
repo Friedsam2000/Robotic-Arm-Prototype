@@ -8,7 +8,7 @@ addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\VirtualRobot\src')
 
 % Initialize the virtualRobot
 if ~exist('virtualRobot','var')
-    virtualRobot = VirtualRobot();
+    virtualRobot = VirtualRobot;
 end
 % Set the virtualRobot to a non-singularity position
 virtualRobot.setQ([0.3; 0.3; 0.5; 0.5])
@@ -17,9 +17,9 @@ virtualRobot.setQ([0.3; 0.3; 0.5; 0.5])
 controller = NullspaceController(virtualRobot);
  
 %% Create a trajectroy
-v_average = 50; %[mm/s]
+v_average = 80; %[mm/s]
 dt = 0.15;
-traj_z = 300;
+traj_z = 400;
 
 % Initialize the planner
 planner = PathPlanner2D(virtualRobot, traj_z);
@@ -27,7 +27,7 @@ planner.drawPath;
 waypoint_list = planner.getPath;
 
 % Initialize the trajectory generator
-trajectoryGenerator = TrajectoryGenerator(virtualRobot, waypoint_list, v_average,dt);
+trajectoryGenerator = TrajectoryGenerator(waypoint_list, v_average,dt);
 [x_d, v_d, t] = trajectoryGenerator.getTrajectory;
 total_timesteps = ceil(t(end)/dt);
 
@@ -57,10 +57,10 @@ while step < total_timesteps
     virtualRobot.setQ(q + q_dot*dt)
 
     % Display the virtualRobot
-    tcp_positions(:,step) = virtualRobot.forwardKinematicsNumeric(q);
+    tcp_positions(:,step) = virtualRobot.getEndeffectorPos;
     plot3(tcp_positions(1,1:step), tcp_positions(2,1:step), tcp_positions(3,1:step), 'k');
-    virtualRobot.draw(0);
-    virtualRobot.frames(end).draw;
+    virtualRobot.draw;
+    % virtualRobot.frames(end).draw;
     drawnow limitrate
 
     % Wait if simulation is faster than real time

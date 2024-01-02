@@ -12,8 +12,14 @@ classdef CustomLink < handle
             obj.endFrame = endFrame;
             obj.color = color;
             obj.lineHandle = [];  % Initialize line handle as empty
-        end
-       
+       end
+
+       function newObj = copy(obj)
+            % Assume startFrame and endFrame are already copied and passed as arguments
+            newObj = CustomLink([], [], obj.color);
+            % Note: You need to set startFrame and endFrame later in the VirtualRobot copy method
+       end
+     
         function draw(obj)
             % Get start and end positions
             startPos = obj.startFrame.getGlobalPosition;

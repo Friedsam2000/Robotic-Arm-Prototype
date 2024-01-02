@@ -1,6 +1,5 @@
 classdef TrajectoryGenerator < handle
     properties (Access = private)
-        robot
         pathX % [mm] row vector
         pathY % [mm] row vector
         pathZ % [mm] row vector
@@ -13,11 +12,10 @@ classdef TrajectoryGenerator < handle
     
     methods
 
-        function obj = TrajectoryGenerator(robot, waypoint_list, averageEndeffectorSpeed, timeIncrement)
+        function obj = TrajectoryGenerator(waypoint_list, averageEndeffectorSpeed, timeIncrement)
             obj.pathX = waypoint_list(1,:);
             obj.pathY = waypoint_list(2,:);
             obj.pathZ = waypoint_list(3,:);
-            obj.robot = robot;
             obj.averageEndeffectorSpeed = averageEndeffectorSpeed;
             obj.timeIncrement = timeIncrement;
 

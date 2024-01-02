@@ -1,41 +1,42 @@
 classdef VirtualRobot < handle
-    % SimulatedRobot is a MATLAB class that represents a robot manipulator 
-    % in a 3D environment. It provides methods for computing forward 
-    % kinematics, Jacobian matrices and displaying the robot configuration 
-    % in a 3D plot. 
-    %
-    % Each instance of the class has an array of Joint objects representing 
-    % the robot's joints, an array of Link objects representing the physical 
-    % connections between joints, and an array of Frame objects representing 
-    % additional frames of the robot.
 
-    properties
-        joints  % An array of Joint objects, defining the joints of the robot
+    properties (SetAccess = private, Hidden)
         links   % An array of Link objects, defining the physical connections between joints
-        frames % An array of Frame objects, defining additional frames of the robot
+        frames % An array of Frame objects, defining joints and frames
         fig % The figure in which everything is visualized
 
-        workspaceResolution = 0.13;
-        workspaceTolerance = 0.02;
         joint_limits = [-pi/4, pi/4;
                         -pi/4, pi/4; 
                         -2*pi, 2*pi; 
-                        -(4/6)*pi, (4/6)*pi];
+                        -(5/6)*pi, (5/6)*pi];
 
+        q = [0;0;0;0]; % Joint Angles
         % Workspace
+        workspaceResolution = 0.13;
+        workspaceTolerance = 0.02;
         boundaryK % A property to store the computed 3D boundary of the workspace
         boundaryVertices % A property to store the vertices of the boundary
     end
 
-    methods
-        function obj = VirtualRobot()
+    methods (Access = public)
+        
+        function obj = VirtualRobot(varargin)
+            
+            % Set default values for optional arguments
+            calc_workspace = 1;
+        
+            % Check if optional arguments were provided and update accordingly
+            if length(varargin) >= 1
+                calc_workspace = varargin{1};
+            end
+
             %% Setup Frames and Joints of the simulated robot
-            orig_frame = CustomFrame([0; 0; 0], [], 'Origin');
-            joint1 = CustomJoint([0; 0; 83.51], orig_frame, 'Joint 1', 'y');
-            joint2 = CustomJoint([0;0;0], joint1, 'Joint 2', 'x');
-            joint3 = CustomJoint([0;0;150.03], joint2, 'Joint 3', 'z');
-            joint4 = CustomJoint([0;0;157.90], joint3, 'Joint 4', 'x');
-            endeffector_frame = CustomFrame([0;0;220.40], joint4, 'Endeffector');
+            orig_frame = CustomFrame([0; 0; 0], [], 'Origin', []);
+            joint1 = CustomFrame([0; 0; 94.5127], orig_frame, 'Joint 1', 'y');
+            joint2 = CustomFrame([0;0;0], joint1, 'Joint 2', 'x');
+            joint3 = CustomFrame([0;0;150.0277], joint2, 'Joint 3', 'z');
+            joint4 = CustomFrame([0;0;157.8995], joint3, 'Joint 4', 'x');
+            endeffector_frame = CustomFrame([0;0;220.40], joint4, 'Endeffector', []);
             
             %% Setup Links of the simulated robot
             numLinks = 5; % Number of links
@@ -47,32 +48,56 @@ classdef VirtualRobot < handle
             link4 = CustomLink(joint3, joint4, repmat(grayLevels(4), 1, 3));
             link5 = CustomLink(joint4, endeffector_frame, repmat(grayLevels(5), 1, 3));
 
-            obj.joints =  [joint1, joint2, joint3, joint4];
             obj.links = [link1, link2, link3, link4, link5];
-            obj.frames = [orig_frame, endeffector_frame];
+            obj.frames = [orig_frame, joint1, joint2, joint3, joint4, endeffector_frame];
 
             % calculate workspace
-            obj.calculateWorkspace;
+            if calc_workspace
+                obj.calculateWorkspaceParallel;
+                %  Alternatively use
+                 % obj.calculateWorkspaceSerial;
+            end
+
         end
 
         function q = getQ(obj)
-            q = vertcat(obj.joints.angle);
+            q = obj.q;
         end
 
-        function setQ(obj, q)
-            arrayfun(@(joint, angle) joint.setAngle(angle), obj.joints, q');
+        function setQ(obj, q_desired)
+
+            q_desired = mod(q_desired + 2*pi, 4*pi) - 2*pi;  % Convert the desired q to the range [-2pi, 2pi]
+            for i = 1:4
+                obj.frames(i+1).setAngle(q_desired(i));
+                obj.q(i) = q_desired(i);
+            end
+
         end
 
-        function draw(obj, draw_frames)
+        function draw(obj, varargin)
             % The display method updates and displays all joints and links
             % Activates hold on, no hold off
             obj.ensureFigureExists();
 
-            if draw_frames
-                arrayfun(@(x) x.draw, obj.joints);
-                arrayfun(@(x) x.draw, obj.frames);
+             % Set default values for optional arguments
+            draw_frames = 0;
+        
+            % Check if optional arguments were provided and update accordingly
+            if length(varargin) >= 1
+                draw_frames = varargin{1};
             end
-            arrayfun(@(x) x.draw, obj.links); 
+            
+            if draw_frames
+                for i = 1:length(obj.frames)
+                    obj.frames(i).draw
+                end
+            end
+
+            for i = 1:length(obj.links)
+                obj.links(i).draw
+            end
+
+            
         end
 
         function visualizeWorkspace(obj)
@@ -87,6 +112,247 @@ classdef VirtualRobot < handle
             alpha 0.1  % Make it slightly transparent
         end
    
+        function [g_r_EE] = getEndeffectorPos(obj)
+            g_r_EE = obj.frames(end).getGlobalPosition;
+        end
+
+        function [elevation] = getShoulderElevation(obj)
+            % Calculate the elevation of the shoulder joint in spherical
+            % coordinates in RAD from q
+            q = obj.getQ;
+            elevation = pi/2 - acos(cos(q(2))*cos(q(1)));           
+        end
+
+    end
+
+    methods (Access = public, Hidden)
+
+        function newObj = copy(obj)
+            newObj = VirtualRobot(0); % Create a new VirtualRobot instance
+    
+            % Step 1: Deep copy of frames
+            for i = 1:length(obj.frames)
+                newObj.frames(i) = obj.frames(i).copy();
+            end
+    
+            % Step 2: Reconstruct parent-child relationships
+            for i = 1:length(obj.frames)
+                originalFrame = obj.frames(i);
+                copiedFrame = newObj.frames(i);
+    
+                if ~isempty(originalFrame.parent)
+                    parentIndex = find(obj.frames == originalFrame.parent);
+                    copiedFrame.parent = newObj.frames(parentIndex);
+                end
+    
+                for j = 1:length(originalFrame.children)
+                    childIndex = find(obj.frames == originalFrame.children(j));
+                    copiedFrame.children = [copiedFrame.children, newObj.frames(childIndex)];
+                end
+            end
+    
+            % Step 3: Deep copy of links
+            for i = 1:length(obj.links)
+                originalLink = obj.links(i);
+                copiedLink = originalLink.copy(); % Assuming CustomLink has a copy method
+    
+                % Update the startFrame and endFrame of the copied link
+                startFrameIndex = find(obj.frames == originalLink.startFrame);
+                endFrameIndex = find(obj.frames == originalLink.endFrame);
+                copiedLink.startFrame = newObj.frames(startFrameIndex);
+                copiedLink.endFrame = newObj.frames(endFrameIndex);
+    
+                newObj.links(i) = copiedLink;
+            end
+        end
+
+        function singularityBool = warnSingularity(obj)
+            % Check for singularity
+            J = obj.getJacobianNumeric;
+            pinvJ = pinv(J);
+
+            if norm(J)*norm(pinvJ) > 25
+                disp('Warning: Close to singularity');
+                singularityBool = true;
+            else
+                singularityBool = false;
+            end
+        end
+        
+        function J = getJacobianNumeric(obj)
+            % Computes the Jacobian matrix numerically, relating joint velocities to end-effector velocities.
+            % Uses finite differences on forward kinematics by perturbing joint angles with 'delta_q'. 
+            % Numerical methods may offer speed advantages over symbolic ones, but precision can vary.
+            
+            % Small change in joint angles
+            delta_q = 1e-6;
+            
+            % Initialize Jacobian matrix
+            J = zeros(3, 4);
+
+            q = obj.getQ;
+
+            %Save q to restore it later
+            q_save = q;
+            
+            % For each joint angle
+            for i = 1:4
+                % Perturb joint angle i
+                q_plus = q;
+                q_plus(i) = q_plus(i) + delta_q;
+                q_minus = q;
+                q_minus(i) = q_minus(i) - delta_q;
+                
+                % Compute forward kinematics for q_plus
+                obj.setQ(q_plus)
+                g_r_EE_plus = obj.getEndeffectorPos;
+                
+                % Compute forward kinematics for q_minus
+                obj.setQ(q_minus)
+                g_r_EE_minus = obj.getEndeffectorPos;
+                
+                % Compute derivative
+                J(:, i) = (g_r_EE_plus - g_r_EE_minus) / (2 * delta_q);
+            end
+            % Restore original q
+            obj.setQ(q_save);
+        end
+
+        function calculateWorkspaceParallel(obj, varargin)
+            tic;
+        
+            joint_limits_local = obj.joint_limits;
+        
+            if ~isempty(obj.boundaryK) && nargin == 1
+                disp("Workspace already calculated. Pass additional argument to update.");
+                return;
+            else
+                disp("Calculating Workspace...");
+            end
+        
+            % Define the range of joint angles
+            q_1 = joint_limits_local(1, 1):obj.workspaceResolution:joint_limits_local(1, 2);
+            q_2 = joint_limits_local(2, 1):obj.workspaceResolution:joint_limits_local(2, 2);
+            q_3 = joint_limits_local(3, 1):obj.workspaceResolution:joint_limits_local(3, 2);
+            q_4 = joint_limits_local(4, 1):obj.workspaceResolution:joint_limits_local(4, 2);
+        
+            % Ensure a parallel pool is open
+            pool = gcp('nocreate'); % Get current parallel pool
+            if isempty(pool)
+                pool = parpool(4); % Create a new pool
+            end
+        
+            % Calculate the number of combinations each worker needs to process
+            total_combinations = length(q_1) * length(q_2) * length(q_3) * length(q_4);
+            combinations_per_worker = ceil(total_combinations / pool.NumWorkers);
+        
+            % Use a cell array to store local workspaces
+            localWorkspaces = cell(1, pool.NumWorkers);
+        
+            % Parallel loop
+            parfor workerIdx = 1:pool.NumWorkers
+                % Determine the range of combinations for this worker
+                startIdx = (workerIdx - 1) * combinations_per_worker + 1;
+                endIdx = min(workerIdx * combinations_per_worker, total_combinations);
+        
+                % Local workspace for this worker
+                localWorkspace = zeros(3, endIdx - startIdx + 1);
+        
+                % Create a deep copy of the robot for each worker
+                v_robot = obj.copy;
+        
+                localIdx = 1; % Local index for localWorkspace
+                for idx = startIdx:endIdx
+                    % Find the indices for each joint angle
+                    [i, j, k, l] = ind2sub([length(q_1), length(q_2), length(q_3), length(q_4)], idx);
+                    v_robot.setQ([q_1(i); q_2(j); q_3(k); q_4(l)]);
+                    localWorkspace(:, localIdx) = v_robot.getEndeffectorPos;
+                    localIdx = localIdx + 1;
+                end
+        
+                % Store the local results in the cell array
+                localWorkspaces{workerIdx} = localWorkspace;
+            end
+
+            % Close pool
+            pool = gcp('nocreate'); % Get the handle to the current pool, if it exists
+            if ~isempty(pool)
+                delete(pool); % Close the pool
+            end        
+
+            % Concatenate the results from each worker
+            workspace = horzcat(localWorkspaces{:});
+        
+            % Reduce the number of workspace points using uniquetol
+            uniqueWorkspace = uniquetol(workspace', obj.workspaceTolerance, 'ByRows', true)';
+        
+            % Compute a 3D boundary (convex hull) of the robot's reduced workspace
+            K = boundary(uniqueWorkspace(1, :)', uniqueWorkspace(2, :)', uniqueWorkspace(3, :)');
+            v = uniqueWorkspace'; % The vertices of the boundary
+        
+            % Store the boundary
+            obj.boundaryK = K;
+            obj.boundaryVertices = v;
+        
+            fprintf("Parallel Workspace Calculation took %.2f seconds\n" + ...
+                "BoundaryVertices Count: %d \n\n", toc, length(v));
+
+        end
+
+        function calculateWorkspaceSerial(obj, varargin)
+            tic;
+        
+            joint_limits_local = obj.joint_limits;
+        
+            if ~isempty(obj.boundaryK) && nargin == 1
+                disp("Workspace already calculated. Pass additional argument to update.");
+                return;
+            else
+                disp("Calculating Workspace...");
+            end
+        
+            % Define the range of joint angles
+            q_1 = joint_limits_local(1, 1):obj.workspaceResolution:joint_limits_local(1, 2);
+            q_2 = joint_limits_local(2, 1):obj.workspaceResolution:joint_limits_local(2, 2);
+            q_3 = joint_limits_local(3, 1):obj.workspaceResolution:joint_limits_local(3, 2);
+            q_4 = joint_limits_local(4, 1):obj.workspaceResolution:joint_limits_local(4, 2);
+        
+            % Initialize workspace array
+            num_samples = length(q_1) * length(q_2) * length(q_3) * length(q_4);
+            workspace = zeros(3, num_samples);
+            n = 1;
+        
+            % Nested loops to iterate through all combinations of joint angles
+            for i = 1:length(q_1)
+                for j = 1:length(q_2)
+                    for k = 1:length(q_3)
+                        for l = 1:length(q_4)
+                            % Set the robot's joint angles
+                            obj.setQ([q_1(i); q_2(j); q_3(k); q_4(l)]);
+        
+                            % Calculate and store the end-effector position
+                            workspace(:, n) = obj.getEndeffectorPos;
+                            n = n + 1;
+                        end
+                    end
+                end
+            end
+        
+            % Reduce the number of workspace points using uniquetol
+            uniqueWorkspace = uniquetol(workspace', obj.workspaceTolerance, 'ByRows', true)';
+        
+            % Compute a 3D boundary (convex hull) of the robot's reduced workspace
+            K = boundary(uniqueWorkspace(1, :)', uniqueWorkspace(2, :)', uniqueWorkspace(3, :)');
+            v = uniqueWorkspace'; % The vertices of the boundary
+        
+            % Store the boundary
+            obj.boundaryK = K;
+            obj.boundaryVertices = v;
+        
+            fprintf("Serial Workspace Calculation took %.2f seconds\n" + ...
+                "BoundaryVertices Count: %d \n\n", toc, length(v));
+        end
+
         function isInside = isPointInWorkspace(obj, point)
             % This method checks if a given point is within the robot's workspace.
         
@@ -94,61 +360,6 @@ classdef VirtualRobot < handle
             vertices = obj.boundaryVertices;
             isInside = inhull(point', vertices);
 
-        end
-
-        function calculateWorkspace(obj, varargin)
-
-            tic
-
-            %% Get all workspace points
-
-            joint_limits_local = obj.joint_limits;
-            resolution_local = obj.workspaceResolution;
-
-            if ~isempty(obj.boundaryK) && nargin == 1
-                 disp("Workspace already calculated. Pass additional argument to update.")
-                 return
-            else
-                disp("Calculating Workspace...")
-            end
-    
-            % Generate multi-dimensional grids
-            [Q1, Q2, Q3, Q4] = ndgrid(joint_limits_local(1,1):resolution_local:joint_limits_local(1,2), ...
-                                      joint_limits_local(2,1):resolution_local:joint_limits_local(2,2), ...
-                                      joint_limits_local(3,1):resolution_local:joint_limits_local(3,2), ...
-                                      joint_limits_local(4,1):resolution_local:joint_limits_local(4,2));
-                                  
-            % Reshape the grids to vectors
-            Q1 = Q1(:); Q2 = Q2(:); Q3 = Q3(:); Q4 = Q4(:);
-        
-            % Preallocate workspace based on the number of samples we'll generate
-            numSamples = numel(Q1);
-            workspace = zeros(3, numSamples);
-        
-            % Compute positions for each sample
-            parfor i = 1:numSamples
-                q = [Q1(i); Q2(i); Q3(i); Q4(i)];
-                workspace(:, i) = VirtualRobot.forwardKinematicsNumeric(q);
-            end
-
-
-           %% Reduce the number of workspace points using uniquetol
-            uniqueWorkspace = uniquetol(workspace', obj.workspaceTolerance, 'ByRows', true)';
-            
-            % Extract the x, y, and z coordinates from the unique points
-            x_positions = uniqueWorkspace(1, :);
-            y_positions = uniqueWorkspace(2, :);
-            z_positions = uniqueWorkspace(3, :);
-            
-            %% Compute a 3D boundary (convex hull) of the robot's reduced workspace.
-            K = boundary(x_positions', y_positions', z_positions');
-            v = uniqueWorkspace'; % The vertices of the boundary
-            
-            % Store the boundary
-            obj.boundaryK = K;
-            obj.boundaryVertices = v;
-
-            disp(toc)
         end
 
     end
@@ -179,86 +390,15 @@ classdef VirtualRobot < handle
                 grid on;
 
                 % Set fixed axis limits
-                xlim([-500, 500]);
-                ylim([-500, 500]);
-                zlim([0, 600]);
+                xlim([-700, 700]);
+                ylim([-700, 700]);
+                zlim([0, 700]);
             end
         end
     end
     
     
-    methods (Static)
-
-        function singularityBool = checkSingularity(q)
-            % Check for singularity
-            J = VirtualRobot.getJacobianNumeric(q);
-            pinvJ = pinv(J);
-
-            if norm(J)*norm(pinvJ) > 25
-                disp('Warning: Close to singularity');
-                singularityBool = true;
-            else
-                singularityBool = false;
-            end
-        end
-
-        function [elevation] = getShoulderElevation(q)
-            % Calculate the elevation of the shoulder joint in spherical
-            % coordinates in RAD from q
-            elevation = pi/2 - acos(cos(q(2))*cos(q(1)));           
-        end
-
-        function [oxE] = forwardKinematicsNumeric(q)
-            R = {VirtualRobot.roty(q(1)), VirtualRobot.rotx(q(2)), VirtualRobot.rotz(q(3)), VirtualRobot.rotx(q(4))};
-            x = [    0         0         0         0         0
-                     0         0         0         0         0
-                83.5100         0  119.3500  163.9900  218.8600];
-            oxE = R{1} * (R{2} * (R{3} * (R{4} * x(:,5) + x(:,4)) + x(:,3)) + x(:,2)) + x(:,1);
-        end
-
-        function J = getJacobianNumeric(q)
-            % Computes the Jacobian matrix numerically, relating joint velocities to end-effector velocities.
-            % Uses finite differences on forward kinematics by perturbing joint angles with 'delta_q'. 
-            % Numerical methods may offer speed advantages over symbolic ones, but precision can vary.
-            
-            % Small change in joint angles
-            delta_q = 1e-6;
-            
-            % Initialize Jacobian matrix
-            J = zeros(3, 4);
-            
-            % For each joint angle
-            parfor i = 1:4
-                % Perturb joint angle i
-                q_plus = q;
-                q_plus(i) = q_plus(i) + delta_q;
-                q_minus = q;
-                q_minus(i) = q_minus(i) - delta_q;
-                
-                % Compute forward kinematics for q_plus
-                oxE_plus = VirtualRobot.forwardKinematicsNumeric(q_plus);
-                
-                % Compute forward kinematics for q_minus
-                oxE_minus = VirtualRobot.forwardKinematicsNumeric(q_minus);
-                
-                % Compute derivative
-                J(:, i) = (oxE_plus - oxE_minus) / (2 * delta_q);
-            end
-        end
-
-        %% Definition of the standard rotational matrices
-        function rotx = rotx(alpha)
-            rotx = [1 0 0; 0 cos(alpha) -sin(alpha); 0 sin(alpha) cos(alpha)];
-        end
-        
-        function roty = roty(beta)
-            roty = [cos(beta) 0 sin(beta); 0 1 0; -sin(beta) 0 cos(beta)];
-        end
-        
-        function rotz = rotz(gamma)
-            rotz = [cos(gamma) -sin(gamma) 0; sin(gamma) cos(gamma) 0; 0 0 1];
-        end
-
+    methods (Static, Hidden)
 
         %% In Hull John D'Errico
         function in = inhull(testpts,xyz,tess,tol)

@@ -2,17 +2,15 @@ classdef NullspaceController < handle
     properties (Access=private)
         % Constants with default values
         Kp = 1;
-        % Conifugre maximum absolut joint velocities % RAD/s
-        q_dot_max = [0.1;0.1;0.2;0.2]*2;
 
         weight_z = 0;
-        weight_preffered_config = 0.1;
+        weight_preffered_config = 0.5;
         exponential_factor_joint_limit = 0;
         weight_joint_limit = 0;
 
         delta_q_numeric_diff = 0.001;
 
-        use_nakamura = true;
+        use_nakamura = false;
         q_min;
         q_max;
 
@@ -23,11 +21,10 @@ classdef NullspaceController < handle
     end
     
     methods
-        function obj = NullspaceController(robot, varargin)
+        function obj = NullspaceController(virtualRobot, varargin)
             % Handle optional input arguments
             p = inputParser;
             addParameter(p, 'Kp', obj.Kp);
-            addParameter(p, 'q_dot_max', obj.q_dot_max);
             addParameter(p, 'weight_z', obj.weight_z);
             addParameter(p, 'delta_q_numeric_diff', obj.delta_q_numeric_diff);
             addParameter(p, 'use_nakamura', obj.use_nakamura);
@@ -39,7 +36,6 @@ classdef NullspaceController < handle
             
             % Assign properties from the parsed inputs
             obj.Kp = p.Results.Kp;
-            obj.q_dot_max = p.Results.q_dot_max;
             obj.weight_z = p.Results.weight_z;
             obj.delta_q_numeric_diff = p.Results.delta_q_numeric_diff;
             obj.use_nakamura = p.Results.use_nakamura;
@@ -48,21 +44,21 @@ classdef NullspaceController < handle
             obj.weight_joint_limit = p.Results.weight_joint_limit;
 
             % Pre-compute and store the perturbation matrix
-            num_joints = length(obj.q_dot_max);
+            num_joints = 4;
             obj.delta_matrix = obj.delta_q_numeric_diff * eye(num_joints);
 
-            % Extract q_max, q_min from passed VirtualRobot object
-            obj.q_max = robot.joint_limits(:,2);
-            obj.q_min = robot.joint_limits(:,1);
+            % Extract q_max, q_min from passed virtualRobot object
+            obj.q_max = virtualRobot.joint_limits(:,2);
+            obj.q_min = virtualRobot.joint_limits(:,1);
 
         end
         
-        function q_dot = computeDesiredJointVelocity(obj, sr, x_desired, z_desired, v_desired)
+        function q_dot = computeDesiredJointVelocity(obj, virtualRobot, x_desired, z_desired, v_desired)
             % Main controller method for velocity control
 
-            % Get current end-effector position and robot configuration once
-            q = sr.getQ;
-            x_current = VirtualRobot.forwardKinematicsNumeric(q);
+            % Get current end-effector position and virtualRobot configuration once
+            q = virtualRobot.getQ;
+            x_current = virtualRobot.getEndeffectorPos;
             
             % Compute desired effective workspace velocity
             v_d_eff = obj.computeEffectiveVelocity(x_desired, x_current, v_desired);
@@ -84,7 +80,10 @@ classdef NullspaceController < handle
             dHdQ = obj.weight_z * dHdQ_z + obj.weight_preffered_config*dHdQ_preferred_config + obj.weight_joint_limit * dHdQ_joint_limit;
 
             % Compute Jacobian
-            J = VirtualRobot.getJacobianNumeric(q);
+            J = virtualRobot.getJacobianNumeric;
+
+            % Filter out singularity movments
+            % v_d_eff = (J*J')/norm(J*J') * v_d_eff;
 
             % Compute q_dot
             if obj.use_nakamura
@@ -93,9 +92,6 @@ classdef NullspaceController < handle
                 q_dot = obj.computeQdotPseudoinverse(J, v_d_eff, dHdQ);
             end
             
-            % Limit joint speeds
-            q_dot = obj.limitQdot(q_dot);
-
             % Ensure compliance with joint angle limits
             q_dot = obj.ensureJointLimitCompliance(q, q_dot);
         end
@@ -103,7 +99,7 @@ classdef NullspaceController < handle
 
     methods (Access=private)
 
-        % Nakamura method for computing Qdot (curr not working)
+        % Nakamura method for computing Qdot
         function q_dot = computeQdotNakamura(~, J, u, dHdQ)
                 z = -dHdQ';
                 B = J * J';
@@ -136,7 +132,7 @@ classdef NullspaceController < handle
         function H = H_z_desired(~, q, z_desired)
 
             z_desired_normalized = z_desired/norm(z_desired);
-            g_A_tcp = VirtualRobot.roty(q(1)) * VirtualRobot.rotx(q(2)) * VirtualRobot.rotz(q(3)) * VirtualRobot.rotx(q(4));
+            g_A_tcp = virtualRobot.roty(q(1)) * virtualRobot.rotx(q(2)) * virtualRobot.rotz(q(3)) * virtualRobot.rotx(q(4));
             z_q = g_A_tcp * [0;0;1];
             z_q_normalized = z_q/norm(z_q);
             % H = 1/2 * (z(q) - z_desired)^2 
@@ -202,12 +198,6 @@ classdef NullspaceController < handle
             
             % Compute gradient
             dHdQ = (H_plus - H_minus) / (2 * delta_q);
-        end
-
-        function q_dot_limited = limitQdot(obj, q_dot)
-            % Limits q_dot without changing the rations between entries in q_dot
-            max_ratio = max(abs(q_dot) ./ obj.q_dot_max);
-            q_dot_limited = q_dot / max(1, max_ratio);
         end
 
         function is_valid = isWithinJointLimits(obj, q_next)

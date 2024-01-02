@@ -20,8 +20,6 @@ classdef RealRobot < handle
         i_shoulder = 5;
         i_elbow = 2.5;
 
-        % Conifugre maximum absolut joint velocities % RAD/s
-        q_dot_max = [0.03;0.03;0.1;0.1];
     end
 
     methods
@@ -81,7 +79,6 @@ classdef RealRobot < handle
         function goToZeroPosition(obj)
             % Uses a PID controller for the servo position to return to the previously stored zero
             % position.
-
 
 
             % Check if Zero Position has been set
@@ -149,13 +146,6 @@ classdef RealRobot < handle
             % joint3 : yaw rotation around z-Axis
             % joint4 : elbow rotatoin around x-Ax
        
-
-            % Ensure velocities do not exceed the configued maximum joint speed
-            for ID = 1:4
-                if abs(jointVelocities(ID)) > obj.q_dot_max(ID)
-                    jointVelocities(ID) = obj.q_dot_max(ID) * sign(jointVelocities(ID));
-                end
-            end
 
             % Convert joint velocities q_dot to servo velocities omega
             servoVelocity = obj.convertJointVelocitiesToServoVelocites(jointVelocities); 
