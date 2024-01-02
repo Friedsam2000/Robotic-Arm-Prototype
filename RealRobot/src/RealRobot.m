@@ -2,10 +2,7 @@ classdef RealRobot < handle
 
     properties
         
-        ServoZeroPositions = [1.04004341168609
-;4.27675668404250
-;3.24898517101937
-;2.79032295849114];
+        ServoZeroPositions = [-inf,-inf,-inf,-inf];
         
         % RAD
         % [0] ShoulderServoOne --> located in x-direction  (front)
@@ -94,7 +91,7 @@ classdef RealRobot < handle
             disp("Approaching Position...")
 
             % Use a default precision of 1 °
-            precision_deg = 0.3;
+            precision_deg = 0.2;
             precision = deg2rad(precision_deg);
 
             % Enable The torque
@@ -105,8 +102,8 @@ classdef RealRobot < handle
             % position by setting their servo.
             integralError = [0; 0; 0; 0];
             prevError = [0; 0; 0; 0];
-            P_Gain = 1;  % Proportional gain
-            I_Gain = 0;  % Integral gain
+            P_Gain = 0.1;  % Proportional gain
+            I_Gain = 0.005;  % Integral gain
             D_Gain = 0;  % Derivative gain
 
             jointsConverged = [0;0;0;0];
