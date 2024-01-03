@@ -82,10 +82,10 @@ classdef NullspaceController < handle
             q_dot = pinvJ * u - N * dHdQ';
 
             % Printing for analyzing cost function impact
-            q_dot_pinv_norm = norm(pinvJ * u);
-            q_dot_cost_norm = norm(N * dHdQ');
-            message = sprintf("Norm of q_dot from pseudoinverse: %.2f\nNorm of q_dot from cost function: %.2f\n\n", q_dot_pinv_norm, q_dot_cost_norm);
-            obj.printWithFrequency(message);
+            % q_dot_pinv_norm = norm(pinvJ * u);
+            % q_dot_cost_norm = norm(N * dHdQ');
+            % message = sprintf("Norm of q_dot from pseudoinverse: %.2f\nNorm of q_dot from cost function: %.2f\n\n", q_dot_pinv_norm, q_dot_cost_norm);
+            % obj.printWithFrequency(message);
 
 
         end

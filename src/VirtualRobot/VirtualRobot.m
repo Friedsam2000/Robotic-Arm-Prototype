@@ -10,7 +10,7 @@ classdef VirtualRobot < handle
 
         joint_limits = [-pi/4, pi/4;
                         -pi/4, pi/4; 
-                        -2*pi, 2*pi; 
+                        -(14/8)*pi, (14/8)*pi; 
                         -(5/6)*pi, (5/6)*pi];
 
         % Preallocate memory for trajectory points

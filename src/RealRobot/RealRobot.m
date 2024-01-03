@@ -23,7 +23,7 @@ classdef RealRobot < handle
         i_elbow = 2.5;
 
         % Conifgure maximum absolut joint velocities % RAD/s
-        q_dot_max = [0.04;0.04;0.06;0.1];
+        q_dot_max = [0.07;0.07;0.1;0.15];
 
 
 

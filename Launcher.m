@@ -182,7 +182,7 @@ classdef Launcher < handle
             
                 % Go to initial position
                 disp("Approaching initial position...")
-                obj.setQ([pi/8;pi/8;pi/4;pi/4],true);
+                obj.setQ([pi/16;pi/16;pi/8;pi/8],true);
     
                 % Plot desired position
                 figure(obj.virtualRobot.fig);
@@ -239,6 +239,97 @@ classdef Launcher < handle
                 end
             end
         end
+        
+        function followTrajectory(obj,trajectory_time,trajectory_height,varargin)
+            if ~obj.started
+                disp("Run start method first!");
+                return
+            end
+
+            % Default value for bypass_busy
+            bypass_busy = false;
+        
+            % Check if bypass_busy is provided in varargin
+            if ~isempty(varargin)
+                bypass_busy = varargin{1};
+            end
+
+            if (~obj.is_busy || bypass_busy)
+                
+                obj.is_busy = true;
+    
+                %% Program Body
+                % Go to initial position
+                disp("Approaching initial position...")
+                obj.setQ([pi/16;pi/16;pi/8;pi/8],true);
+
+                % Initialize the controller
+                controller = NullspaceController(obj.virtualRobot);
+
+                % Initialize the planner
+                planner = PathPlanner2D(obj.virtualRobot, trajectory_height);
+                
+                % Prompt the user to draw a path
+                planner.userInputPath;
+                
+                % Initialize the trajectory generator
+                trajectoryGenerator = TrajectoryGenerator(planner.getWaypointList, trajectory_time);
+                [x_d, v_d, t] = trajectoryGenerator.getTrajectory;
+                
+                % Plot the desired trajectory
+                obj.virtualRobot.draw
+                trajectoryGenerator.draw(obj.virtualRobot.fig)
+                
+                % Plot the workspace
+                obj.virtualRobot.workspace.draw;
+                
+                %% Control Loop
+                
+                % Variables for time tracking
+                loopBeginTime = tic;  % Start the timer
+                
+                while true
+                    % Simulation
+                    q = obj.realRobot.getQ;
+                    obj.virtualRobot.setQ(q);
+                    
+                    % Calculate elapsed time and the time increment (dt)
+                    elapsedRealTime = toc(loopBeginTime);
+                
+                    % Find the index in the trajectory that corresponds to the elapsed time
+                    [~, index] = min(abs(t - elapsedRealTime));
+                
+                    % Break the loop if the end of the trajectory is reached
+                    if index >= length(t)
+                        obj.setQ([0;0;0;0],true);
+                        obj.realRobot.torqueEnableDisable(0);
+                        break;
+                    end
+                
+                    % Get the desired position and velocity for the current timestep
+                    current_x_d = x_d(:, index);
+                    current_v_d = v_d(:, index);
+                
+                    % Compute the desired joint velocity
+                    q_dot = controller.computeDesiredJointVelocity(current_x_d, NaN, current_v_d);
+                
+                    % Set joint speed of real robot
+                    obj.realRobot.setJointVelocities(q_dot);
+                
+                    % Update and draw the end-effector trajectory and the robot
+                    obj.virtualRobot.updateTrajectory;
+                    obj.virtualRobot.draw;
+                
+                end
+                
+               
+                %%
+                if ~bypass_busy
+                    obj.is_busy = false;
+                end
+            end
+        end
+    
     end
 
 
@@ -279,11 +370,10 @@ classdef Launcher < handle
             close all;
             currentFile = mfilename('fullpath');
             [currentDir, ~, ~] = fileparts(currentFile);
-            parentDir = fullfile(currentDir, '..');
-            addpath(fullfile(parentDir, 'VirtualRobot'));
-            addpath(fullfile(parentDir, 'Planner'));
-            addpath(fullfile(parentDir, 'Controller'));
-            addpath(fullfile(parentDir, 'RealRobot'));
+            addpath(fullfile(currentDir, 'src\VirtualRobot'));
+            addpath(fullfile(currentDir, 'src\RealRobot'));
+            addpath(fullfile(currentDir, 'src\Planner'));
+            addpath(fullfile(currentDir, 'src\Controller'));
         end           
 
     end
