@@ -3,8 +3,6 @@ classdef RealRobot < handle
     properties
         
         ServoZeroPositions = [-inf,-inf,-inf,-inf];
-
-
         
         % RAD
         % [0] ShoulderServoOne --> located in x-direction  (front)
@@ -27,10 +25,6 @@ classdef RealRobot < handle
         % Conifgure maximum absolut joint velocities % RAD/s
         q_dot_max = [0.06;0.06;0.1;0.2];
 
-        joint_limits = [-pi/4, pi/4;
-                -pi/4, pi/4; 
-                -2*pi, 2*pi; 
-                -(5/6)*pi, (5/6)*pi];
 
     end
 
@@ -167,7 +161,6 @@ classdef RealRobot < handle
                     jointVelocities(ID) = obj.q_dot_max(ID) * sign(jointVelocities(ID));
                 end
             end
-       
 
             % Convert joint velocities q_dot to servo velocities omega
             servoVelocity = obj.convertJointVelocitiesToServoVelocites(jointVelocities); 

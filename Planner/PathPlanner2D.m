@@ -1,6 +1,11 @@
 classdef PathPlanner2D < handle
+    % The planner slices the workspace of the robot at a given height and
+    % lets the user draw waypoints. It then returns these waypoints (the
+    % path) as a waypoint list. The first waypoint is the current
+    % endeffector position of the virtual robot
+
     properties (Access = private)
-        virtualRobot  % Instance of VirtualRobot
+        virtualRobot  % Referenced instance of VirtualRobot
         height        % Given height z for the 2D slice
         pathX         % X coordinates of the drawn path
         pathY         % Y coordinates of the drawn path
@@ -17,10 +22,10 @@ classdef PathPlanner2D < handle
             obj.segments = obj.calculateWorkspaceSlice;
         end
         
-        function waypoint_list = getPath(obj)
+        function waypoint_list = getWaypointList(obj)
             % Returns the X, Y, and Z coordinates of the drawn path
             if isempty(obj.pathX) || isempty(obj.pathY) || isempty(obj.pathZ)
-                warning('Path has not been defined. Run drawPath first.');
+                warning('Path has not been defined. Run userInputPath first.');
                 waypoint_list = [];
                 return;
             end
@@ -32,50 +37,50 @@ classdef PathPlanner2D < handle
 
         end
 
-        function drawPath(obj)
+        function userInputPath(obj)
             % Open a new figure window with grid on and specified limits
             obj.hFig = figure;
-
-            fprintf('Draw the path using the mouse with left-click.\nFinish the drawing by right-clicking.\n\n');
-
-
+        
             % Determine axis limits based on the workspace slice
             allXs = cell2mat(cellfun(@(seg) seg(:, 1), obj.segments, 'UniformOutput', false));
             allYs = cell2mat(cellfun(@(seg) seg(:, 2), obj.segments, 'UniformOutput', false));
-    
+        
             margin = 100;
             minX = min(min(allXs)) - margin;
             maxX = max(max(allXs)) + margin;
             minY = min(min(allYs)) - margin;
             maxY = max(max(allYs)) + margin;
-
+        
             axis([minX maxX minY maxY]);
-
-
             grid on;
             hold on;
             xlabel('X');
             ylabel('Y');
             title('Trajectory in 2D Plane');
-            
+        
             % Plot the workspace segments
             for i = 1:length(obj.segments)
                 seg = obj.segments{i};
                 plot(seg(:, 1), seg(:, 2), 'g-', 'LineWidth', 2);
             end
-
-             % Get current virtualRobot position in the XY-plane
+        
+            % Get current virtualRobot position in the XY-plane
             currentPosition = obj.virtualRobot.getEndeffectorPos;
             currentX = currentPosition(1);
             currentY = currentPosition(2);
         
-            % Set the starting point of the path to the current robot position
+            % Set the starting point of the path to directly below the current endeffector position
             obj.pathX = [currentX];
             obj.pathY = [currentY];
             obj.pathZ = [obj.height];
         
             % Plot the starting point on the figure
             plot(currentX, currentY, 'o', 'MarkerSize', 6, 'MarkerFaceColor', 'r');
+        
+            % Display instructions on the figure
+            instructionText = 'Draw the path by adding waypoints with left-click. Finish with right-click.';
+            annotation('textbox', [0.15, 0.8, 0.7, 0.1], 'String', instructionText, 'EdgeColor', 'none', 'HorizontalAlignment', 'center', 'FontSize', 10);
+
         
             % Use a while loop to continuously capture points until right-click
             while true
@@ -117,8 +122,8 @@ classdef PathPlanner2D < handle
             % Calculate the intersection of the robot's workspace with the plane defined by z
 
             segments = {};
-            for i = 1:size(obj.virtualRobot.boundaryK, 1)
-                tri = obj.virtualRobot.boundaryVertices(obj.virtualRobot.boundaryK(i, :), :);  % Extract triangle vertices
+            for i = 1:size(obj.virtualRobot.workspace.boundaryK, 1)
+                tri = obj.virtualRobot.workspace.boundaryVertices(obj.virtualRobot.workspace.boundaryK(i, :), :);  % Extract triangle vertices
                 
                 % Check if the triangle intersects the plane
                 isAbove = tri(:, 3) > obj.height;

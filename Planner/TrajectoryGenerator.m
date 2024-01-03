@@ -3,8 +3,8 @@ classdef TrajectoryGenerator < handle
         pathX % [mm] row vector
         pathY % [mm] row vector
         pathZ % [mm] row vector
-        averageEndeffectorSpeed % [mm/s]
-        timeIncrement % [s]
+        totalTime % [s]
+        timeIncrement = 0.05; % [s]
         x_d % [mm] row: point
         v_d % [mm/s] row: velocity
         t % [s] row
@@ -12,12 +12,11 @@ classdef TrajectoryGenerator < handle
     
     methods
 
-        function obj = TrajectoryGenerator(waypoint_list, averageEndeffectorSpeed, timeIncrement)
+        function obj = TrajectoryGenerator(waypoint_list, totalTime)
             obj.pathX = waypoint_list(1,:);
             obj.pathY = waypoint_list(2,:);
             obj.pathZ = waypoint_list(3,:);
-            obj.averageEndeffectorSpeed = averageEndeffectorSpeed;
-            obj.timeIncrement = timeIncrement;
+            obj.totalTime = totalTime;
 
             obj.generateTrajectory;
         end
@@ -38,8 +37,7 @@ classdef TrajectoryGenerator < handle
             
             % Create spline interpolations for X, Y, and Z
             s = cumsum([0; sqrt(diff(obj.pathX').^2 + diff(obj.pathY').^2 + diff(obj.pathZ').^2)]); % cumulative arclength
-            totalTime = s(end) / obj.averageEndeffectorSpeed;
-            totalTimesteps = ceil(totalTime / obj.timeIncrement) + 1;
+            totalTimesteps = ceil(obj.totalTime / obj.timeIncrement) + 1;
             
             s_d = linspace(0, s(end), totalTimesteps); % desired time steps based on the timeIncrement
             x_d_spline = spline(s, obj.pathX, s_d);
