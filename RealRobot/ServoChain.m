@@ -104,6 +104,11 @@ classdef ServoChain < handle
                 obj.availableIDs = [obj.availableIDs, ID];
               end
             end
+            if length(obj.availableIDs) < 4
+                error("Not 4 Dynamixel Detected!")
+            end
+
+
         end
 
         %Destructor

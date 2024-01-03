@@ -1,26 +1,29 @@
-clearvars -except virtualRobot
+%% Setup workspace and matlab PATH
+clear
 clc
 close all
 
-addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\RealRobot\src')
-addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\VirtualRobot\src')
+% Get the directory of the currently executing script
+currentFile = mfilename('fullpath');
+[currentDir, ~, ~] = fileparts(currentFile);
 
-%% Setup simulated robot, controller, planner, and trajectory generator
+% Construct the paths to the folders one level up
+parentDir = fullfile(currentDir, '..');  % This goes one level up
+virtualRobotDir = fullfile(parentDir, 'VirtualRobot');
+plannerDir = fullfile(parentDir, 'Planner'); 
+controllerDir = fullfile(parentDir, 'Controller'); 
 
-% Initialize the robot
-if ~exist('virtualRobot','var')
-    virtualRobot = VirtualRobot();
-end
+% Add these paths to the MATLAB path
+addpath(virtualRobotDir);
+addpath(plannerDir);
+addpath(controllerDir);
 
-% Initialize the controller
-controller = NullspaceController(virtualRobot);
+%% Setup virtual robot, controller, planner, and trajectory generator
 
-%% Connect real robot
-realRobot = RealRobot();
+virtualRobot = VirtualRobot;
+realRobot = RealRobot;
 
 % Initial position setup for Real robot
-realRobot.torqueEnableDisable(0);
-realRobot.setOperatingMode('velocity');
 realRobot.setZeroPositionToCurrentPosition;
 realRobot.torqueEnableDisable(1);
 realRobot.setJointVelocities([0.02,0.02,0.1,0.1]);
@@ -30,49 +33,59 @@ realRobot.setJointVelocities([0,0,0,0]);
 % Set simulated Robot to same config as real robot
 virtualRobot.setQ(realRobot.getQ);
 
-
-%% Create a static goal position
-x_desired = [200;200;400];
-% Plot the desired point
-virtualRobot.draw(0)
-scatter3(x_desired(1),x_desired(2),x_desired(3), 30, 'filled', 'm');
-figure(virtualRobot.fig);
+% Initialize the controller
+controller = NullspaceController(virtualRobot);
+ 
+% Desired position
+x_desired = [100;100;500];
+virtualRobot.draw
+scatter3(x_desired(1),x_desired(2),x_desired(3), 'm', 'filled');
 
 % Plot the workspace
-virtualRobot.visualizeWorkspace;
+virtualRobot.workspace.draw;
 
 %% Control Loop
-% Init array for storing tcp positions
-tcp_positions = zeros(3,10000);
 
-%% Loop
-step = 1;
-while 1
+% Variables for time tracking
+loopBeginTime = tic;  % Start the timer
+previousTime = 0;  % Initialize previous time
 
-    % Update the simulated Robot
+breakTimerStarted = false;
+breakTimerValue = 0;
+
+while true
+    % Update virtual robot and plot
     q = realRobot.getQ;
     virtualRobot.setQ(q);
-    tcp_positions(:,step) = virtualRobot.getEndeffectorPos;
-    plot3(tcp_positions(1,1:step), tcp_positions(2,1:step), tcp_positions(3,1:step), 'k');
-    virtualRobot.draw(0);
-    virtualRobot.frames(end).draw;
-    drawnow limitrate
-   
-    % Compute q_dot with controller
-    q_dot = controller.computeDesiredJointVelocity(virtualRobot, x_desired,  NaN , 0);
+    
+    % Compute the desired joint velocity
+    q_dot = controller.computeDesiredJointVelocity(x_desired, NaN, 0);
+            
+    % Update and draw the end-effector trajectory and the robot
+    virtualRobot.updateTrajectory;
+    virtualRobot.draw;
     
     % Set q_dot to real Robot
     realRobot.setJointVelocities(q_dot);
-
+    
     % Print the distance to the goal
     distance_to_goal = norm(x_desired-virtualRobot.getEndeffectorPos);
     fprintf('Distance to goal: %.0f mm \n', distance_to_goal);
+    
 
     if distance_to_goal < 2
-        realRobot.goToZeroPosition;
-        break
+        if ~breakTimerStarted
+            % Start the break timer
+            breakTimerValue = tic;
+            breakTimerStarted = true;
+        elseif toc(breakTimerValue) >= 5
+            % 5 seconds have passed since the timer started
+            realRobot.setJointVelocities([0; 0; 0; 0]);
+            break;
+        end
+    else
+        breakTimerStarted = false;  % Reset the timer if the condition is no longer met
     end
-
-    step = step + 1;
 end
+
 

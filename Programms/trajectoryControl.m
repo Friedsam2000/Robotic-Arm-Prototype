@@ -1,26 +1,29 @@
-clearvars -except virtualRobot
+%% Setup workspace and matlab PATH
+clear
 clc
 close all
 
-addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\RealRobot\src')
-addpath('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\VirtualRobot\src')
+% Get the directory of the currently executing script
+currentFile = mfilename('fullpath');
+[currentDir, ~, ~] = fileparts(currentFile);
 
-%% Setup simulated robot, controller, planner, and trajectory generator
+% Construct the paths to the folders one level up
+parentDir = fullfile(currentDir, '..');  % This goes one level up
+virtualRobotDir = fullfile(parentDir, 'VirtualRobot');
+plannerDir = fullfile(parentDir, 'Planner'); 
+controllerDir = fullfile(parentDir, 'Controller'); 
 
-% Initialize the robot
-if ~exist('virtualRobot','var')
-    virtualRobot = VirtualRobot();
-end
+% Add these paths to the MATLAB path
+addpath(virtualRobotDir);
+addpath(plannerDir);
+addpath(controllerDir);
 
-% Initialize the controller
-controller = NullspaceController(virtualRobot);
+%% Setup virtual robot, controller, planner, and trajectory generator
 
-%% Connect real robot
-realRobot = RealRobot();
+virtualRobot = VirtualRobot;
+realRobot = RealRobot;
 
 % Initial position setup for Real robot
-realRobot.torqueEnableDisable(0);
-realRobot.setOperatingMode('velocity');
 realRobot.setZeroPositionToCurrentPosition;
 realRobot.torqueEnableDisable(1);
 realRobot.setJointVelocities([0.02,0.02,0.1,0.1]);
@@ -28,60 +31,69 @@ pause(1)
 realRobot.setJointVelocities([0,0,0,0]);
 
 % Set simulated Robot to same config as real robot
-virtualRobot.setQ(realRobot.getQ)
+virtualRobot.setQ(realRobot.getQ);
+
+% Initialize the controller
+controller = NullspaceController(virtualRobot);
  
-%% Create a trajectroy
-v_average = 50; %[mm/s]
-dt = 0.15; % Robot cant receive and send information in a shorter time than 0.15 seconds 
-traj_z = 400;
+%% Create a trajectory
+trajectory_time = 15; % s
+trajectory_height = 400;
 
 % Initialize the planner
-planner = PathPlanner2D(virtualRobot, traj_z);
-planner.drawPath;
-waypoint_list = planner.getPath;
+planner = PathPlanner2D(virtualRobot, trajectory_height);
+
+% Prompt the user to draw a path
+planner.userInputPath;
 
 % Initialize the trajectory generator
-trajectoryGenerator = TrajectoryGenerator(virtualRobot, waypoint_list, v_average,dt);
+trajectoryGenerator = TrajectoryGenerator(planner.getWaypointList, trajectory_time);
 [x_d, v_d, t] = trajectoryGenerator.getTrajectory;
-total_timesteps = ceil(t(end)/dt);
 
 % Plot the desired trajectory
-virtualRobot.draw(0)
-plot3(x_d(1,:),x_d(2,:),x_d(3,:),'m');
-scatter3(waypoint_list(1,:),waypoint_list(2,:),waypoint_list(3,:), 30, 'filled', 'm');
-figure(virtualRobot.fig);
+virtualRobot.draw
+trajectoryGenerator.draw(virtualRobot.fig)
 
 % Plot the workspace
-virtualRobot.visualizeWorkspace;
+virtualRobot.workspace.draw;
 
 %% Control Loop
 
-% Init array for storing tcp positions
-tcp_positions = zeros(3,total_timesteps);
+% Variables for time tracking
+loopBeginTime = tic;  % Start the timer
+previousTime = 0;  % Initialize previous time
 
-%% Loop
-trajectoryStartTime = tic; % Start timing the trajectory
-step = 1;
-while step < total_timesteps
-
-    % Update the simulated Robot
+while true
+    % Simulation
     q = realRobot.getQ;
     virtualRobot.setQ(q);
+    
+    % Calculate elapsed time and the time increment (dt)
+    elapsedRealTime = toc(loopBeginTime);
+    dt = elapsedRealTime - previousTime;
+    previousTime = elapsedRealTime;  % Update the previous time for the next loop iteration
 
-    % Compute q_dot with controller
-    q_dot = controller.computeDesiredJointVelocity(virtualRobot, x_d(:,step),  NaN , v_d(:,step));
+    % Find the index in the trajectory that corresponds to the elapsed time
+    [~, index] = min(abs(t - elapsedRealTime));
 
-    % Set q_dot to real Robot
+    % Break the loop if the end of the trajectory is reached
+    if index >= length(t)
+        realRobot.setJointVelocities([0;0;0;0]);
+        break;
+    end
+
+    % Get the desired position and velocity for the current timestep
+    current_x_d = x_d(:, index);
+    current_v_d = v_d(:, index);
+
+    % Compute the desired joint velocity
+    q_dot = controller.computeDesiredJointVelocity(current_x_d, NaN, current_v_d);
+
+    % Set joint speed of real robot
     realRobot.setJointVelocities(q_dot);
 
-    % Display the robot
-    tcp_positions(:,step) = virtualRobot.forwardKinematicsNumeric(q);
-    plot3(tcp_positions(1,1:step), tcp_positions(2,1:step), tcp_positions(3,1:step), 'k');
-    virtualRobot.draw(0);
-    virtualRobot.frames(end).draw;
-    drawnow limitrate
+    % Update and draw the end-effector trajectory and the robot
+    virtualRobot.updateTrajectory;
+    virtualRobot.draw;
 
-
-    step = step +1;
 end
-realRobot.setJointVelocities([0;0;0;0]);

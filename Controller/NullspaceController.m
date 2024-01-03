@@ -1,7 +1,7 @@
 classdef NullspaceController < handle
     properties (Access=private)
 
-        Kp = 0.5;
+        Kp = 1;
 
         % Weights of the Null-Space Tasks (only one can be Non-Zero)
         weight_z = 0; % Weight of the preferred z-Axis Vector
@@ -82,11 +82,11 @@ classdef NullspaceController < handle
             q_dot = pinvJ * u - N * dHdQ';
 
             % Printing for analyzing cost function impact
-            % q_dot_pinv_norm = norm(pinvJ * u);
-            % q_dot_cost_norm = norm(N * dHdQ');
-            % message = sprintf("Norm of q_dot from pseudoinverse: %.2f\nNorm of q_dot from cost function: %.2f\n\n", q_dot_pinv_norm, q_dot_cost_norm);
-            % obj.printWithFrequency(message);
-            % 
+            q_dot_pinv_norm = norm(pinvJ * u);
+            q_dot_cost_norm = norm(N * dHdQ');
+            message = sprintf("Norm of q_dot from pseudoinverse: %.2f\nNorm of q_dot from cost function: %.2f\n\n", q_dot_pinv_norm, q_dot_cost_norm);
+            obj.printWithFrequency(message);
+
 
         end
         
@@ -167,11 +167,11 @@ classdef NullspaceController < handle
                 if q_next(idx) < obj.q_min(idx) && q_dot(idx) < 0
                     % If joint is moving towards lower limit and is too close, only allow motion away from the limit
                     q_dot(idx) = 0;
-                    obj.printWithFrequency('Warning: Joint %d is approaching lower limit. Angle: %.2f °.\n', idx, rad2deg(q(idx)));
+                    fprintf('Warning: Joint %d is approaching lower limit. Angle: %.2f °.\n', idx, rad2deg(q(idx)));
                 elseif q_next(idx) > obj.q_max(idx) && q_dot(idx) > 0
                     % If joint is moving towards upper limit and is too close, only allow motion away from the limit
                     q_dot(idx) = 0;
-                    obj.printWithFrequency('Warning: Joint %d is approaching upper limit. Angle: %.2f °.\n', idx, rad2deg(q(idx)));
+                    fprintf('Warning: Joint %d is approaching upper limit. Angle: %.2f °.\n', idx, rad2deg(q(idx)));
                 end
             end
         end

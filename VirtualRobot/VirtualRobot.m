@@ -52,12 +52,12 @@ classdef VirtualRobot < handle
             q = obj.q;
         end
 
-        function setQ(obj, q_desired)
+        function setQ(obj, q)
 
-            q_desired = mod(q_desired + 2*pi, 4*pi) - 2*pi;  % Convert the desired q to the range [-2pi, 2pi]
+            q = mod(q + 2*pi, 4*pi) - 2*pi;  % Convert the desired q to the range [-2pi, 2pi]
             for i = 1:4
-                obj.frames(i+1).setAngle(q_desired(i));
-                obj.q(i) = q_desired(i);
+                obj.frames(i+1).setAngle(q(i));
+                obj.q(i) = q(i);
             end
 
         end

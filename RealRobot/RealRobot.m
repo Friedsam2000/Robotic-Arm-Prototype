@@ -23,7 +23,9 @@ classdef RealRobot < handle
         i_elbow = 2.5;
 
         % Conifgure maximum absolut joint velocities % RAD/s
-        q_dot_max = [0.06;0.06;0.1;0.2];
+        q_dot_max = [0.04;0.04;0.06;0.1];
+
+
 
 
     end
@@ -80,71 +82,6 @@ classdef RealRobot < handle
             %Convert servoAngles phi to jointAngles q
             jointAngles = obj.convertServoAnglesToJointAngles(servoAngles);            
 
-        end
-
-        function setQ(obj, q_desired)
-            % Uses a PID controller for the servo position to return to a
-            % position
-
-            % Check if Zero Position has been set
-            if isinf(sum(obj.ServoZeroPositions))
-                fprintf("Could not return to zero position, Zero position of the robot is not set. \n\n")
-                return
-            end
-
-            disp("Approaching Position...")
-
-            % Use a default precision of 1 °
-            precision_deg = 0.1;
-            precision = deg2rad(precision_deg);
-
-            % Enable The torque
-            obj.torqueEnableDisable(1);
-
-            % Initialize errors and gains for the PID controller. This
-            % controller tries to move the servos to their stored zero
-            % position by setting their servo.
-            integralError = [0; 0; 0; 0];
-            prevError = [0; 0; 0; 0];
-            P_Gain = 1;  % Proportional gain
-            I_Gain = 0;  % Integral gain
-            D_Gain = 0;  % Derivative gain
-
-            jointsConverged = [0;0;0;0];
-    
-            while 1
-                % Get current joint angles in RAD
-                q = obj.getQ;
-   
-                % Calculate remaining errors
-                currentError = q_desired-q; % As they should become 0
-                integralError = integralError + currentError;
-                derivativeError = currentError - prevError;
-                prevError = currentError;
-               
-                %Set velocites
-                PID_velocities = P_Gain * currentError + I_Gain * integralError + D_Gain * derivativeError;
-
-                obj.setJointVelocities(PID_velocities);
-
-                % Check if joints converged
-                for i = 1:4
-                    if abs(currentError(i)) <= precision
-                        jointsConverged(i) = 1;
-                    end
-                end
-                
-                % If all joints converged disable the torque and return
-                if sum(jointsConverged) == 4
-                    obj.setJointVelocities([0;0;0;0])
-                    fprintf("All joints converged \n")
-                    break
-                end
-            end
-        end
-
-        function goToZeroPosition(obj)
-           obj.setQ([0;0;0;0]);
         end
 
         function setJointVelocities(obj,jointVelocities)
