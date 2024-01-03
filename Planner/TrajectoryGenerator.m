@@ -27,6 +27,23 @@ classdef TrajectoryGenerator < handle
             t = obj.t;
         end
 
+        function draw(obj, fig)
+
+            if isempty(fig)
+                error("The TrajectoryGenerator draw method needs a figure specified" + ...
+                    " (e.g. from a virtualRobot.fig object)")
+            end
+
+            % Draw the generated trajectory in the specified figure
+            if ~isempty(obj.x_d)
+                figure(fig);  % Activate the specified figure
+                hold on;  % Ensure that the plot does not overwrite existing plots
+                plot3(obj.x_d(1,:), obj.x_d(2,:), obj.x_d(3,:), 'm-', 'LineWidth', 1);
+            else
+                warning('TrajectoryGenerator: No trajectory data to plot.');
+            end
+        end
+
     end
 
     methods (Access = private)

@@ -16,6 +16,9 @@ classdef NullspaceController < handle
         q_max;
         q_min;
 
+        lastPrintTime = 0;    % Timestamp of the last printed warning message
+        printInterval = 0.3;    % Minimum time interval between prints in seconds
+
     end
 
     
@@ -24,7 +27,7 @@ classdef NullspaceController < handle
             obj.virtualRobot = virtualRobot;
             obj.q_max = virtualRobot.joint_limits(:,2);
             obj.q_min = virtualRobot.joint_limits(:,1);
-
+            obj.lastPrintTime = tic;
 
         end
         
@@ -151,23 +154,33 @@ classdef NullspaceController < handle
 
         function q_dot = ensureJointLimitCompliance(obj, q, q_dot)
             % Predicted next joint configuration
-            q_next = q + q_dot * 0.15; % this timestep should approx. match the control loop
+            q_next = q + q_dot * 0.3; % this timestep should be bigger then the control loop dt
         
             % Check if the predicted next configuration violates the joint limits
             for idx = 1:length(q)
-                if q_next(idx) < obj.q_min(idx)
+                if q_next(idx) < obj.q_min(idx) && q_dot(idx) < 0
                     % If joint is moving towards lower limit and is too close, only allow motion away from the limit
-                    if q_dot(idx) < 0
-                        q_dot(idx) = 0;
-                    end
-                    fprintf('Warning: Joint %d is approaching lower limit. Angle : %.2f °.\n', idx, rad2deg(q_next(idx)));
-                elseif q_next(idx) > obj.q_max(idx)
+                    q_dot(idx) = 0;
+                    obj.printWithFrequency('Warning: Joint %d is approaching lower limit. Angle: %.2f °.\n', idx, rad2deg(q_next(idx)));
+                elseif q_next(idx) > obj.q_max(idx) && q_dot(idx) > 0
                     % If joint is moving towards upper limit and is too close, only allow motion away from the limit
-                    if q_dot(idx) > 0
-                        q_dot(idx) = 0;
-                    end
-                    fprintf('Warning: Joint %d is approaching upper limit. Angle : %.2f °.\n', idx, rad2deg(q_next(idx)));
+                    q_dot(idx) = 0;
+                    obj.printWithFrequency('Warning: Joint %d is approaching upper limit. Angle: %.2f °.\n', idx, rad2deg(q_next(idx)));
                 end
+            end
+        end
+
+        function printWithFrequency(obj, message, varargin)
+            % Get the current elapsed time since the timer started
+            currentTime = toc(obj.lastPrintTime);
+    
+            % Check if enough time has passed since the last print
+            if currentTime > obj.printInterval
+                % Print the message
+                fprintf(message, varargin{:});
+    
+                % Reset the timer for the next print
+                obj.lastPrintTime = tic;
             end
         end
     end

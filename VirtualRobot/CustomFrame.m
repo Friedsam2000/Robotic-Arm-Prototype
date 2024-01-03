@@ -105,8 +105,7 @@ classdef CustomFrame < handle
                 case 'z'
                     obj.p_A_f = CustomFrame.rotz(angle);
                 otherwise
-                    error("Error setting angle for frame: %s \n" + ...
-                        "invalid rotation axis label \n", obj.label);
+                    error('Error setting angle for frame: %s\ninvalid rotation axis label', obj.label);
             end
             
         end

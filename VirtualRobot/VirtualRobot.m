@@ -13,6 +13,8 @@ classdef VirtualRobot < handle
                         -2*pi, 2*pi; 
                         -(5/6)*pi, (5/6)*pi];
 
+        % Preallocate memory for trajectory points
+        trajectoryPoints = zeros(3, 1000); % Preallocate for 1000 points
 
     end
 
@@ -115,6 +117,9 @@ classdef VirtualRobot < handle
             for i = 1:length(obj.links)
                 obj.links(i).draw
             end
+
+            % Draw trajectory if there is one
+            obj.drawTrajectory;
         
             % Optionally: draw frames (can be slower)
             if length(varargin) >= 1
@@ -126,7 +131,37 @@ classdef VirtualRobot < handle
                 end
             end
 
+            drawnow limitrate;
+
             
+        end
+
+
+        function updateTrajectory(obj)
+            % Check if the current step exceeds the preallocated size
+            lastUpdatedPoint = find(any(obj.trajectoryPoints, 1), 1, 'last');
+
+            if isempty(lastUpdatedPoint)
+                lastUpdatedPoint = 0;
+            end
+
+            if (lastUpdatedPoint + 100) > size(obj.trajectoryPoints, 2)
+                % Resize the array - increase by a fixed amount (e.g., another 1000 points)
+                obj.trajectoryPoints(:, end+1:end+1000) = 0;
+            end
+    
+            % Update the trajectory with the new end-effector position
+            obj.trajectoryPoints(:, lastUpdatedPoint+1) = obj.getEndeffectorPos;
+        end
+
+        function drawTrajectory(obj)
+            % Draw the trajectory of the end-effector
+            % Only draw up to the last updated point
+            lastUpdatedPoint = find(any(obj.trajectoryPoints, 1), 1, 'last');
+            if ~isempty(lastUpdatedPoint)
+                plot3(obj.trajectoryPoints(1, 1:lastUpdatedPoint), obj.trajectoryPoints(2, 1:lastUpdatedPoint), obj.trajectoryPoints(3, 1:lastUpdatedPoint), 'k-', 'LineWidth', 1);
+                hold on;
+            end
         end
 
     end
