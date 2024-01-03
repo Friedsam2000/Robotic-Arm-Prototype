@@ -1,7 +1,7 @@
 classdef NullspaceController < handle
     properties (Access=private)
 
-        Kp = 1;
+        Kp = 0.5;
 
         % Weights of the Null-Space Tasks (only one can be Non-Zero)
         weight_z = 0; % Weight of the preferred z-Axis Vector
@@ -31,11 +31,11 @@ classdef NullspaceController < handle
 
         end
         
-        function q_dot = computeDesiredJointVelocity(obj, virtualRobot, x_desired, z_desired, v_desired)
+        function q_dot = computeDesiredJointVelocity(obj, x_desired, z_desired, v_desired)
 
             % Get current end-effector position and virtualRobot configuration once
-            q = virtualRobot.getQ;
-            x_current = virtualRobot.getEndeffectorPos;
+            q = obj.virtualRobot.getQ;
+            x_current = obj.virtualRobot.getEndeffectorPos;
             
             % Compute desired effective workspace velocity
             v_d_eff = obj.computeEffectiveVelocity(x_desired, x_current, v_desired);
@@ -49,16 +49,22 @@ classdef NullspaceController < handle
                 dHdQ_z = obj.numericDiff(@obj.H_z_desired, q, z_desired);
                 dHdQ = obj.weight_z * dHdQ_z;
             else
-                error("Null Space Controller: Either weight_z or weight_preffered_config must be 0 \n")
+                error("Controller Error: Either weight_z or weight_preffered_config must be 0")
             end
 
-            % Compute Jacobian
-            J = virtualRobot.getJacobianNumeric;
+            % Compute Jacobian and pseudoinverse
+            J = obj.virtualRobot.getJacobianNumeric;
+            pinvJ = pinv(J);
 
-            % Filter out singularity movments
-            % v_d_eff = (J*J')/norm(J*J') * v_d_eff;
+            % Check singularity
+            if norm(J)*norm(pinvJ) > 25
+                message = sprintf('Controller Warning: Close to singularity, stopping\n\n');
+                obj.printWithFrequency(message);
+                q_dot = [0;0;0;0];
+                return
+            end
 
-            q_dot = obj.computeQdotPseudoinverse(J, v_d_eff, dHdQ);
+            q_dot = obj.computeQdotPseudoinverse(J, pinvJ, v_d_eff, dHdQ);
             
             % Ensure compliance with joint angle limits
             q_dot = obj.ensureJointLimitCompliance(q, q_dot);
@@ -69,17 +75,17 @@ classdef NullspaceController < handle
 
         % Pseudoinverse, Nullspaceprojector method for computing the desired
         % joint velocites q_dot
-        function q_dot = computeQdotPseudoinverse(~, J, u, dHdQ)
-            % Compute pseudo-inverse
-            pinvJ = pinv(J);
+        function q_dot = computeQdotPseudoinverse(obj, J, pinvJ, u, dHdQ)
+
             N = (eye(4) - pinvJ * J);
             % Compute joint-space velocity q_dot
             q_dot = pinvJ * u - N * dHdQ';
-            
+
+            % Printing for analyzing cost function impact
             % q_dot_pinv_norm = norm(pinvJ * u);
             % q_dot_cost_norm = norm(N * dHdQ');
-            % 
-            % fprintf("Norm of q_dot from pseudoinverse: %.2f\nNorm of q_dot from cost function: %.2f\n\n", q_dot_pinv_norm, q_dot_cost_norm);
+            % message = sprintf("Norm of q_dot from pseudoinverse: %.2f\nNorm of q_dot from cost function: %.2f\n\n", q_dot_pinv_norm, q_dot_cost_norm);
+            % obj.printWithFrequency(message);
             % 
 
         end
@@ -161,11 +167,11 @@ classdef NullspaceController < handle
                 if q_next(idx) < obj.q_min(idx) && q_dot(idx) < 0
                     % If joint is moving towards lower limit and is too close, only allow motion away from the limit
                     q_dot(idx) = 0;
-                    obj.printWithFrequency('Warning: Joint %d is approaching lower limit. Angle: %.2f °.\n', idx, rad2deg(q_next(idx)));
+                    obj.printWithFrequency('Warning: Joint %d is approaching lower limit. Angle: %.2f °.\n', idx, rad2deg(q(idx)));
                 elseif q_next(idx) > obj.q_max(idx) && q_dot(idx) > 0
                     % If joint is moving towards upper limit and is too close, only allow motion away from the limit
                     q_dot(idx) = 0;
-                    obj.printWithFrequency('Warning: Joint %d is approaching upper limit. Angle: %.2f °.\n', idx, rad2deg(q_next(idx)));
+                    obj.printWithFrequency('Warning: Joint %d is approaching upper limit. Angle: %.2f °.\n', idx, rad2deg(q(idx)));
                 end
             end
         end

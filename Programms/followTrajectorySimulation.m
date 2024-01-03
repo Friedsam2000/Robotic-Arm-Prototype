@@ -29,7 +29,7 @@ virtualRobot.setQ([0.3; 0.3; 0.5; 0.5])
 controller = NullspaceController(virtualRobot);
  
 %% Create a trajectory
-trajectory_time = 5; % s
+trajectory_time = 15; % s
 trajectory_height = 400;
 
 % Initialize the planner
@@ -77,7 +77,7 @@ while true
     current_v_d = v_d(:, index);
 
     % Compute the desired joint velocity
-    q_dot = controller.computeDesiredJointVelocity(virtualRobot, current_x_d, NaN, current_v_d);
+    q_dot = controller.computeDesiredJointVelocity(current_x_d, NaN, current_v_d);
 
     % Update the simulated robot's joint configuration
     virtualRobot.setQ(q + q_dot * dt);
