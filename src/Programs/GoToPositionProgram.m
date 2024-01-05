@@ -1,22 +1,15 @@
-classdef FollowTrajectoryProgram < Program
+classdef GoToPositionProgram < Program
     properties
-        trajectoryHeight
-        trajectoryTime
+        x_desired
     end
 
     methods
-        function obj = FollowTrajectoryProgram(launcherObj, varargin)
+        function obj = GoToPositionProgram(launcherObj,x_desired, varargin)
             % Call superclass constructor
             obj@Program(launcherObj);
 
             % Parse optional arguments
-            p = inputParser;
-            addOptional(p, 'trajectoryHeight', 400); % Default height
-            addOptional(p, 'trajectoryTime', 10); % Default time
-            parse(p, varargin{:});
-
-            obj.trajectoryHeight = p.Results.trajectoryHeight;
-            obj.trajectoryTime = p.Results.trajectoryTime;
+            obj.x_desired = x_desired;
         end
 
         function execute(obj)
@@ -32,21 +25,12 @@ classdef FollowTrajectoryProgram < Program
 
             % Controller and Planner
             controller = NullspaceController(obj.launcher.virtualRobot);
-            planner = PathPlanner2D(obj.launcher.virtualRobot, obj.trajectoryHeight);
-            planner.userInputPath; % User inputs path
-
-            % Trajectory Generator
-            trajectoryGenerator = TrajectoryGenerator(planner.getWaypointList, obj.trajectoryTime);
-            [x_d, v_d, t] = trajectoryGenerator.getTrajectory;
-
-            % Draw the desired trajectory
-            trajectoryGenerator.draw(obj.launcher.virtualRobot.fig);
 
             % Control Loop
-            loopBeginTime = tic;
             while true
                 % Update virtual robot
                 q = obj.updateConfig;
+                scatter3(obj.x_desired(1),obj.x_desired(2),obj.x_desired(3), 'm', 'filled');
 
                 % Check Singularity
                 J = obj.launcher.virtualRobot.getJacobianNumeric;
@@ -55,19 +39,28 @@ classdef FollowTrajectoryProgram < Program
                     break
                 end
 
-                % Time calculations
-                elapsedRealTime = toc(loopBeginTime);
-                [~, index] = min(abs(t - elapsedRealTime));
-                if index >= length(t)
-                    break; % Exit loop at the end of the trajectory
-                end
+                q_dot = controller.computeDesiredJointVelocity(obj.x_desired, NaN, 0);
 
-                % Compute velocities
-                current_x_d = x_d(:, index);
-                current_v_d = v_d(:, index);
-                q_dot = controller.computeDesiredJointVelocity(current_x_d, NaN, current_v_d);
                 % Update real robot
                 obj.launcher.realRobot.setJointVelocities(q_dot);
+
+                % Print the distance to the goal
+                distance_to_goal = norm(obj.x_desired-obj.launcher.virtualRobot.getEndeffectorPos);
+                fprintf('Distance to goal: %.0f mm \n', distance_to_goal);
+
+                if distance_to_goal < 5
+                    if ~breakTimerStarted
+                        % Start the break timer
+                        breakTimerValue = tic;
+                        breakTimerStarted = true;
+                    elseif toc(breakTimerValue) >= 3
+                        % 5 seconds have passed since the timer started
+                        obj.launcher.realRobot.setJointVelocities([0; 0; 0; 0]);
+                        break;
+                    end
+                else
+                    breakTimerStarted = false;  % Reset the timer if the condition is no longer met
+                end
 
                 pause(0.01); % Short pause to yield execution
             end

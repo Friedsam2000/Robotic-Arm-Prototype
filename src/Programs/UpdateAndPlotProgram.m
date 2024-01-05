@@ -24,8 +24,8 @@ classdef UpdateAndPlotProgram < Program
             if isvalid(obj.timerObj) && strcmp(obj.timerObj.Running, 'on')
                 stop(obj.timerObj);
                 delete(obj.timerObj);
-                obj.launcher.notifyProgramStopped(obj); % Notify Launcher about the stop
             end
+            obj.launcher.notifyProgramStopped(obj); % Notify Launcher about the stop
         end
 
         function initializeTimer(obj)
@@ -36,19 +36,11 @@ classdef UpdateAndPlotProgram < Program
 
         function safeUpdate(obj)
             try
-                obj.update(); % Try to run the update method
+                 q = obj.updateConfig(); % Try to run the update method
             catch ME
                 disp(['Program: Error encountered in Update and Plot Program: ', ME.message]);
                 obj.stop(); % Stop the program
             end
-        end
-
-        function update(obj)
-            % Update and plot logic
-            q = obj.launcher.realRobot.getQ;
-            obj.launcher.virtualRobot.setQ(q);
-            obj.launcher.virtualRobot.draw;
-            obj.launcher.virtualRobot.frames(end).draw;
         end
     end
 end

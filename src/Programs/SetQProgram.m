@@ -1,8 +1,8 @@
 classdef SetQProgram < Program
     properties
         q_desired
-        Kp = 3
-        precision = 0.3  % Default precision in degrees
+        Kp = 1;
+        precision = 0.5;  % Default precision in degrees
     end
 
     methods
@@ -21,6 +21,7 @@ classdef SetQProgram < Program
             obj.Kp = p.Results.Kp;
             obj.precision = deg2rad(p.Results.precision); % Convert to radians
         end
+
         function execute(obj)
 
             % Setup a cleanup function that gets called when Strg + C
@@ -29,17 +30,14 @@ classdef SetQProgram < Program
             obj.launcher.realRobot.torqueEnable;
 
             % Initial drawing
-            q = obj.launcher.realRobot.getQ;
-            obj.launcher.virtualRobot.setQ(q);
-            obj.launcher.virtualRobot.draw;
+            q = obj.updateConfig;
             obj.launcher.virtualRobot.workspace.draw;
+            
 
             % P-Control Loop for Joint Positions
             while 1
                 % Update virtual robot and plot
-                q = obj.launcher.realRobot.getQ;
-                obj.launcher.virtualRobot.setQ(q);
-                obj.launcher.virtualRobot.draw;
+                q = obj.updateConfig;
 
                 % Calculate remaining errors
                 currentError = obj.q_desired - q;

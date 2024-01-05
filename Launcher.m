@@ -41,7 +41,9 @@ classdef Launcher < handle
 
             obj.realRobot = RealRobot(dynamixel_lib_path,PORT);
             obj.realRobot.setZeroPositionToCurrentPosition;
-            obj.realRobot.torqueDisable;
+            disp("Launcher: Zero Position Set")
+            obj.realRobot.torqueEnable;
+            disp("Launcher: Torque Enabled")
 
         end
 
@@ -81,7 +83,6 @@ classdef Launcher < handle
             if ~isempty(obj.currentProgram)
                 disp("Stopped by call to launcher stop")
                 obj.currentProgram.stop();
-                obj.currentProgram = [];
             end
         end
     

@@ -106,7 +106,7 @@ classdef RealRobot < handle
             for ID = 1:4
                 if abs(jointVelocities(ID)) > obj.q_dot_max(ID)
                     jointVelocities(ID) = obj.q_dot_max(ID) * sign(jointVelocities(ID));
-                    fprintf("Joint %d velocity limited by RealRobot\n", ID)
+                    % fprintf("Joint %d velocity limited by RealRobot\n", ID)
                 end
             end
 

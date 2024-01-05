@@ -95,5 +95,7 @@ while true
 
     % Update and draw the end-effector trajectory and the robot
     virtualRobot.draw;
+    virtualRobot.frames(end).draw;
+
 
 end

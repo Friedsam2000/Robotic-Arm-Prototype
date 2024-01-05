@@ -2,7 +2,7 @@ classdef Workspace < handle
     %WORKSPACE Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties
+    properties (SetAccess=private)
 
         virtualRobot; % A reference to the virtualRobot object used to sample the workspace
         % and also contains a reference to the figure in which the
@@ -15,6 +15,8 @@ classdef Workspace < handle
 
         boundaryK % A property to store the computed 3D boundary of the workspace
         boundaryVertices % A property to store the vertices of the boundary
+
+        plotHandle; % Graphics handle for the workspace plot
 
     end
     
@@ -44,20 +46,22 @@ classdef Workspace < handle
 
         
         function draw(obj)
-
             % Ensure that the referenced virtual robot has a figure
             obj.virtualRobot.ensureFigureExists;
-
-            % Activate the figure that is already used to plot the
-            % virtualRobot
-            figure(obj.virtualRobot.fig);
         
-            % Plot the boundary
-            trisurf(obj.boundaryK, obj.boundaryVertices(:, 1), obj.boundaryVertices(:, 2), obj.boundaryVertices(:, 3), 'Facecolor', 'cyan', 'Edgecolor', 'none');
-            light('Position', [1 3 2]);
-            lighting gouraud
-            alpha 0.1  % Make it slightly transparent
+            % Redraw if the plot handle is not valid
+            if isempty(obj.plotHandle) || ~isgraphics(obj.plotHandle)
+                % Activate the figure that is already used to plot the virtualRobot
+                figure(obj.virtualRobot.fig);
+            
+                % Plot the boundary and store the handle
+                obj.plotHandle = trisurf(obj.boundaryK, obj.boundaryVertices(:, 1), obj.boundaryVertices(:, 2), obj.boundaryVertices(:, 3), 'Facecolor', 'cyan', 'Edgecolor', 'none');
+                light('Position', [1 3 2]);
+                lighting gouraud
+                alpha 0.1  % Make it slightly transparent
+            end
         end
+
    
         function calculateWorkspaceSerial(obj)
 
