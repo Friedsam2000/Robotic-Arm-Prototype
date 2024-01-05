@@ -3,7 +3,7 @@ classdef NullspaceController < handle
     properties
 
         Kp = 1;
-        Ki = 0.01;
+        Ki = 0;
 
         % Weights of the Null-Space Tasks (only one can be Non-Zero)
         weight_z = 0; % Weight of the preferred z-Axis Vector

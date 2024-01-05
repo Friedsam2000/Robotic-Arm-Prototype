@@ -29,8 +29,8 @@ virtualRobot.setQ([0.3; 0.3; 0.5; 0.5])
 controller = NullspaceController(virtualRobot);
 
 % Conifgure maximum absolut joint velocities % RAD/s
-q_dot_max = [0.5;0.5;0.68;1];
- 
+q_dot_max =  [0.4;0.4;0.68;1];
+
 %% Create a trajectory
 trajectory_time = 5; % s
 trajectory_height = 400;

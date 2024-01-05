@@ -78,8 +78,8 @@ classdef Launcher < handle
         end
 
         function stopCurrentProgram(obj)
-            disp("Stopped by call to launcher stop")
             if ~isempty(obj.currentProgram)
+                disp("Stopped by call to launcher stop")
                 obj.currentProgram.stop();
                 obj.currentProgram = [];
             end

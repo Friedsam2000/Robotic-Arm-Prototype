@@ -22,11 +22,15 @@ classdef SetQProgram < Program
             obj.precision = deg2rad(p.Results.precision); % Convert to radians
         end
         function execute(obj)
-            obj.launcher.realRobot.torqueEnable;
 
             % Setup a cleanup function that gets called when Strg + C
             % during loop
             cleanupObj = onCleanup(@() obj.cleanup());
+            obj.launcher.realRobot.torqueEnable;
+
+            % Initial drawing
+            q = obj.launcher.realRobot.getQ;
+            obj.launcher.virtualRobot.setQ(q);
             obj.launcher.virtualRobot.draw;
             obj.launcher.virtualRobot.workspace.draw;
 
