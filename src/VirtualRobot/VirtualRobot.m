@@ -205,18 +205,26 @@ classdef VirtualRobot < handle
                 xlabel('X');
                 ylabel('Y');
                 zlabel('Z');
-                title('Simulated Robot');
                 grid on;
-
+        
                 % Set fixed axis limits
-                xlim([-700, 700]);
-                ylim([-700, 700]);
-                zlim([0, 700]);
-
+                xlim([-600, 600]);
+                ylim([-600, 600]);
+                zlim([0, 650]);
+        
+                % Set camera view angle
+                camva(5.368090431213385);
+        
                 % Clear Trajectory
                 obj.clearTrajectory;
+        
+                % Position the figure
+                screenSize = get(0, 'ScreenSize');
+                figWidth = 2 * screenSize(3) / 3;
+                set(obj.fig, 'Position', [1, 1, figWidth, screenSize(4)]);
             end
         end
+
     end
     
 end

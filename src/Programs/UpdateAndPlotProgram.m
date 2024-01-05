@@ -15,8 +15,6 @@ classdef UpdateAndPlotProgram < Program
                 % Reinitialize the timer if it's not valid
                 obj.initializeTimer();
             end
-            obj.launcher.virtualRobot.draw;
-            obj.launcher.virtualRobot.workspace.draw;
             start(obj.timerObj);
         end
 

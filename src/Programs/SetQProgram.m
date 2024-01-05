@@ -30,9 +30,7 @@ classdef SetQProgram < Program
             obj.launcher.realRobot.torqueEnable;
 
             % Initial drawing
-            q = obj.updateConfig;
-            obj.launcher.virtualRobot.workspace.draw;
-            
+            q = obj.updateConfig;            
 
             % P-Control Loop for Joint Positions
             while 1

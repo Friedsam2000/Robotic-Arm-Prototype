@@ -28,7 +28,6 @@ classdef FollowTrajectoryProgram < Program
 
             % Initial drawing
             q = obj.updateConfig;
-            obj.launcher.virtualRobot.workspace.draw;
 
             % Controller and Planner
             controller = NullspaceController(obj.launcher.virtualRobot);

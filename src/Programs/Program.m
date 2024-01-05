@@ -19,6 +19,9 @@ classdef (Abstract) Program < handle
             obj.launcher.virtualRobot.setQ(q);
             obj.launcher.virtualRobot.draw;
             obj.launcher.virtualRobot.frames(end).draw;
+            obj.launcher.virtualRobot.frames(1).draw;
+            obj.launcher.virtualRobot.workspace.draw;
+
         end
 
         function stop(obj)
