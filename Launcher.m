@@ -81,7 +81,6 @@ classdef Launcher < handle
 
         function stopCurrentProgram(obj)
             if ~isempty(obj.currentProgram)
-                disp("Stopped by call to launcher stop")
                 obj.currentProgram.stop();
             end
         end

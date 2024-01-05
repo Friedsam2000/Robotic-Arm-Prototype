@@ -75,16 +75,5 @@ classdef FollowTrajectoryProgram < Program
             % Cleanup
             obj.stop();
         end
-
-        function stop(obj)
-            % Stop method implementation
-            obj.launcher.realRobot.setJointVelocities([0; 0; 0; 0]);
-            obj.launcher.notifyProgramStopped(obj);  % Notify Launcher about the stop
-        end
-
-        function cleanup(obj)
-            % Cleanup actions
-            obj.stop();
-        end
     end
 end

@@ -56,14 +56,5 @@ classdef SetQProgram < Program
             end
             obj.stop;
         end
-
-        function stop(obj)
-            obj.launcher.realRobot.setJointVelocities([0; 0; 0; 0]);
-            obj.launcher.notifyProgramStopped(obj);  % Notify Launcher about the stop
-        end
-
-        function cleanup(obj)
-            obj.stop
-        end
     end
 end

@@ -11,7 +11,6 @@ classdef (Abstract) Program < handle
 
         % Abstract methods
         execute(obj);  % Method to execute the program
-        stop(obj);     % Method to stop the program
 
         % Common method for updating and drawing the robot configuration
         function q = updateConfig(obj)
@@ -20,6 +19,17 @@ classdef (Abstract) Program < handle
             obj.launcher.virtualRobot.setQ(q);
             obj.launcher.virtualRobot.draw;
             obj.launcher.virtualRobot.frames(end).draw;
+        end
+
+        function stop(obj)
+            % Stop method implementation
+            obj.launcher.realRobot.setJointVelocities([0; 0; 0; 0]);
+            obj.launcher.notifyProgramStopped(obj);  % Notify Launcher about the stop
+        end
+
+        function cleanup(obj)
+            % Cleanup actions
+            obj.stop();
         end
     end
 end
