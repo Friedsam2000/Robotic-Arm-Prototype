@@ -1,11 +1,18 @@
 classdef NullspaceController < handle
-    properties (Access=private)
+
+    properties
 
         Kp = 1;
+        Ki = 0.01;
 
         % Weights of the Null-Space Tasks (only one can be Non-Zero)
         weight_z = 0; % Weight of the preferred z-Axis Vector
-        weight_preffered_config = 0.5; % Weight of the preferred joint configuration
+        weight_preffered_config = 2; % Weight of the preferred joint configuration
+    end
+
+
+    properties (Access=private)
+
 
         % Variable used for numeric derivation of Cost Function H
         delta_matrix =  0.001 * eye(4);
@@ -19,6 +26,8 @@ classdef NullspaceController < handle
         lastPrintTime = 0;    % Timestamp of the last printed warning message
         printInterval = 0.3;    % Minimum time interval between prints in seconds
 
+        integralError = [0; 0; 0];
+
     end
 
     
@@ -28,6 +37,8 @@ classdef NullspaceController < handle
             obj.q_max = virtualRobot.joint_limits(:,2);
             obj.q_min = virtualRobot.joint_limits(:,1);
             obj.lastPrintTime = tic;
+            obj.integralError = [0; 0; 0];
+
 
         end
         
@@ -92,13 +103,15 @@ classdef NullspaceController < handle
         
         function v_d_eff = computeEffectiveVelocity(obj, x_desired, x_current, v_desired)
             % Calculate v_d_eff (Driftkompensation)
-            % P - Controller, could be expanded to PID
+            % PI - Controller, could be expanded to PID
             
-            % Compute error
-            error = x_desired - x_current;
+            % Calculate remaining errors
+            currentError = x_desired-x_current; % As they should become 0
+            obj.integralError = obj.integralError + currentError;
+           
             
             % Compute effective workspace velocity
-            v_d_eff = error * obj.Kp + v_desired;
+            v_d_eff = currentError * obj.Kp   + obj.integralError * obj.Ki + v_desired;
             
         end
         

@@ -8,7 +8,7 @@ currentFile = mfilename('fullpath');
 [currentDir, ~, ~] = fileparts(currentFile);
 
 % Construct the paths to the folders one level up
-parentDir = fullfile(currentDir, '..');  % This goes one level up
+parentDir = fullfile(currentDir, '..');  % This goes one level up to src
 virtualRobotDir = fullfile(parentDir, 'VirtualRobot');
 plannerDir = fullfile(parentDir, 'Planner'); 
 controllerDir = fullfile(parentDir, 'Controller'); 
@@ -27,9 +27,12 @@ virtualRobot.setQ([0.3; 0.3; 0.5; 0.5])
 
 % Initialize the controller
 controller = NullspaceController(virtualRobot);
+
+% Conifgure maximum absolut joint velocities % RAD/s
+q_dot_max = [0.5;0.5;0.68;1];
  
 %% Create a trajectory
-trajectory_time = 15; % s
+trajectory_time = 5; % s
 trajectory_height = 400;
 
 % Initialize the planner
@@ -79,11 +82,18 @@ while true
     % Compute the desired joint velocity
     q_dot = controller.computeDesiredJointVelocity(current_x_d, NaN, current_v_d);
 
+    % Ensure velocities do not exceed the configued maximum joint speed
+    for ID = 1:4
+        if abs(q_dot(ID)) > q_dot_max(ID)
+            q_dot(ID) = q_dot_max(ID) * sign(q_dot(ID));
+            fprintf("Limited q_dot by sim : Joint %d \n", ID)
+        end
+    end
+
     % Update the simulated robot's joint configuration
     virtualRobot.setQ(q + q_dot * dt);
 
     % Update and draw the end-effector trajectory and the robot
-    virtualRobot.updateTrajectory;
     virtualRobot.draw;
 
 end

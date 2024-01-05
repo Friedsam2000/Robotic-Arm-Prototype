@@ -117,8 +117,20 @@ classdef Workspace < handle
             fprintf("Serial Workspace Calculation took %.2f seconds\n" + ...
                 "BoundaryVertices Count: %d \n\n", toc, length(v));
 
-    	    % Save the workspace object
-             save('workspaceObject.mat', 'obj');
+    	    % Save the workspace object to VirtualRobot folder
+            % Get the directory of the currently executing script
+            currentFile = mfilename('fullpath');
+            [currentDir, ~, ~] = fileparts(currentFile);
+            
+            % Construct the paths to the folders one level up
+            parentDir = fullfile(currentDir, '..');  % This goes one level up to src
+            virtualRobotDir = fullfile(parentDir, 'VirtualRobot');
+
+            % Specify the full path for the .mat file to be saved
+            matFilePath = fullfile(virtualRobotDir, 'workspaceObject.mat');
+            
+            % Save the workspace object 'obj' to the specified path
+            save(matFilePath, 'obj');
 
         end
 

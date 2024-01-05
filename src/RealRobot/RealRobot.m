@@ -2,6 +2,13 @@ classdef RealRobot < handle
 
     properties
         
+        % Conifgure maximum absolut joint velocities % RAD/s
+        q_dot_max = [0.4;0.4;0.68;1];
+
+    end
+
+    properties (SetAccess = private)
+        
         ServoZeroPositions = [-inf,-inf,-inf,-inf];
         
         % RAD
@@ -22,32 +29,35 @@ classdef RealRobot < handle
         i_shoulder = 5;
         i_elbow = 2.5;
 
-        % Conifgure maximum absolut joint velocities % RAD/s
-        q_dot_max = [0.07;0.07;0.1;0.15];
-
+        % limit joint 3 to 6.5 rev/min to maintain stability of the internal
+        % velocity controller. The controller uses high gains to overcome
+        % stick-slip behaviour due to high plain bearing friction
+        % x / 60 --> rev / s
+        % (x / 60 ) * 2 * pi --> rad /s
+        % Servo revs are joint revs 
 
 
 
     end
 
     methods
-        function obj = RealRobot()
-            obj.ServoChain = ServoChain();
+        function obj = RealRobot(dynamixel_lib_path, PORT)
+            obj.ServoChain = ServoChain(dynamixel_lib_path, PORT);
         end
 
-        function torqueEnableDisable(obj,enable_bool)
+        function torqueDisable(obj)
             % Enable / Disable the torque of the whole robot.
 
             for ID = 1:4
-                obj.ServoChain.torqueEnableDisable(ID,enable_bool);
+                obj.ServoChain.torqueEnableDisable(ID,0);
             end
         end
 
-        function setOperatingMode(obj, modeString)
-            % Set the Operating Mode of the whole Robot
+        function torqueEnable(obj)
+            % Enable / Disable the torque of the whole robot.
 
             for ID = 1:4
-                obj.ServoChain.setOperatingMode(ID,modeString);
+                obj.ServoChain.torqueEnableDisable(ID,1);
             end
         end
 
@@ -96,6 +106,7 @@ classdef RealRobot < handle
             for ID = 1:4
                 if abs(jointVelocities(ID)) > obj.q_dot_max(ID)
                     jointVelocities(ID) = obj.q_dot_max(ID) * sign(jointVelocities(ID));
+                    fprintf("Joint %d velocity limited by RealRobot\n", ID)
                 end
             end
 
@@ -103,6 +114,7 @@ classdef RealRobot < handle
             servoVelocity = obj.convertJointVelocitiesToServoVelocites(jointVelocities); 
 
             for ID = 1:4
+                % Ser ServoVelocities in rev/min
                 obj.ServoChain.setServoVelocity(ID, servoVelocity(ID))
             end
 
@@ -148,7 +160,11 @@ classdef RealRobot < handle
             omega_1 = 0.5*(q_2_dot-q_1_dot) * obj.i_shoulder;
             omega_2 = +0.5*(q_2_dot+q_1_dot) * obj.i_shoulder;
 
-            servoVelocities = [omega_1;omega_2;omega_3;omega_4];
+            % Servo velocities in rad_s
+            servoVelocities_rad_s = [omega_1;omega_2;omega_3;omega_4];
+
+            % Convert rad/s to rev/min
+            servoVelocities = 60*(servoVelocities_rad_s)/(2*pi);
 
         end
     end

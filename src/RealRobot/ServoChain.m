@@ -21,38 +21,27 @@ classdef ServoChain < handle
     
     methods
         %Constructor
-        function obj = ServoChain(PORT)
-            % Hint: Get the correct Port string in your device manager e.g.
-            % 'COM3', 'COM4'
+        function obj = ServoChain(dynamixel_lib_path, PORT)
 
-            % Check if the constructor was called with a specified Port
-            if nargin == 0
-                % If not, use 'COM3' as a default port
-                PORT = 'COM3';
-            end
-
-            %% Modify the following string to your absolute path to the DynamixelSDK
-            absolute_path = 'C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\src\DynamixelLib\c\';
-            addpath(genpath([absolute_path, 'include\dynamixel_sdk\']))
-            %%
+            addpath(genpath([dynamixel_lib_path, 'include\dynamixel_sdk\']))
             
             %Checks your OS and adds the correct built library
             %Pre-built for windows, you need to build yourself on Linux and
             %Mac. There is a Makefile in the linked folder.
             if strcmp(computer, 'PCWIN')
               obj.lib_name = 'dxl_x86_c';
-              addpath(genpath([absolute_path, 'build\win32']))
+              addpath(genpath([dynamixel_lib_path, 'build\win32']))
             elseif strcmp(computer, 'PCWIN64')
-              addpath(genpath([absolute_path, 'build\win64']))
+              addpath(genpath([dynamixel_lib_path, 'build\win64']))
               obj.lib_name = 'dxl_x64_c';
             elseif strcmp(computer, 'GLNX86')
-              addpath(genpath([absolute_path, 'build\linux32']))
+              addpath(genpath([dynamixel_lib_path, 'build\linux32']))
               obj.lib_name = 'libdxl_x86_c';
             elseif strcmp(computer, 'GLNXA64')
-              addpath(genpath([absolute_path, 'build\linux64']))
+              addpath(genpath([dynamixel_lib_path, 'build\linux64']))
               obj.lib_name = 'libdxl_x64_c';
             elseif strcmp(computer, 'MACI64')
-              addpath(genpath([absolute_path, 'build\mac']))
+              addpath(genpath([dynamixel_lib_path, 'build\mac']))
               obj.lib_name = 'libdxl_mac_c';
             end
 
@@ -105,7 +94,7 @@ classdef ServoChain < handle
               end
             end
             if length(obj.availableIDs) < 4
-                error("Not 4 Dynamixel Detected!")
+                error("Not all 4 dynamixel servos detected!")
             end
 
 
@@ -145,26 +134,6 @@ classdef ServoChain < handle
             end
         end
 
-        function setOperatingMode(obj, ID, modeString)
-            % Set the operating mode of a Servo
-
-            obj.checkIDAvailable(ID);
-            switch modeString
-                case 'position'
-                    OP_MODE = 3;
-                case 'velocity'
-                    OP_MODE = 1;
-                otherwise
-                    error('Error setting servo operating mode: Invalid mode. Use ''position'', or ''velocity .');
-            end
-
-            %Local Definitions
-            ADDR_PRO_OP_MODE = 11;
-
-            % Set the Operating Mode
-            calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num , obj.PROTOCOL_VERSION, ID, ADDR_PRO_OP_MODE, OP_MODE);
-        end
-
         function servoAngle = getServoAngle(obj,ID)
             %Receive the current Position of a servo in RAD. Can be multi
             %rotation and supports negative angles.
@@ -199,8 +168,6 @@ classdef ServoChain < handle
         end
     
         function setServoVelocity(obj, ID, servoVelocity)
-            %Set the current Position of a servo in RAD/s. Supports
-            %negative velocities.
 
             % Set a Servos velocity in rev/min
            checkIDAvailable(obj, ID);
@@ -208,8 +175,8 @@ classdef ServoChain < handle
             % Local Definitions
             ADDR_PRO_GOAL_VELOCITY      = 104;
 
-            % Convert desired rev/s to dynamixel deciaml
-            VELOCITY_VAL = (servoVelocity*60)/0.229; % Convert rad/s to decimal 
+            % Convert desired rev/min to dynamixel decimal
+            VELOCITY_VAL = (servoVelocity)/0.229; % Convert rev/min to decimal 
 
             %Round VELOCITY_VAL since dynamixel accepts only integers here
             VELOCITY_VAL = round(VELOCITY_VAL);

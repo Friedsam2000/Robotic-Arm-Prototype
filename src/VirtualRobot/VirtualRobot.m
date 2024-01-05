@@ -6,15 +6,26 @@ classdef VirtualRobot < handle
         fig % The figure in which everything is visualized
         workspace % A workspace object
 
-        q = [0;0;0;0]; % Joint Angles
-
         joint_limits = [-pi/4, pi/4;
-                        -pi/4, pi/4; 
-                        -(14/8)*pi, (14/8)*pi; 
-                        -(5/6)*pi, (5/6)*pi];
+        -pi/4, pi/4; 
+        -(14/8)*pi, (14/8)*pi; 
+        -(5/6)*pi, (5/6)*pi];
+
 
         % Preallocate memory for trajectory points
-        trajectoryPoints = zeros(3, 1000); % Preallocate for 1000 points
+        trajectoryPoints = zeros(3, 100); % Preallocate for 100 points
+
+    end
+
+    properties
+        trajectoryLength = 1000;  % Default value for trajectory length
+    end
+
+    properties (Access = private)
+
+        trajectoryPlot % Handle for the trajectory plot
+
+        q = [0;0;0;0]; % Joint Angles
 
     end
 
@@ -48,6 +59,15 @@ classdef VirtualRobot < handle
 
         end
 
+        function delete(obj)
+            % Destructor
+            if ~isempty(obj.fig) && isvalid(obj.fig)
+                % Set CloseRequestFcn to a simple closing function
+                set(obj.fig, 'CloseRequestFcn', 'closereq');
+                close(obj.fig); % Close the figure
+            end
+        end
+        
         function q = getQ(obj)
             q = obj.q;
         end
@@ -109,17 +129,34 @@ classdef VirtualRobot < handle
             % The display method updates and displays all joints and links
             % Activates hold on, no hold off
             obj.ensureFigureExists();
-
-             % Set default values for optional argument to draw frames
+        
+            % Set default values for optional argument to draw frames
             draw_frames = 0;
-
+        
             % Draw links
             for i = 1:length(obj.links)
                 obj.links(i).draw
             end
-
-            % Draw trajectory if there is one
-            obj.drawTrajectory;
+        
+            % Get the latest end-effector position
+            newPoint = obj.getEndeffectorPos();
+        
+            % Append the new point to the trajectory
+            obj.trajectoryPoints = [obj.trajectoryPoints(:, 2:end), newPoint]; % Shift and append new point
+        
+            % Ensure the trajectory array always has 100 columns
+            if size(obj.trajectoryPoints, 2) < 100
+                obj.trajectoryPoints = [zeros(3, 100 - size(obj.trajectoryPoints, 2)), obj.trajectoryPoints];
+            end
+        
+           % Draw the trajectory
+            if ~isempty(obj.trajectoryPoints)
+                if isempty(obj.trajectoryPlot) || ~isgraphics(obj.trajectoryPlot)
+                    obj.trajectoryPlot = plot3(obj.trajectoryPoints(1, :), obj.trajectoryPoints(2, :), obj.trajectoryPoints(3, :), 'k-', 'LineWidth', 1);
+                else
+                    set(obj.trajectoryPlot, 'XData', obj.trajectoryPoints(1, :), 'YData', obj.trajectoryPoints(2, :), 'ZData', obj.trajectoryPoints(3, :));
+                end
+            end
         
             % Optionally: draw frames (can be slower)
             if length(varargin) >= 1
@@ -130,38 +167,17 @@ classdef VirtualRobot < handle
                     obj.frames(i).draw
                 end
             end
-
+        
             drawnow limitrate;
-
-            
         end
 
-
-        function updateTrajectory(obj)
-            % Check if the current step exceeds the preallocated size
-            lastUpdatedPoint = find(any(obj.trajectoryPoints, 1), 1, 'last');
-
-            if isempty(lastUpdatedPoint)
-                lastUpdatedPoint = 0;
-            end
-
-            if (lastUpdatedPoint + 100) > size(obj.trajectoryPoints, 2)
-                % Resize the array - increase by a fixed amount (e.g., another 1000 points)
-                obj.trajectoryPoints(:, end+1:end+1000) = 0;
-            end
+        function clearTrajectory(obj)
+            % Get the current end-effector position
+            currentEEPos = obj.getEndeffectorPos();
     
-            % Update the trajectory with the new end-effector position
-            obj.trajectoryPoints(:, lastUpdatedPoint+1) = obj.getEndeffectorPos;
-        end
-
-        function drawTrajectory(obj)
-            % Draw the trajectory of the end-effector
-            % Only draw up to the last updated point
-            lastUpdatedPoint = find(any(obj.trajectoryPoints, 1), 1, 'last');
-            if ~isempty(lastUpdatedPoint)
-                plot3(obj.trajectoryPoints(1, 1:lastUpdatedPoint), obj.trajectoryPoints(2, 1:lastUpdatedPoint), obj.trajectoryPoints(3, 1:lastUpdatedPoint), 'k-', 'LineWidth', 1);
-                hold on;
-            end
+            % Fill the trajectoryPoints with the current end-effector position,
+            % repeated trajectoryLength times
+            obj.trajectoryPoints = repmat(currentEEPos, 1, obj.trajectoryLength);
         end
 
     end
@@ -169,10 +185,11 @@ classdef VirtualRobot < handle
     methods (Access = public, Hidden)
 
         function closeFigureCallback(obj, src)
-            % This callback function will be executed when the figure is being closed.
-            % It clears the fig property of the object and then closes the figure.
-            obj.fig = [];
-            delete(src);
+            % Check if the object is still valid before modifying its properties
+            if isvalid(obj)
+                obj.fig = [];
+            end
+            delete(src); % Close the figure
         end
 
         function ensureFigureExists(obj)
@@ -195,6 +212,9 @@ classdef VirtualRobot < handle
                 xlim([-700, 700]);
                 ylim([-700, 700]);
                 zlim([0, 700]);
+
+                % Clear Trajectory
+                obj.clearTrajectory;
             end
         end
     end
