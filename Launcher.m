@@ -2,16 +2,29 @@ classdef Launcher < handle
     properties (SetAccess=private)
         virtualRobot = [];
         realRobot = [];
-        currentProgram;
+        currentProgram
+    end
+    
+    methods (Static)
+        function obj = getInstance()
+            persistent uniqueInstance
+            if isempty(uniqueInstance) || ~isvalid(uniqueInstance)
+                uniqueInstance = Launcher();
+            end
+            obj = uniqueInstance;
+        end
     end
 
-    methods
+    methods (Access=private)
         function obj = Launcher()
             % Constructor
             obj.initPath();
             obj.virtualRobot = VirtualRobot;
 
         end
+    end
+
+    methods
 
         function delete(obj)
              % Destructor
@@ -24,6 +37,11 @@ classdef Launcher < handle
         end
 
         function connect(obj,varargin)
+
+            if ~isempty(obj.realRobot)
+                delete(obj.realRobot)
+            end
+
             % Check if the constructor was called with a specified port
             if nargin < 2
                 % If not, use 'COM3' as a default port
@@ -82,6 +100,8 @@ classdef Launcher < handle
         function stopCurrentProgram(obj)
             if ~isempty(obj.currentProgram)
                 obj.currentProgram.stop();
+            else
+                disp("Launcher: No program running")
             end
         end
     
@@ -101,7 +121,7 @@ classdef Launcher < handle
 
     methods (Static)
 
-        function initPath(obj)
+        function initPath(~)
             % Initialize the MATLAB path
 
             clc;
