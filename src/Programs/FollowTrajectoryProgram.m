@@ -1,4 +1,10 @@
 classdef FollowTrajectoryProgram < Program
+
+    properties (Constant)
+        name = "2D Trajectory";
+    end
+
+
     properties
         trajectoryHeight
         trajectoryTime
@@ -17,6 +23,7 @@ classdef FollowTrajectoryProgram < Program
 
             obj.trajectoryHeight = p.Results.trajectoryHeight;
             obj.trajectoryTime = p.Results.trajectoryTime;
+
         end
 
         function execute(obj)

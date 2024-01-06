@@ -1,4 +1,9 @@
 classdef SetQProgram < Program
+
+    properties (Constant)
+        name = "Set Joints";
+    end
+
     properties
         q_desired
         Kp = 1;
@@ -20,6 +25,7 @@ classdef SetQProgram < Program
 
             obj.Kp = p.Results.Kp;
             obj.precision = deg2rad(p.Results.precision); % Convert to radians
+
         end
 
         function execute(obj)

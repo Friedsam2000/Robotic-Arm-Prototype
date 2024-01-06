@@ -1,4 +1,10 @@
 classdef UpdateAndPlotProgram < Program
+    
+    properties (Constant)
+         name = "Plotting";
+    end
+
+
     properties
         timerObj  % Timer object
     end

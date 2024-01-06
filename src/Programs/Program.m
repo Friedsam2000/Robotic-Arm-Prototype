@@ -1,4 +1,9 @@
 classdef (Abstract) Program < handle
+
+    properties (Abstract, Constant)
+        name % Name of the program
+    end
+    
     properties
         launcher  % Reference to the Launcher object
     end

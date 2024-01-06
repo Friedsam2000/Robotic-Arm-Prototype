@@ -1,4 +1,13 @@
 classdef GoToPositionProgram < Program
+
+
+    properties (Constant)
+
+        name = "Set Position";
+
+    end
+
+
     properties
         x_desired
     end
@@ -10,6 +19,7 @@ classdef GoToPositionProgram < Program
 
             % Parse optional arguments
             obj.x_desired = x_desired;
+
         end
 
         function execute(obj)
