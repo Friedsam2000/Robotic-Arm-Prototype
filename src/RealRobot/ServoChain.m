@@ -52,7 +52,7 @@ classdef ServoChain < handle
                 if isempty(notfound) && isempty(warnings)
                     fprintf("Succeeded to load the dynamixel library \n");
                 else
-                    fprintf("Failed to load the dynamixel library \n");
+                    error("Failed to load the dynamixel library \n");
                 end
             end
 
@@ -67,7 +67,7 @@ classdef ServoChain < handle
             else
                 unloadlibrary(obj.lib_name);
                 delete(obj)
-                error('Failed to open the port!\n');
+                error("Failed to open the port!");
             end
 
             % Set port baudrate
@@ -75,7 +75,7 @@ classdef ServoChain < handle
                 fprintf('Succeeded to change the baudrate!\n');
             else
                 delete(obj)
-                error('Failed to change the baudrate!\n');
+                error("Failed to change the baudrate!");
             end
 
             % Initialize PacketHandler Structs
@@ -95,8 +95,9 @@ classdef ServoChain < handle
             end
             if length(obj.availableIDs) < 4
                 error("Not all 4 dynamixel servos detected!")
+            else
+                fprintf("All Servos Detected. Ready.\n")
             end
-
 
         end
 
@@ -130,7 +131,7 @@ classdef ServoChain < handle
             % Throws an error if the ID of a Servo is not available
 
             if ~ismember(ID, obj.availableIDs)
-                error('Servo ID %d is not available', ID);
+                error("Servo not available");
             end
         end
 

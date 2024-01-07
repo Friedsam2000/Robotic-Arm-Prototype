@@ -1,45 +1,39 @@
-classdef GoToPositionProgram < Program
+classdef Set_Position < AbstractProgram
 
 
     properties (Constant)
 
-        name = "Set Position";
+        name = "Set_Position";
 
     end
 
-
-    properties
-        x_desired
-    end
 
     methods
-        function obj = GoToPositionProgram(launcherObj,x_desired, varargin)
-            % Call superclass constructor
-            obj@Program(launcherObj);
 
-            % Parse optional arguments
-            obj.x_desired = x_desired;
 
-        end
-
-        function execute(obj)
+        function execute(obj, x_desired, varargin)
 
             % Setup a cleanup function that gets called when Strg + C
-            % during loop
+            % during loop or program crashes
             cleanupObj = onCleanup(@() obj.cleanup());
-            obj.launcher.realRobot.torqueEnable;
 
             % Initial drawing
-            q = obj.updateConfig;
-            
+            obj.updateConfig;
+
+            % Parse optional arguments
+            % p = inputParser;
+            % addOptional(p, 'trajectoryHeight', currentHeight); % Default height is current height
+            % parse(p, varargin{:});
+            % trajectoryHeight = p.Results.trajectoryHeight;
+
             % Controller and Planner
             controller = NullspaceController(obj.launcher.virtualRobot);
 
             % Control Loop
             while true
                 % Update virtual robot
-                q = obj.updateConfig;
-                scatter3(obj.x_desired(1),obj.x_desired(2),obj.x_desired(3), 'm', 'filled');
+                obj.updateConfig;
+                scatter3(x_desired(1),x_desired(2),x_desired(3), 'm', 'filled');
 
                 % Check Singularity
                 J = obj.launcher.virtualRobot.getJacobianNumeric;
@@ -48,14 +42,14 @@ classdef GoToPositionProgram < Program
                     break
                 end
 
-                q_dot = controller.computeDesiredJointVelocity(obj.x_desired, NaN, 0);
+                q_dot = controller.computeDesiredJointVelocity(x_desired, NaN, 0);
 
                 % Update real robot
                 obj.launcher.realRobot.setJointVelocities(q_dot);
 
                 % Print the distance to the goal
-                distance_to_goal = norm(obj.x_desired-obj.launcher.virtualRobot.getEndeffectorPos);
-                fprintf('Distance to goal: %.0f mm \n', distance_to_goal);
+                distance_to_goal = norm(x_desired-obj.launcher.virtualRobot.getEndeffectorPos);
+                printf('Distance to goal: %.0f mm \n', distance_to_goal);
 
                 if distance_to_goal < 5
                     if ~breakTimerStarted
@@ -63,8 +57,6 @@ classdef GoToPositionProgram < Program
                         breakTimerValue = tic;
                         breakTimerStarted = true;
                     elseif toc(breakTimerValue) >= 3
-                        % 5 seconds have passed since the timer started
-                        obj.launcher.realRobot.setJointVelocities([0; 0; 0; 0]);
                         break;
                     end
                 else
@@ -73,8 +65,6 @@ classdef GoToPositionProgram < Program
 
                 pause(0.01); % Short pause to yield execution
             end
-
-            % Cleanup
             obj.stop();
         end
     end

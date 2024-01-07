@@ -79,7 +79,7 @@ classdef RealRobot < handle
 
             % Check if Zero Position has been set
             if isinf(sum(obj.ServoZeroPositions))
-                fprintf("Could not get Joint Angle, Zero position of the robot is not set. \n\n")
+                warning("RealRobot: Could not get Joint Angle, Zero position of the robot is not set. \n\n")
                 return
             end
 

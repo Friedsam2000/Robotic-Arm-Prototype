@@ -1,4 +1,4 @@
-classdef (Abstract) Program < handle
+classdef (Abstract) AbstractProgram < handle
 
     properties (Abstract, Constant)
         name % Name of the program
@@ -9,18 +9,17 @@ classdef (Abstract) Program < handle
     end
 
     methods
-        function obj = Program(launcherObj, varargin)
+        function obj = AbstractProgram(launcherObj, varargin)
             obj.launcher = launcherObj;
-            % Additional constructor logic can be added here if needed
         end
 
         % Abstract methods
         execute(obj);  % Method to execute the program
 
         % Common method for updating and drawing the robot configuration
-        function q = updateConfig(obj)
+        function updateConfig(obj)
             % Update and plot logic
-            q = obj.launcher.realRobot.getQ;
+            obj.launcher.realRobot.getQ;
             obj.launcher.virtualRobot.setQ(q);
             obj.launcher.virtualRobot.draw;
             obj.launcher.virtualRobot.frames(end).draw;
@@ -29,15 +28,14 @@ classdef (Abstract) Program < handle
 
         end
 
+        % Notify the Launcher that the program stopped
         function stop(obj)
-            % Stop method implementation
-            obj.launcher.realRobot.setJointVelocities([0; 0; 0; 0]);
             obj.launcher.notifyProgramStopped(obj);  % Notify Launcher about the stop
         end
 
+        % Cleanup actions (Strg + C during Execution or Error during execution)
         function cleanup(obj)
-            % Cleanup actions
-            obj.stop();
+            obj.launcher.notifyProgramCrashed(obj);
         end
     end
 end

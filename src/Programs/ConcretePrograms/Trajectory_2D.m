@@ -1,48 +1,37 @@
-classdef FollowTrajectoryProgram < Program
+classdef Trajectory_2D < AbstractProgram
 
     properties (Constant)
-        name = "2D Trajectory";
-    end
-
-
-    properties
-        trajectoryHeight
-        trajectoryTime
+        name = "Trajectory_2D";
     end
 
     methods
-        function obj = FollowTrajectoryProgram(launcherObj, varargin)
-            % Call superclass constructor
-            obj@Program(launcherObj);
+
+        function execute(obj,trajectoryTime,varargin)
+
+            % Setup a cleanup function that gets called when Strg + C
+            % during loop or program crashes
+            cleanupObj = onCleanup(@() obj.cleanup());
+
+            % Initial drawing
+            obj.updateConfig;
+
+            % Get Current Height
+            g_r_EE = obj.launcher.virtualRobot.getEndeffectorPos;
+            currentHeight = g_r_EE(3);
 
             % Parse optional arguments
             p = inputParser;
-            addOptional(p, 'trajectoryHeight', 400); % Default height
-            addOptional(p, 'trajectoryTime', 10); % Default time
+            addOptional(p, 'trajectoryHeight', currentHeight); % Default height is current height
             parse(p, varargin{:});
-
-            obj.trajectoryHeight = p.Results.trajectoryHeight;
-            obj.trajectoryTime = p.Results.trajectoryTime;
-
-        end
-
-        function execute(obj)
-
-            % Setup a cleanup function that gets called when Strg + C
-            % during loop
-            cleanupObj = onCleanup(@() obj.cleanup());
-            obj.launcher.realRobot.torqueEnable;
-
-            % Initial drawing
-            q = obj.updateConfig;
+            trajectoryHeight = p.Results.trajectoryHeight;
 
             % Controller and Planner
             controller = NullspaceController(obj.launcher.virtualRobot);
-            planner = PathPlanner2D(obj.launcher.virtualRobot, obj.trajectoryHeight);
+            planner = PathPlanner2D(obj.launcher.virtualRobot, trajectoryHeight);
             planner.userInputPath; % User inputs path
 
             % Trajectory Generator
-            trajectoryGenerator = TrajectoryGenerator(planner.getWaypointList, obj.trajectoryTime);
+            trajectoryGenerator = TrajectoryGenerator(planner.getWaypointList, trajectoryTime);
             [x_d, v_d, t] = trajectoryGenerator.getTrajectory;
 
             % Draw the desired trajectory
@@ -52,7 +41,7 @@ classdef FollowTrajectoryProgram < Program
             loopBeginTime = tic;
             while true
                 % Update virtual robot
-                q = obj.updateConfig;
+                obj.updateConfig;
 
                 % Check Singularity
                 J = obj.launcher.virtualRobot.getJacobianNumeric;
@@ -77,8 +66,6 @@ classdef FollowTrajectoryProgram < Program
 
                 pause(0.01); % Short pause to yield execution
             end
-
-            % Cleanup
             obj.stop();
         end
     end
