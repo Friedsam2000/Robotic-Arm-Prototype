@@ -6,11 +6,13 @@ classdef Trajectory_2D < AbstractProgram
 
     methods
 
-        function execute(obj,trajectoryTime,varargin)
+        function execute(obj,varargin)
+
 
             % Setup a cleanup function that gets called when Strg + C
             % during loop or program crashes
             cleanupObj = onCleanup(@() obj.cleanup());
+            obj.is_running = true;
 
             % Initial drawing
             obj.updateConfig;
@@ -22,8 +24,10 @@ classdef Trajectory_2D < AbstractProgram
             % Parse optional arguments
             p = inputParser;
             addOptional(p, 'trajectoryHeight', currentHeight); % Default height is current height
+            addOptional(p, 'trajectoryTime', 10);
             parse(p, varargin{:});
             trajectoryHeight = p.Results.trajectoryHeight;
+            trajectoryTime = p.Results.trajectoryTime;
 
             % Controller and Planner
             controller = NullspaceController(obj.launcher.virtualRobot);

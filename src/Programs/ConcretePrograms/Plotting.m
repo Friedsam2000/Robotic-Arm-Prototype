@@ -12,15 +12,22 @@ classdef Plotting < AbstractProgram
         function execute(obj)
             % Setup a cleanup function that gets called when Strg + C
             % during loop or program crashes
-            cleanupObj = onCleanup(@() obj.cleanup());
+            obj.is_running = true;
 
             obj.createAndStartTimer;
         end
 
     end
 
-    methods (Access=private)
+    methods (Hidden)
 
+        function stop(obj)
+            % Notify the Launcher that the program stopped
+            obj.stopAndDeleteTimer;
+            obj.launcher.notifyProgramStopped(obj);  % Notify Launcher about the stop
+            obj.is_running = false;
+        end
+        
         function stopAndDeleteTimer(obj)
             if ~isempty(obj.timerObj) && isa(obj.timerObj, 'timer')
                 if strcmp(obj.timerObj.Running, 'on')

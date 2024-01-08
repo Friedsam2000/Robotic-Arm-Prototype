@@ -111,6 +111,7 @@ classdef Launcher < handle
             obj.stopCurrentProgram;
             if ~isempty(obj.realRobot)
                 delete(obj.realRobot)
+                obj.realRobot = [];
             end
 
         end
@@ -127,6 +128,7 @@ classdef Launcher < handle
                 % arguments
                 try
                     obj.currentProgramInstance = feval(programName, obj);
+                    fprintf('Insantiated Program: %s \n', obj.currentProgramInstance.name);
                 catch ME
                     fprintf('Launcher: Failed to instantiate %s. Error: %s. '\n', programName, ME.message );
                 end        
@@ -137,8 +139,7 @@ classdef Launcher < handle
         end
 
         function stopCurrentProgram(obj)
-            % Stop the current program based on its name
-            if ~isempty(obj.currentProgramInstance)
+            if ~isempty(obj.currentProgramInstance) && obj.currentProgramInstance.is_running
                 obj.currentProgramInstance.stop;
             end
         end

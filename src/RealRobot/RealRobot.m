@@ -7,7 +7,7 @@ classdef RealRobot < handle
 
     end
 
-    properties (SetAccess = private)
+    properties (SetAccess = private, Hidden)
         
         ServoZeroPositions = [-inf,-inf,-inf,-inf];
         
@@ -35,10 +35,8 @@ classdef RealRobot < handle
         % x / 60 --> rev / s
         % (x / 60 ) * 2 * pi --> rad /s
         % Servo revs are joint revs 
-
-
-
     end
+    
 
     methods
         function obj = RealRobot(dynamixel_lib_path, PORT)
@@ -93,7 +91,9 @@ classdef RealRobot < handle
             jointAngles = obj.convertServoAnglesToJointAngles(servoAngles);            
 
         end
+    end
 
+    methods(Hidden)
         function setJointVelocities(obj,jointVelocities)
             % Set the angular velocities q_dot of all joints in rad/s.
 
@@ -119,6 +119,9 @@ classdef RealRobot < handle
             end
 
         end
+    end
+
+    methods (Access=private)
         
         function jointAngles = convertServoAnglesToJointAngles(obj,servoAngles)
             

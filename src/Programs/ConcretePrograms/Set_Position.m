@@ -16,6 +16,7 @@ classdef Set_Position < AbstractProgram
             % Setup a cleanup function that gets called when Strg + C
             % during loop or program crashes
             cleanupObj = onCleanup(@() obj.cleanup());
+            obj.is_running = true;
 
             % Initial drawing
             obj.updateConfig;
@@ -49,7 +50,7 @@ classdef Set_Position < AbstractProgram
 
                 % Print the distance to the goal
                 distance_to_goal = norm(x_desired-obj.launcher.virtualRobot.getEndeffectorPos);
-                printf('Distance to goal: %.0f mm \n', distance_to_goal);
+                fprintf('Distance to goal: %.0f mm \n', distance_to_goal);
 
                 if distance_to_goal < 5
                     if ~breakTimerStarted

@@ -12,19 +12,26 @@ classdef Set_Joints < AbstractProgram
             % Setup a cleanup function that gets called when Strg + C
             % during loop or program crashes
             cleanupObj = onCleanup(@() obj.cleanup());
+            obj.is_running = true;
 
             % Initial drawing
             obj.updateConfig;
 
             % Parse optional arguments
-            % p = inputParser;
-            % addOptional(p, 'trajectoryHeight', currentHeight); % Default height is current height
-            % parse(p, varargin{:});
-            % trajectoryHeight = p.Results.trajectoryHeight;
+            p = inputParser;
+            addOptional(p, 'Kp', 1.5); % Default Kp is 1.5
+            addOptional(p, 'precision_deg', 0.5); % Default precision is 0.5 deg
+
+            parse(p, varargin{:});
+            Kp = p.Results.Kp;
+            precision_deg = p.Results.precision_deg;
+
+            precision_rad = deg2rad(precision_deg);
 
             % P-Control Loop for Joint Positions
             while 1
                 % Update virtual robot and plot
+                obj.updateConfig;
                 q = obj.launcher.realRobot.getQ;
 
                 % Calculate remaining errors
@@ -35,8 +42,8 @@ classdef Set_Joints < AbstractProgram
                 obj.launcher.realRobot.setJointVelocities(PID_velocities);
 
                 % Check if joints converged
-                if all(abs(currentError) <= obj.precision)
-                    printf("Program: All joints converged \n");
+                if all(abs(currentError) <= precision_rad)
+                    fprintf("Program: All joints converged \n");
                     break;
                 end
 
