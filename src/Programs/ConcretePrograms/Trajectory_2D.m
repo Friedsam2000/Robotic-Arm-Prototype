@@ -1,21 +1,21 @@
 classdef Trajectory_2D < AbstractProgram
 
     properties (Constant)
-        name = "Trajectory_2D";
+
+        default_trajectoryTime = 15; % [s]
     end
 
     methods
 
-        function execute(obj,varargin)
-
+        function start(obj,varargin)
 
             % Setup a cleanup function that gets called when Strg + C
             % during loop or program crashes
-            cleanupObj = onCleanup(@() obj.cleanup());
-            obj.is_running = true;
-
+            cleanupObj = onCleanup(@() obj.stop());
+            % Set Status
+            obj.launcher.status = 'executing';
             % Initial drawing
-            obj.updateConfig;
+            obj.updateConfigAndPlot;
 
             % Get Current Height
             g_r_EE = obj.launcher.virtualRobot.getEndeffectorPos;
@@ -24,7 +24,7 @@ classdef Trajectory_2D < AbstractProgram
             % Parse optional arguments
             p = inputParser;
             addOptional(p, 'trajectoryHeight', currentHeight); % Default height is current height
-            addOptional(p, 'trajectoryTime', 10);
+            addOptional(p, 'trajectoryTime', obj.default_trajectoryTime);
             parse(p, varargin{:});
             trajectoryHeight = p.Results.trajectoryHeight;
             trajectoryTime = p.Results.trajectoryTime;
@@ -43,16 +43,11 @@ classdef Trajectory_2D < AbstractProgram
 
             % Control Loop
             loopBeginTime = tic;
-            while true
-                % Update virtual robot
-                obj.updateConfig;
+            % Control Loop
+            while ~obj.launcher.virtualRobot.checkSingularity
 
-                % Check Singularity
-                J = obj.launcher.virtualRobot.getJacobianNumeric;
-                if cond(J) > 25
-                    warning("Program: Close to Singularity. Aborting.");
-                    break;
-                end
+                % Update virtual robot and plot
+                obj.updateConfigAndPlot;
 
                 % Time calculations
                 elapsedRealTime = toc(loopBeginTime);
@@ -61,11 +56,8 @@ classdef Trajectory_2D < AbstractProgram
                     break; % Exit loop at the end of the trajectory
                 end
 
-                % Compute velocities
-                current_x_d = x_d(:, index);
-                current_v_d = v_d(:, index);
-                q_dot = controller.computeDesiredJointVelocity(current_x_d, NaN, current_v_d);
-                % Update real robot
+                % Set velocities
+                q_dot = controller.computeDesiredJointVelocity(x_d(:, index), NaN, v_d(:, index));
                 obj.launcher.realRobot.setJointVelocities(q_dot);
 
                 pause(0.01); % Short pause to yield execution

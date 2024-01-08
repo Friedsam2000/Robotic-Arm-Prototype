@@ -1,17 +1,19 @@
 classdef Workspace < handle
     %WORKSPACE Summary of this class goes here
     %   Detailed explanation goes here
-    
-    properties (SetAccess=private)
 
-        virtualRobot; % A reference to the virtualRobot object used to sample the workspace
-        % and also contains a reference to the figure in which the
-        % workspace should be plotted as well as the joint_limits
-
+    properties (Constant)
         workspaceResolution = 0.1; % The angle resolution for sampling the workspace (rad)
 
         workspaceTolerance = 0.02; % A tolerance for filtering out nearly identical
         %  workspace samples before computing boundary (safes compute)
+    end
+    
+    properties
+
+        virtualRobot; % A reference to the virtualRobot object used to sample the workspace
+        % and also contains a reference to the figure in which the
+        % workspace should be plotted as well as the joint_limits
 
         boundaryK % A property to store the computed 3D boundary of the workspace
         boundaryVertices % A property to store the vertices of the boundary
@@ -43,20 +45,15 @@ classdef Workspace < handle
             end
         end
 
-
-        
-        function draw(obj)
-            % Redraw if the plot handle is not valid
-            if isempty(obj.plotHandle) || ~isgraphics(obj.plotHandle)
-            
-                % Plot the boundary and store the handle
-                obj.plotHandle = trisurf(obj.boundaryK, obj.boundaryVertices(:, 1), obj.boundaryVertices(:, 2), obj.boundaryVertices(:, 3), 'Facecolor', 'cyan', 'Edgecolor', 'none');
-                light('Position', [1 3 2]);
-                lighting gouraud
-                alpha 0.1  % Make it slightly transparent
-            end
+        function initWorkspacePlot(obj)
+            % Plot the boundary and store the handle
+            obj.plotHandle = trisurf(obj.boundaryK, obj.boundaryVertices(:, 1), ...
+                                 obj.boundaryVertices(:, 2), obj.boundaryVertices(:, 3), ...
+                                 'Facecolor', 'cyan', 'Edgecolor', 'none');
+            light('Position', [1 3 2]);
+            lighting gouraud;
+            alpha(obj.plotHandle, 0.1);  % Make it slightly transparent
         end
-
    
         function calculateWorkspaceSerial(obj)
 
@@ -141,10 +138,6 @@ classdef Workspace < handle
             isInside = inhull(point', vertices);
 
         end
-
-    end
-
-    methods (Static, Hidden)
 
         %% In Hull John D'Errico
         function in = inhull(testpts,xyz,tess,tol)
@@ -326,7 +319,7 @@ classdef Workspace < handle
 
 
         end
-    end
 
+    end
 end
 

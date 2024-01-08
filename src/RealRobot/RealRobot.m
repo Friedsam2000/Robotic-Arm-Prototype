@@ -1,45 +1,48 @@
 classdef RealRobot < handle
 
-    properties
-        
-        % Conifgure maximum absolut joint velocities % RAD/s
-        q_dot_max = [0.2;0.2;0.5;0.5];
+    properties (Constant)
 
-    end
-
-    properties (SetAccess = private, Hidden)
-        
-        ServoZeroPositions = [-inf,-inf,-inf,-inf];
-        
-        % RAD
-        % [0] ShoulderServoOne --> located in x-direction  (front)
-        % [1] ShoulderServoTwo (back)
-        % [2] YawServo
-        % [3] ElbowServo
-
-        %ServoChain Object
-        ServoChain = [];
         % Assume following ID's (can be configured in Dynamixel Wizard)
         % ID 1 : ShoulderServoOne 
         % ID 2 : ShoulderServoTwo
         % ID 3 : YawServo
         % ID 4 : ElbowServo
 
-        %Transmission ratios
-        i_shoulder = 5;
-        i_elbow = 2.5;
-
+        % [0] ShoulderServoOne --> located in x-direction  (front)
+        % [1] ShoulderServoTwo (back)
+        % [2] YawServo
+        % [3] ElbowServo
+        
+        % Conifgure maximum absolut joint velocities % RAD/s
         % limit joint 3 to 6.5 rev/min to maintain stability of the internal
         % velocity controller. The controller uses high gains to overcome
         % stick-slip behaviour due to high plain bearing friction
         % x / 60 --> rev / s
         % (x / 60 ) * 2 * pi --> rad /s
         % Servo revs are joint revs 
+        q_dot_max = [0.2;0.2;0.5;0.5];
+
+        %Transmission ratios
+        i_shoulder = 5;
+        i_elbow = 2.5;
+
+
+    end
+
+    properties
+        
+        % The Servo Angles that are considered as Zero Configuration
+        ServoZeroPositions = [-inf,-inf,-inf,-inf];
+
+        %ServoChain Object
+        ServoChain;
+
     end
     
 
     methods
         function obj = RealRobot(dynamixel_lib_path, PORT)
+            obj.ServoChain = [];
             obj.ServoChain = ServoChain(dynamixel_lib_path, PORT);
         end
 
@@ -91,9 +94,7 @@ classdef RealRobot < handle
             jointAngles = obj.convertServoAnglesToJointAngles(servoAngles);            
 
         end
-    end
 
-    methods(Hidden)
         function setJointVelocities(obj,jointVelocities)
             % Set the angular velocities q_dot of all joints in rad/s.
 
@@ -119,10 +120,7 @@ classdef RealRobot < handle
             end
 
         end
-    end
-
-    methods (Access=private)
-        
+      
         function jointAngles = convertServoAnglesToJointAngles(obj,servoAngles)
             
             phi_1_0 = obj.ServoZeroPositions(1);

@@ -1,46 +1,35 @@
 classdef Plotting < AbstractProgram
     
     properties (Constant)
-         name = "Plotting";
+         targetUpdatePeriod = 0.1;
     end
     
-    properties (Access = private)
-        timerObj  % Timer object
-    end
 
     methods
-        function execute(obj)
-            obj.is_running = true;
-            obj.createAndStartTimer;
-        end
-
-    end
-
-    methods (Hidden)
-
-        function stop(obj)
-            % Notify the Launcher that the program stopped
-            obj.stopAndDeleteTimer;
-            obj.launcher.notifyProgramStopped(obj);  % Notify Launcher about the stop
-            obj.is_running = false;
-        end
         
-        function stopAndDeleteTimer(obj)
-            if ~isempty(obj.timerObj)
-                if strcmp(obj.timerObj.Running, 'on')
-                    stop(obj.timerObj);
-                end
-                delete(obj.timerObj);
-            end
-        end
-
-        function createAndStartTimer(obj)
-            % Delete timer if there is one
-            obj.stopAndDeleteTimer;
-            % Create and start timer
-            obj.timerObj = timer('ExecutionMode', 'fixedRate', 'Period', 0.1, ...
-                                 'BusyMode', 'drop', 'TimerFcn', @(~,~) obj.updateConfig);
+        function start(obj)
             start(obj.timerObj);
         end
+        
+        function obj = Plotting(launcherObj, varargin)
+            % Call the constructor of the superclass
+            obj@AbstractProgram(launcherObj, varargin);
+
+            % Create and start timer, delete object if timer crashes / stops
+            obj.timerObj = timer('ExecutionMode', 'fixedRate', 'Period', obj.targetUpdatePeriod, ...
+                                 'BusyMode', 'drop', 'TimerFcn', @(~,~) obj.timerCallback, 'ErrorFcn', @(~,~) delete(obj));
+        end
+
+        function timerCallback(obj)
+            % Update Config and Plot
+            obj.updateConfigAndPlot;
+            % Update Singularity Status
+            if obj.launcher.virtualRobot.checkSingularity
+                obj.launcher.status = 'singularity';
+            else
+                obj.launcher.status = 'ready';
+            end
+        end
+        
     end
 end

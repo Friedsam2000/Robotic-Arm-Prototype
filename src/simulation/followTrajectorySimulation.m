@@ -46,11 +46,9 @@ trajectoryGenerator = TrajectoryGenerator(planner.getWaypointList, trajectory_ti
 [x_d, v_d, t] = trajectoryGenerator.getTrajectory;
 
 % Plot the desired trajectory
-virtualRobot.draw
+virtualRobot.initRobotPlot
 trajectoryGenerator.draw(virtualRobot.fig)
 
-% Plot the workspace
-virtualRobot.workspace.draw;
 
 %% Control Loop
 
@@ -94,8 +92,7 @@ while true
     virtualRobot.setQ(q + q_dot * dt);
 
     % Update and draw the end-effector trajectory and the robot
-    virtualRobot.draw;
-    virtualRobot.frames(end).draw;
+    virtualRobot.updateRobotPlot;
 
 
 end

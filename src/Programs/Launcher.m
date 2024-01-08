@@ -1,12 +1,113 @@
 classdef Launcher < handle
-    properties (SetAccess=private)
-        virtualRobot = [];
-        realRobot = [];
-        currentProgramInstance = [];
-        programNames = [];
+    properties
+        virtualRobot;
+        realRobot;
+        currentProgramInstance;
+        programNames;
+        status;
+    end
+   
+    methods
+        
+
+        function obj = Launcher()
+
+            % Add all relevant folders to MATLAB PATH
+            obj.initPath();
+            
+            % No connection upon launcher intialisation
+            obj.realRobot = [];
+
+            % Create the Virtual Robot Object
+            obj.virtualRobot = VirtualRobot;
+
+            % Load all available Programs
+            obj.programNames = obj.getPrograms;
+            obj.currentProgramInstance = [];
+
+            obj.status = 'disconnected';
+            % 'disconnected' --> no realRobot object, no connection,
+            % 'ready' --> connection to real robot, no program running
+            % 'singularity' --> plotting method warns singularity config
+            % 'executing' --> non-plotting program executing
+
+        end
+
+        function delete(obj)
+            delete(obj.currentProgramInstance)
+
+        end
+
+        function connect(obj,varargin)
+            % Disconnect first (if a connection exists)
+            obj.disconnect;
+
+            % Check if the constructor was called with a specified port
+            if nargin < 2
+                % If not, use 'COM3' as a default port
+                PORT = 'COM3';
+            else
+                % Use the provided port
+                PORT = varargin{1};
+            end
+
+            % Get Path to Dynamixel Lib
+            currentFile = mfilename('fullpath');
+            [currentDir, ~, ~] = fileparts(currentFile);
+            [parentDir, ~, ~] = fileparts(currentDir);
+            dynamixel_lib_path = fullfile(parentDir, 'DynamixelLib\c\');
+
+            % Connect
+            obj.realRobot = RealRobot(dynamixel_lib_path,PORT);
+
+            % Set zero pos
+            obj.realRobot.setZeroPositionToCurrentPosition;
+
+            % Start the plotting program
+            obj.instantiateProgram('Plotting')
+            obj.currentProgramInstance.start();
+
+            % Set the Torque to enabled
+            obj.realRobot.torqueEnable;
+            fprintf("Launcher: Torque Enabled. \n");
+        end
+
+        function disconnect(obj)
+            % Stop any program running
+            % Stop the current program if there is one
+            if ~isempty(obj.currentProgramInstance)
+                delete(obj.currentProgramInstance)
+            end
+            % Disconnect
+            delete(obj.realRobot);
+            obj.status = 'disconnected';
+        end
+        
+        function instantiateProgram(obj, programName)
+            % Check if the programName is in the available programs
+            if ismember(programName, obj.programNames)
+
+                % Stop the current program if there is one
+                if ~isempty(obj.currentProgramInstance)
+                    delete(obj.currentProgramInstance)
+                end
+
+                % Instantiate the program using its name
+                % Pass a reference to the launcher instance and variable
+                % arguments
+                try
+                    obj.currentProgramInstance = feval(programName, obj);
+                    fprintf('Launcher: Insantiated Program: %s \n', programName);
+                catch ME
+                    fprintf('Launcher: Failed to instantiate %s. Error: %s. \n', programName, ME.message );
+                end        
+            else
+                fprintf('Launcher: Program %s not found in available programs. \n', programName);
+            end
+        end
     end
 
-    methods (Static)
+    methods (Static, Hidden)
 
         function programs = getPrograms()
             % Get Current Dir of Launcher.m file
@@ -22,150 +123,9 @@ classdef Launcher < handle
 
             for i = 1:length(programFiles)
                 programName = erase(programFiles(i).name, '.m');
-                if ~exist(programName, 'class')
-                    continue; % Skip if the class does not exist
-                end
-
-                % Attempt to access the constant 'name' property of the class
-                try
-                    programName = eval([programName '.name']);
-                    if ischar(programName) || isstring(programName)
-                        programs{end + 1} = char(programName); % Add the program name to the list
-                    end
-                catch
-                    % Handle or ignore errors in class instantiation
-                end
+                programs{end + 1} = char(programName); % Add the program name to the list
             end
         end
-
-    end
-
-    methods
-        function obj = Launcher()
-            % Constructor (can only be accessed via getInstance method
-            % This is to ensure only one launcher is active at a time
-            % (unique)
-
-            % Add all relevant folders to MATLAB PATH
-            obj.initPath();
-
-            % Create the Virtual Robot Object
-            obj.virtualRobot = VirtualRobot;
-
-            % Load all available Programs
-            obj.programNames = obj.getPrograms;
-
-        end
-
-    end
-
-    methods
-
-        function delete(obj)
-            % Destructor
-            obj.disconnect;
-            delete(obj.virtualRobot);
-        end
-
-        function connect(obj,varargin)
-
-            % Reconnect if Connect is called as realRobot exists.
-            if ~isempty(obj.realRobot)
-                delete(obj.realRobot)
-            end
-
-            % Check if the constructor was called with a specified port
-            if nargin < 2
-                % If not, use 'COM3' as a default port
-                PORT = 'COM3';
-            else
-                % Use the provided port
-                PORT = varargin{1};
-            end
-
-            % Get Current Dir of Launcher.m file (Programs)
-            currentFile = mfilename('fullpath');
-            [currentDir, ~, ~] = fileparts(currentFile);
-
-            % Get Parent Dir (src)
-            [parentDir, ~, ~] = fileparts(currentDir);
-
-            dynamixel_lib_path = fullfile(parentDir, 'DynamixelLib\c\');
-
-            obj.realRobot = RealRobot(dynamixel_lib_path,PORT);
-
-            obj.realRobot.torqueEnable;
-
-            fprintf("Launcher: Torque Enabled. \n");
-
-        end
-
-        function disconnect(obj)
-            obj.stopCurrentProgram;
-            if ~isempty(obj.realRobot)
-                delete(obj.realRobot)
-                obj.realRobot = [];
-            end
-
-        end
-
-        function instantiateProgram(obj, programName)
-            % Check if the programName is in the available programs
-            if ismember(programName, obj.programNames)
-
-                % Stop the current program
-                obj.stopCurrentProgram;
-
-                % Instantiate and the program using its name
-                % Pass a reference to the launcher instance and variable
-                % arguments
-                try
-                    obj.currentProgramInstance = feval(programName, obj);
-                    fprintf('Insantiated Program: %s \n', obj.currentProgramInstance.name);
-                catch ME
-                    fprintf('Launcher: Failed to instantiate %s. Error: %s. '\n', programName, ME.message );
-                end        
-
-            else
-                fprintf('Launcher: Program %s not found in available programs. \n', programName);
-            end
-        end
-
-        function stopCurrentProgram(obj)
-            if ~isempty(obj.currentProgramInstance) && obj.currentProgramInstance.is_running
-                obj.currentProgramInstance.stop;
-            end
-        end
-        
-    end
-
-    methods (Hidden)
-        function notifyProgramStopped(obj, program)
-            % Notification when a program is stopped, this gets called by
-            % the program itself
-            fprintf('Launcher: %s has stopped. \n', program.name);
-
-            % Halting
-            obj.realRobot.setJointVelocities([0;0;0;0])
-            fprintf('Halting. \n');
-
-        end
-
-        function notifyProgramCrashed(obj, program)
-            % Notification when a program is stopped, this gets called by
-            % the program itself
-            warning('Launcher: Program %s has crashed. \n', program.name);
-
-            % Halting
-            obj.realRobot.setJointVelocities([0;0;0;0])
-            fprintf('Halting. \n');
-
-            obj.currentProgramInstance = [];
-        end
-    end
-
-
-    methods (Static)
 
         function initPath(~)
             % Initialize the MATLAB path
