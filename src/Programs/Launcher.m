@@ -7,13 +7,6 @@ classdef Launcher < handle
     end
 
     methods (Static)
-        function obj = getInstance()
-            persistent uniqueInstance
-            if isempty(uniqueInstance) || ~isvalid(uniqueInstance)
-                uniqueInstance = Launcher();
-            end
-            obj = uniqueInstance;
-        end
 
         function programs = getPrograms()
             % Get Current Dir of Launcher.m file
@@ -47,7 +40,7 @@ classdef Launcher < handle
 
     end
 
-    methods (Access=private)
+    methods
         function obj = Launcher()
             % Constructor (can only be accessed via getInstance method
             % This is to ensure only one launcher is active at a time

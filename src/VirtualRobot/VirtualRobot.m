@@ -58,15 +58,6 @@ classdef VirtualRobot < handle
             obj.workspace = Workspace(obj);
 
         end
-
-        function delete(obj)
-            % Destructor
-            if ~isempty(obj.fig) && isvalid(obj.fig)
-                % Set CloseRequestFcn to a simple closing function
-                set(obj.fig, 'CloseRequestFcn', 'closereq');
-                close(obj.fig); % Close the figure
-            end
-        end
         
         function q = getQ(obj)
             q = obj.q;
@@ -184,20 +175,9 @@ classdef VirtualRobot < handle
     
     methods (Access = public, Hidden)
 
-        function closeFigureCallback(obj, src)
-            % Check if the object is still valid before modifying its properties
-            if isvalid(obj)
-                obj.fig = [];
-            end
-            delete(src); % Close the figure
-        end
-
         function ensureFigureExists(obj)
             if isempty(obj.fig) || ~isvalid(obj.fig)
                 obj.fig = figure;
-
-                % Set the CloseRequestFcn of the figure
-                set(obj.fig, 'CloseRequestFcn', @(src, event) obj.closeFigureCallback(src));
 
                 hold on
                 view(-290, 25);

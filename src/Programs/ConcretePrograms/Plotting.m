@@ -10,10 +10,7 @@ classdef Plotting < AbstractProgram
 
     methods
         function execute(obj)
-            % Setup a cleanup function that gets called when Strg + C
-            % during loop or program crashes
             obj.is_running = true;
-
             obj.createAndStartTimer;
         end
 
@@ -29,7 +26,7 @@ classdef Plotting < AbstractProgram
         end
         
         function stopAndDeleteTimer(obj)
-            if ~isempty(obj.timerObj) && isa(obj.timerObj, 'timer')
+            if ~isempty(obj.timerObj)
                 if strcmp(obj.timerObj.Running, 'on')
                     stop(obj.timerObj);
                 end
