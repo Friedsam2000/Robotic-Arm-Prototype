@@ -19,8 +19,8 @@ classdef Set_Joints < AbstractProgram
 
             % Parse optional arguments
             p = inputParser;
-            addOptional(p, 'Kp', 1.5); % Default Kp is 1.5
-            addOptional(p, 'precision_deg', 0.3); % Default precision is 0.5 deg
+            addOptional(p, 'Kp', 2); % Default Kp is 1.5
+            addOptional(p, 'precision_deg', 0.5); % Default precision is 0.5 deg
 
             parse(p, varargin{:});
             Kp = p.Results.Kp;

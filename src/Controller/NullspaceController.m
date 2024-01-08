@@ -69,8 +69,6 @@ classdef NullspaceController < handle
 
             % Check singularity
             if norm(J)*norm(pinvJ) > 25
-                message = sprintf('Controller Warning: Close to singularity, stopping\n\n');
-                obj.printWithFrequency(message);
                 q_dot = [0;0;0;0];
                 return
             end
@@ -188,19 +186,5 @@ classdef NullspaceController < handle
                 end
             end
         end
-
-        function printWithFrequency(obj, message, varargin)
-            % Get the current elapsed time since the timer started
-            currentTime = toc(obj.lastPrintTime);
-    
-            % Check if enough time has passed since the last print
-            if currentTime > obj.printInterval
-                % Print the message
-                fprintf(message, varargin{:});
-    
-                % Reset the timer for the next print
-                obj.lastPrintTime = tic;
-            end
-        end
-    end
+   end
 end

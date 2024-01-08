@@ -50,8 +50,8 @@ classdef Trajectory_2D < AbstractProgram
                 % Check Singularity
                 J = obj.launcher.virtualRobot.getJacobianNumeric;
                 if cond(J) > 25
-                    disp("Program: Close to Singularity. Stopping.")
-                    break
+                    warning("Program: Close to Singularity. Aborting.");
+                    break;
                 end
 
                 % Time calculations
