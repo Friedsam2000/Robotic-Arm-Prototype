@@ -11,15 +11,12 @@ classdef VirtualRobot < handle
         -(14/8)*pi, (14/8)*pi; 
         -(5/6)*pi, (5/6)*pi];
 
-
-        % Preallocate memory for trajectory points
-        trajectoryPoints = zeros(3, 100); % Preallocate for 100 points
+        trajectoryLength = 30;  % Default value for trajectory length
+        trajectoryPoints;
+        tcpTextHandle % Handle for the end-effector position text
 
     end
 
-    properties
-        trajectoryLength = 1000;  % Default value for trajectory length
-    end
 
     properties (Access = private)
 
@@ -56,6 +53,9 @@ classdef VirtualRobot < handle
 
             %% Create the workspace object
             obj.workspace = Workspace(obj);
+
+            obj.trajectoryPoints = zeros(3, obj.trajectoryLength);
+
 
         end
         
@@ -135,9 +135,9 @@ classdef VirtualRobot < handle
             % Append the new point to the trajectory
             obj.trajectoryPoints = [obj.trajectoryPoints(:, 2:end), newPoint]; % Shift and append new point
         
-            % Ensure the trajectory array always has 100 columns
-            if size(obj.trajectoryPoints, 2) < 100
-                obj.trajectoryPoints = [zeros(3, 100 - size(obj.trajectoryPoints, 2)), obj.trajectoryPoints];
+            % Ensure the trajectory array always has obj.trajectoryLength columns
+            if size(obj.trajectoryPoints, 2) < obj.trajectoryLength
+                obj.trajectoryPoints = [zeros(3, obj.trajectoryLength - size(obj.trajectoryPoints, 2)), obj.trajectoryPoints];
             end
         
            % Draw the trajectory
@@ -165,7 +165,16 @@ classdef VirtualRobot < handle
             % Draw Workspace
             obj.workspace.draw;
 
-        
+            % Write the end-effector position [x, y, z] on the figure
+            tcp_pos = obj.getEndeffectorPos;
+            tcp_pos_str = sprintf('End-Effector Position: [%.2f, %.2f, %.2f]', tcp_pos(1), tcp_pos(2), tcp_pos(3));
+
+            if isempty(obj.tcpTextHandle) || ~isvalid(obj.tcpTextHandle)
+                obj.tcpTextHandle = text(0, 0, 680, tcp_pos_str, 'FontSize', 10, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+            else
+                set(obj.tcpTextHandle, 'String', tcp_pos_str);
+            end
+
             drawnow limitrate;
         end
 
