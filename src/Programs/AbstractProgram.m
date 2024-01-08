@@ -28,9 +28,6 @@ classdef (Abstract) AbstractProgram < handle
             % Update and plot logic
             obj.launcher.virtualRobot.setQ(obj.launcher.realRobot.getQ);
             obj.launcher.virtualRobot.draw;
-            obj.launcher.virtualRobot.frames(end).draw;
-            obj.launcher.virtualRobot.frames(1).draw;
-            obj.launcher.virtualRobot.workspace.draw;
 
         end
 

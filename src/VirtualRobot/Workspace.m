@@ -46,13 +46,8 @@ classdef Workspace < handle
 
         
         function draw(obj)
-            % Ensure that the referenced virtual robot has a figure
-            obj.virtualRobot.ensureFigureExists;
-        
             % Redraw if the plot handle is not valid
             if isempty(obj.plotHandle) || ~isgraphics(obj.plotHandle)
-                % Activate the figure that is already used to plot the virtualRobot
-                figure(obj.virtualRobot.fig);
             
                 % Plot the boundary and store the handle
                 obj.plotHandle = trisurf(obj.boundaryK, obj.boundaryVertices(:, 1), obj.boundaryVertices(:, 2), obj.boundaryVertices(:, 3), 'Facecolor', 'cyan', 'Edgecolor', 'none');

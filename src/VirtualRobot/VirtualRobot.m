@@ -155,9 +155,16 @@ classdef VirtualRobot < handle
             end
             if draw_frames
                 for i = 1:length(obj.frames)
-                    obj.frames(i).draw
+                    obj.frames(i).draw;
                 end
+            else
+                obj.frames(end).draw;
+                obj.frames(1).draw;
             end
+
+            % Draw Workspace
+            obj.workspace.draw;
+
         
             drawnow limitrate;
         end
