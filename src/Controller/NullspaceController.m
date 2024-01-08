@@ -2,12 +2,12 @@ classdef NullspaceController < handle
 
     properties
 
-        Kp = 1;
+        Kp = 0.5;
         Ki = 0;
 
         % Weights of the Null-Space Tasks (only one can be Non-Zero)
         weight_z = 0; % Weight of the preferred z-Axis Vector
-        weight_preffered_config = 2; % Weight of the preferred joint configuration
+        weight_preffered_config = 0.5; % Weight of the preferred joint configuration
     end
 
 
@@ -67,12 +67,6 @@ classdef NullspaceController < handle
             J = obj.virtualRobot.getJacobianNumeric;
             pinvJ = pinv(J);
 
-            % Check singularity
-            if norm(J)*norm(pinvJ) > 25
-                q_dot = [0;0;0;0];
-                return
-            end
-
             q_dot = obj.computeQdotPseudoinverse(J, pinvJ, v_d_eff, dHdQ);
             
             % Ensure compliance with joint angle limits
@@ -93,8 +87,7 @@ classdef NullspaceController < handle
             % Printing for analyzing cost function impact
             % q_dot_pinv_norm = norm(pinvJ * u);
             % q_dot_cost_norm = norm(N * dHdQ');
-            % message = sprintf("Norm of q_dot from pseudoinverse: %.2f\nNorm of q_dot from cost function: %.2f\n\n", q_dot_pinv_norm, q_dot_cost_norm);
-            % obj.printWithFrequency(message);
+
 
 
         end

@@ -3,7 +3,7 @@ classdef RealRobot < handle
     properties
         
         % Conifgure maximum absolut joint velocities % RAD/s
-        q_dot_max = [0.4;0.4;0.68;1];
+        q_dot_max = [0.2;0.2;0.5;0.5];
 
     end
 
