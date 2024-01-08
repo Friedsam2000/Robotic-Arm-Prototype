@@ -28,7 +28,6 @@ classdef (Abstract) AbstractProgram < handle
             % Update and plot logic
             obj.launcher.virtualRobot.setQ(obj.launcher.realRobot.getQ);
             obj.launcher.virtualRobot.draw;
-
         end
 
         % Notify the Launcher that the program stopped

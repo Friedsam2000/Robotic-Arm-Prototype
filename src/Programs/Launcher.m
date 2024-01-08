@@ -94,9 +94,9 @@ classdef Launcher < handle
 
             obj.realRobot = RealRobot(dynamixel_lib_path,PORT);
 
-            obj.realRobot.torqueDisable;
-            fprintf("Torque Disabled. \n" + ...
-                "Please set zero position and enable torque. \n");
+            obj.realRobot.torqueEnable;
+
+            fprintf("Launcher: Torque Enabled. \n");
 
         end
 
