@@ -48,7 +48,6 @@ classdef RealRobot < handle
 
         function torqueDisable(obj)
             % Enable / Disable the torque of the whole robot.
-
             for ID = 1:4
                 obj.ServoChain.torqueEnableDisable(ID,0);
             end
@@ -63,7 +62,6 @@ classdef RealRobot < handle
         end
 
         function setZeroPositionToCurrentPosition(obj)
-            
             % Store the current servo angles as zero angles
             for ID = 1:4
                 obj.ServoZeroPositions(ID) = obj.ServoChain.getServoAngle(ID);
@@ -80,8 +78,7 @@ classdef RealRobot < handle
 
             % Check if Zero Position has been set
             if isinf(sum(obj.ServoZeroPositions))
-                warning("RealRobot: Could not get Joint Angle, Zero position of the robot is not set. \n\n")
-                return
+                error("RealRobot: Could not get Joint Angles. Zero position of the robot is not set.")
             end
 
             % Get all servo angles phi in RAD

@@ -2,7 +2,6 @@ classdef Set_Position < AbstractProgram
 
 
     properties (Constant)
-
         default_Kp = 0.5;
         default_weight_preffered_config = 0.5;
         default_precision = 3; % mm
@@ -11,22 +10,16 @@ classdef Set_Position < AbstractProgram
 
     methods
 
-        function execute(obj, x_desired, varargin)
+        function concreteProgram(obj, varargin)
 
-            % Setup a cleanup function that gets called when Strg + C
-            % during loop or program crashes
-            cleanupObj = onCleanup(@() obj.stop());
-            % Set Status
-            obj.launcher.status = 'executing';
-            % Initial drawing
-            obj.updateConfigAndPlot;
-
-            % Parse optional arguments
+            % Parse input arguments
             p = inputParser;
+            addRequired(p, 'x_desired', @(x) isvector(x) && length(x) == 3 && all(isnumeric(x)) && iscolumn(x));
             addOptional(p, 'Kp', obj.default_Kp); % Default height is current height
             addOptional(p, 'weight_preffered_config', obj.default_weight_preffered_config);
             addOptional(p, 'precision', obj.default_precision);
             parse(p, varargin{:});
+            x_desired = p.Results.x_desired;
             Kp = p.Results.Kp;
             weight_preffered_config = p.Results.weight_preffered_config;
             precision = p.Results.precision;
@@ -58,15 +51,15 @@ classdef Set_Position < AbstractProgram
                         breakTimerValue = tic;
                         breakTimerStarted = true;
                     elseif toc(breakTimerValue) >= 3 % 3 Seconds within precision
+                        fprintf("Position Reached within Tolerance \n")
                         break;
                     end
                 else
                     breakTimerStarted = false;  % Reset the timer if the condition is no longer met
                 end
 
-                pause(0.01); % Short pause to yield execution
             end
-            obj.stop
+            delete(obj)
         end
     end
 end

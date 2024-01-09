@@ -8,21 +8,15 @@ classdef Set_Joints < AbstractProgram
 
     methods
 
-        function start(obj, q_desired, varargin)
-
-            % Setup a cleanup function that gets called when Strg + C
-            % during loop or program crashes
-            cleanupObj = onCleanup(@() obj.stop());
-            % Set Status
-            obj.launcher.status = 'executing';
-            % Initial drawing
-            obj.updateConfigAndPlot;
+        function concreteProgram(obj, varargin)
 
             % Parse optional arguments
             p = inputParser;
-            addOptional(p, 'Kp', obj.default_Kp);
-            addOptional(p, 'precision_deg', obj.default_precision_deg);
+            addRequired(p, 'q_desired', @(x) isvector(x) && length(x) == 4 && all(isnumeric(x)) && iscolumn(x));
+            addParameter(p, 'Kp', obj.default_Kp);
+            addParameter(p, 'precision_deg', obj.default_precision_deg);
             parse(p, varargin{:});
+            q_desired = p.Results.q_desired;
             Kp = p.Results.Kp;
             precision_deg = p.Results.precision_deg;
             precision_rad = deg2rad(precision_deg);
@@ -31,7 +25,7 @@ classdef Set_Joints < AbstractProgram
             while 1
 
                 % Update virtual robot and plot
-                obj.updateConfig;
+                obj.updateConfigAndPlot;
                 q = obj.launcher.virtualRobot.getQ;
 
                 % Calculate remaining errors
@@ -43,13 +37,12 @@ classdef Set_Joints < AbstractProgram
 
                 % Check if joints converged
                 if all(abs(currentError) <= precision_rad)
+                    fprintf("All Joints Converged \n")
                     break;
                 end
 
-                % Maybe unecessary
-                pause(0.01);  % Pause to allow MATLAB to process other events
             end
-            obj.stop;
+            delete(obj)
         end
     end
 end

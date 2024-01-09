@@ -135,7 +135,6 @@ classdef VirtualRobot < handle
 
         function initRobotPlot(obj)
             % Initialize the figure
-            close all;
             obj.fig = figure;
             hold on
             view(-290, 25);

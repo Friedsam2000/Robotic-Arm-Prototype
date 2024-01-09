@@ -2,27 +2,42 @@ classdef (Abstract) AbstractProgram < handle
 
     properties
         launcher  % Reference to the Launcher object
-        timerObj % Reference to a timer obj if the program uses one
+        timerObj = []; % Reference to a timer obj if the program uses one
+        onDeleteCallback = []; % Function handle for delete callback
     end
 
     methods
-        % Abstract methods have to be defined in concrete program
-        start(obj);  % Method to start
-    end
 
-    methods (Hidden)
+        % Abstract definition of
+        concreteProgram(obj,varargin);
 
-        function obj = AbstractProgram(launcherObj, varargin)
-            obj.launcher = launcherObj;
+        function start(obj, varargin)  % Method to start
+            try
+                obj.concreteProgram(varargin{:});
+            catch
+                delete(obj)
+            end
         end
 
+        % Constructor
+        function obj = AbstractProgram(launcherObj, onDeleteCallback)
+            obj.launcher = launcherObj;
+            obj.onDeleteCallback = onDeleteCallback;
+        end
+
+        % Delete method
         function delete(obj)
-            if isvalid(obj.launcher)
-                obj.launcher.status = 'ready';
-                obj.launcher.currentProgramInstance = [];
+            if ~isempty(obj.launcher) && isvalid(obj.launcher)
+                fprintf('Halting');
+                obj.launcher.realRobot.setJointVelocities([0;0;0;0])
+            end
+
+            % Execute the delete callback if it's a non-empty function handle
+            if ~isempty(obj.onDeleteCallback) && isa(obj.onDeleteCallback, 'function_handle')
+                obj.onDeleteCallback(obj);
             end
             % Delete timer if there is one
-            if isvalid(obj.timerObj)
+            if ~isempty(obj.timerObj) && isvalid(obj.timerObj)
                 if strcmp(obj.timerObj.Running, 'on')
                     stop(obj.timerObj);
                 end
@@ -39,6 +54,9 @@ classdef (Abstract) AbstractProgram < handle
             % Common method to update the virtual robots configuration and update the plot
             obj.launcher.virtualRobot.setQ(obj.launcher.realRobot.getQ);
             obj.launcher.virtualRobot.updateRobotPlot;
+
+            % Update Singularity Status
+            obj.launcher.singularityWarning = obj.launcher.virtualRobot.checkSingularity;
         end
     end
 end

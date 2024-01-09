@@ -103,7 +103,7 @@ classdef ServoChain < handle
 
         %Destructor
         function delete(obj)
-                disp("closing port, unloading library")
+                fprintf("ServoChain: Closing port. Unloading library. \n")
                 calllib(obj.lib_name, 'closePort', obj.port_num);
                 unloadlibrary(obj.lib_name);
         end
@@ -129,7 +129,6 @@ classdef ServoChain < handle
 
         function checkIDAvailable(obj, ID)
             % Throws an error if the ID of a Servo is not available
-
             if ~ismember(ID, obj.availableIDs)
                 error("Servo not available");
             end

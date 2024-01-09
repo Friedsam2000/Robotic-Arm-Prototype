@@ -1,22 +1,12 @@
 classdef Trajectory_2D < AbstractProgram
 
     properties (Constant)
-
         default_trajectoryTime = 15; % [s]
     end
 
     methods
-
-        function start(obj,varargin)
-
-            % Setup a cleanup function that gets called when Strg + C
-            % during loop or program crashes
-            cleanupObj = onCleanup(@() obj.stop());
-            % Set Status
-            obj.launcher.status = 'executing';
-            % Initial drawing
-            obj.updateConfigAndPlot;
-
+        function concreteProgram(obj,varargin)
+            
             % Get Current Height
             g_r_EE = obj.launcher.virtualRobot.getEndeffectorPos;
             currentHeight = g_r_EE(3);
@@ -43,9 +33,8 @@ classdef Trajectory_2D < AbstractProgram
 
             % Control Loop
             loopBeginTime = tic;
-            % Control Loop
             while ~obj.launcher.virtualRobot.checkSingularity
-
+                
                 % Update virtual robot and plot
                 obj.updateConfigAndPlot;
 
@@ -60,9 +49,9 @@ classdef Trajectory_2D < AbstractProgram
                 q_dot = controller.computeDesiredJointVelocity(x_d(:, index), NaN, v_d(:, index));
                 obj.launcher.realRobot.setJointVelocities(q_dot);
 
-                pause(0.01); % Short pause to yield execution
             end
-            obj.stop();
+
+            delete(obj)
         end
     end
 end

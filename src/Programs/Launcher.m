@@ -1,22 +1,33 @@
 classdef Launcher < handle
     properties
+        % Instances
         virtualRobot;
         realRobot;
         currentProgramInstance;
+
+        % Singularity warning: true or false
+        singularityWarning;
+
+        % List of all available concrete programs
         programNames;
+
+        % Launcher Status:
+        % 'disconnected' --> no realRobot object, no connection,
+        % 'ready' --> connection to real robot, no program running
+        % 'busy' --> non-plotting program executing
         status;
     end
-   
-    methods
-        
 
-        function obj = Launcher()
+    methods
+
+
+        function obj = Launcher(varargin)
+
+            clc
+            close all
 
             % Add all relevant folders to MATLAB PATH
-            obj.initPath();
-            
-            % No connection upon launcher intialisation
-            obj.realRobot = [];
+            dynamixel_lib_path = obj.initPath();
 
             % Create the Virtual Robot Object
             obj.virtualRobot = VirtualRobot;
@@ -26,24 +37,9 @@ classdef Launcher < handle
             obj.currentProgramInstance = [];
 
             obj.status = 'disconnected';
-            % 'disconnected' --> no realRobot object, no connection,
-            % 'ready' --> connection to real robot, no program running
-            % 'singularity' --> plotting method warns singularity config
-            % 'executing' --> non-plotting program executing
-
-        end
-
-        function delete(obj)
-            delete(obj.currentProgramInstance)
-
-        end
-
-        function connect(obj,varargin)
-            % Disconnect first (if a connection exists)
-            obj.disconnect;
 
             % Check if the constructor was called with a specified port
-            if nargin < 2
+            if nargin < 1
                 % If not, use 'COM3' as a default port
                 PORT = 'COM3';
             else
@@ -51,58 +47,85 @@ classdef Launcher < handle
                 PORT = varargin{1};
             end
 
-            % Get Path to Dynamixel Lib
-            currentFile = mfilename('fullpath');
-            [currentDir, ~, ~] = fileparts(currentFile);
-            [parentDir, ~, ~] = fileparts(currentDir);
-            dynamixel_lib_path = fullfile(parentDir, 'DynamixelLib\c\');
-
             % Connect
             obj.realRobot = RealRobot(dynamixel_lib_path,PORT);
 
             % Set zero pos
             obj.realRobot.setZeroPositionToCurrentPosition;
+            obj.singularityWarning = true;
+
+            % Set status
+            obj.status = 'ready';
 
             % Start the plotting program
-            obj.instantiateProgram('Plotting')
-            obj.currentProgramInstance.start();
+            obj.launchProgram('Plotting')
 
             % Set the Torque to enabled
             obj.realRobot.torqueEnable;
             fprintf("Launcher: Torque Enabled. \n");
         end
 
-        function disconnect(obj)
-            % Stop any program running
-            % Stop the current program if there is one
-            if ~isempty(obj.currentProgramInstance)
-                delete(obj.currentProgramInstance)
+        function delete(obj)
+
+            % Stop any running program
+            delete(obj.currentProgramInstance);
+
+            % Return to zero
+            obj.realRobot.torqueEnable;
+            fprintf('Launcher: Returning To Zero.')
+            obj.launchProgram('Set_Joints', [0;0;0;0]);
+
+            % Waint until program finished
+            while ~strcmp(obj.status, 'ready')
+                pause(0.1); % Short pause to yield execution
+                drawnow;    % Process any pending callbacks or events
             end
+
             % Disconnect
-            delete(obj.realRobot);
-            obj.status = 'disconnected';
+            delete(obj.realRobot); 
+
+            close all
         end
-        
-        function instantiateProgram(obj, programName)
-            % Check if the programName is in the available programs
-            if ismember(programName, obj.programNames)
 
-                % Stop the current program if there is one
-                if ~isempty(obj.currentProgramInstance)
-                    delete(obj.currentProgramInstance)
-                end
+        function launchProgram(obj, programName, varargin)
 
-                % Instantiate the program using its name
-                % Pass a reference to the launcher instance and variable
-                % arguments
-                try
-                    obj.currentProgramInstance = feval(programName, obj);
-                    fprintf('Launcher: Insantiated Program: %s \n', programName);
-                catch ME
-                    fprintf('Launcher: Failed to instantiate %s. Error: %s. \n', programName, ME.message );
-                end        
-            else
+            % Check if in ready state
+            if ~strcmp(obj.status, 'ready')
+                fprintf("Launcher: Can't Launch Program. Status: %s \n", obj.status);
+                return;
+            end
+
+            % Check if program is in the list of available programs
+            if ~ismember(programName, obj.programNames)
                 fprintf('Launcher: Program %s not found in available programs. \n', programName);
+                return
+            end
+            
+            % Try to launch
+            try
+                obj.status = 'busy';
+                onDeleteCallback = @(progObj) obj.onProgramDelete(progObj);
+                obj.currentProgramInstance = feval(programName, obj, onDeleteCallback);
+                obj.currentProgramInstance.start(varargin{:});
+                if isa(obj.currentProgramInstance, 'Plotting')
+                    obj.status = 'ready';
+                end
+            catch ME
+                fprintf('Launcher: Failed to launch Program: %s. Error: %s. \n', programName, ME.message);
+                obj.status = 'ready';
+                return;
+            end
+        end
+
+        function onProgramDelete(obj, deletedProgram)
+            % Callback function to handle program deletion
+            fprintf('Launcher: Program %s ended.\n', class(deletedProgram));
+            if ~isa(deletedProgram, 'Plotting')
+                % Set the status to 'ready' if the deleted program was not
+                % the plotting program
+                obj.status = 'ready';
+                % Relaunch plotting
+                obj.launchProgram('Plotting')
             end
         end
     end
@@ -127,11 +150,7 @@ classdef Launcher < handle
             end
         end
 
-        function initPath(~)
-            % Initialize the MATLAB path
-
-            clc;
-            close all;
+        function dynamixel_lib_path = initPath(~)
 
             % Get Current Dir of Launcher.m file (Programs)
             currentFile = mfilename('fullpath');
@@ -146,6 +165,9 @@ classdef Launcher < handle
             addpath(fullfile(parentDir, 'Controller'));
             addpath(fullfile(parentDir, 'Programs'));
             addpath(fullfile(parentDir, 'Programs\ConcretePrograms'));
+
+            dynamixel_lib_path = fullfile(parentDir, 'DynamixelLib\c\');
+
 
         end
     end
