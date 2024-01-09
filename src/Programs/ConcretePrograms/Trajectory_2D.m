@@ -42,6 +42,7 @@ classdef Trajectory_2D < AbstractProgram
                 elapsedRealTime = toc(loopBeginTime);
                 [~, index] = min(abs(t - elapsedRealTime));
                 if index >= length(t)
+                    fprintf("Program %s: Trajectory time elapsed. \n", class(obj))
                     break; % Exit loop at the end of the trajectory
                 end
 

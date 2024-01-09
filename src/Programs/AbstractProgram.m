@@ -28,7 +28,7 @@ classdef (Abstract) AbstractProgram < handle
         % Delete method
         function delete(obj)
             if ~isempty(obj.launcher) && isvalid(obj.launcher)
-                fprintf('Halting');
+                fprintf('Program %s: Halting \n', class(obj));
                 obj.launcher.realRobot.setJointVelocities([0;0;0;0])
             end
 

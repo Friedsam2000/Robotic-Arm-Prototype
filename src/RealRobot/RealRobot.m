@@ -35,21 +35,21 @@ classdef RealRobot < handle
         ServoZeroPositions = [-inf,-inf,-inf,-inf];
 
         %ServoChain Object
-        ServoChain;
+        servoChain;
 
     end
     
 
     methods
         function obj = RealRobot(dynamixel_lib_path, PORT)
-            obj.ServoChain = [];
-            obj.ServoChain = ServoChain(dynamixel_lib_path, PORT);
+            obj.servoChain = [];
+            obj.servoChain = ServoChain(dynamixel_lib_path, PORT);
         end
 
         function torqueDisable(obj)
             % Enable / Disable the torque of the whole robot.
             for ID = 1:4
-                obj.ServoChain.torqueEnableDisable(ID,0);
+                obj.servoChain.torqueEnableDisable(ID,0);
             end
         end
 
@@ -57,14 +57,14 @@ classdef RealRobot < handle
             % Enable / Disable the torque of the whole robot.
 
             for ID = 1:4
-                obj.ServoChain.torqueEnableDisable(ID,1);
+                obj.servoChain.torqueEnableDisable(ID,1);
             end
         end
 
         function setZeroPositionToCurrentPosition(obj)
             % Store the current servo angles as zero angles
             for ID = 1:4
-                obj.ServoZeroPositions(ID) = obj.ServoChain.getServoAngle(ID);
+                obj.ServoZeroPositions(ID) = obj.servoChain.getServoAngle(ID);
             end
         end
        
@@ -84,7 +84,7 @@ classdef RealRobot < handle
             % Get all servo angles phi in RAD
             servoAngles = [-inf; -inf; -inf; -inf];
             for ID = 1:4
-                servoAngles(ID) = obj.ServoChain.getServoAngle(ID);
+                servoAngles(ID) = obj.servoChain.getServoAngle(ID);
             end
 
             %Convert servoAngles phi to jointAngles q
@@ -113,7 +113,7 @@ classdef RealRobot < handle
 
             for ID = 1:4
                 % Ser ServoVelocities in rev/min
-                obj.ServoChain.setServoVelocity(ID, servoVelocity(ID))
+                obj.servoChain.setServoVelocity(ID, servoVelocity(ID))
             end
 
         end

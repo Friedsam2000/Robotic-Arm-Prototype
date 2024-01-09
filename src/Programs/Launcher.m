@@ -18,8 +18,21 @@ classdef Launcher < handle
         status;
     end
 
-    methods
 
+    methods (Static)
+        % Static method to get the instance of the class
+        function single_instance = getInstance(varargin)
+            persistent instance;
+            if isempty(instance) || ~isvalid(instance)
+                instance = Launcher(varargin{:});
+            end
+
+            single_instance = instance;
+        end
+    end
+
+    
+    methods (Access = private)
 
         function obj = Launcher(varargin)
 
@@ -50,6 +63,11 @@ classdef Launcher < handle
             % Connect
             obj.realRobot = RealRobot(dynamixel_lib_path,PORT);
 
+            % Check Connection
+            if ~obj.realRobot.servoChain.checkConnection
+                error("Connection Failed")
+            end
+
             % Set zero pos
             obj.realRobot.setZeroPositionToCurrentPosition;
             obj.singularityWarning = true;
@@ -64,7 +82,9 @@ classdef Launcher < handle
             obj.realRobot.torqueEnable;
             fprintf("Launcher: Torque Enabled. \n");
         end
+    end
 
+    methods
         function delete(obj)
 
             % Stop any running program
@@ -72,7 +92,7 @@ classdef Launcher < handle
 
             % Return to zero
             obj.realRobot.torqueEnable;
-            fprintf('Launcher: Returning To Zero.')
+            fprintf('Launcher: Returning To Zero. \n')
             obj.launchProgram('Set_Joints', [0;0;0;0]);
 
             % Waint until program finished
@@ -81,6 +101,12 @@ classdef Launcher < handle
                 drawnow;    % Process any pending callbacks or events
             end
 
+            fprintf('Launcher: Stopping \n');
+            obj.realRobot.setJointVelocities([0;0;0;0]);
+
+            % Stop any running program
+            delete(obj.currentProgramInstance);
+
             % Disconnect
             delete(obj.realRobot); 
 
@@ -88,6 +114,7 @@ classdef Launcher < handle
         end
 
         function launchProgram(obj, programName, varargin)
+
 
             % Check if in ready state
             if ~strcmp(obj.status, 'ready')
@@ -100,12 +127,17 @@ classdef Launcher < handle
                 fprintf('Launcher: Program %s not found in available programs. \n', programName);
                 return
             end
-            
+
+            % Stop any running program
+            delete(obj.currentProgramInstance);
+
+
             % Try to launch
             try
                 obj.status = 'busy';
                 onDeleteCallback = @(progObj) obj.onProgramDelete(progObj);
                 obj.currentProgramInstance = feval(programName, obj, onDeleteCallback);
+                fprintf('Launcher: Program %s starting...\n', class(obj.currentProgramInstance));
                 obj.currentProgramInstance.start(varargin{:});
                 if isa(obj.currentProgramInstance, 'Plotting')
                     obj.status = 'ready';
@@ -167,8 +199,6 @@ classdef Launcher < handle
             addpath(fullfile(parentDir, 'Programs\ConcretePrograms'));
 
             dynamixel_lib_path = fullfile(parentDir, 'DynamixelLib\c\');
-
-
         end
     end
 end

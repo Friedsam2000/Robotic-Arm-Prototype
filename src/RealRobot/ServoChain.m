@@ -20,7 +20,6 @@ classdef ServoChain < handle
     end
     
     methods
-        %Constructor
         function obj = ServoChain(dynamixel_lib_path, PORT)
 
             addpath(genpath([dynamixel_lib_path, 'include\dynamixel_sdk\']))
@@ -101,11 +100,19 @@ classdef ServoChain < handle
 
         end
 
-        %Destructor
         function delete(obj)
                 fprintf("ServoChain: Closing port. Unloading library. \n")
                 calllib(obj.lib_name, 'closePort', obj.port_num);
                 unloadlibrary(obj.lib_name);
+        end
+
+        function is_connected = checkConnection(obj)
+            VALUE = calllib(obj.lib_name, 'pingGetModelNum', obj.port_num, obj.PROTOCOL_VERSION, 4);
+            if VALUE ~= 1010
+                is_connected = false;
+            else
+                is_connected = true;
+            end
         end
 
         function torqueEnableDisable(obj,ID,enable_bool)

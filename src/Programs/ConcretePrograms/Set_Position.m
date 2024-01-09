@@ -2,9 +2,9 @@ classdef Set_Position < AbstractProgram
 
 
     properties (Constant)
-        default_Kp = 0.5;
-        default_weight_preffered_config = 0.5;
-        default_precision = 3; % mm
+        default_Kp = 1;
+        default_weight_preffered_config = 1;
+        default_precision = 5; % mm
     end
 
 
@@ -51,7 +51,7 @@ classdef Set_Position < AbstractProgram
                         breakTimerValue = tic;
                         breakTimerStarted = true;
                     elseif toc(breakTimerValue) >= 3 % 3 Seconds within precision
-                        fprintf("Position Reached within Tolerance \n")
+                        fprintf("Program %s: Position Reached within Tolerance \n", class(obj))
                         break;
                     end
                 else
