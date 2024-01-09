@@ -22,7 +22,7 @@ classdef Set_Joints < AbstractProgram
             precision_rad = deg2rad(precision_deg);
 
             % P-Control Loop for Joint Positions
-            while 1
+            while strcmp(obj.launcher.status, 'busy')
 
                 % Update virtual robot and plot
                 obj.updateConfigAndPlot;
@@ -40,6 +40,7 @@ classdef Set_Joints < AbstractProgram
                     fprintf("Program %s: Position Reached within Tolerance \n", class(obj))
                     break;
                 end
+                
 
             end
             delete(obj)

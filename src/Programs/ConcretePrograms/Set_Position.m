@@ -33,7 +33,7 @@ classdef Set_Position < AbstractProgram
             scatter3(x_desired(1),x_desired(2),x_desired(3), 'm', 'filled');
 
             % Control Loop
-            while ~obj.launcher.virtualRobot.checkSingularity
+            while ~obj.launcher.virtualRobot.checkSingularity && strcmp(obj.launcher.status, 'busy')
 
                 % Update virtual robot and plot
                 obj.updateConfigAndPlot;

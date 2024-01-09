@@ -33,7 +33,7 @@ classdef Trajectory_2D < AbstractProgram
 
             % Control Loop
             loopBeginTime = tic;
-            while ~obj.launcher.virtualRobot.checkSingularity
+            while ~obj.launcher.virtualRobot.checkSingularity && strcmp(obj.launcher.status, 'busy')
                 
                 % Update virtual robot and plot
                 obj.updateConfigAndPlot;
