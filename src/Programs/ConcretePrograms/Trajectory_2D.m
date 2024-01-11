@@ -5,23 +5,26 @@ classdef Trajectory_2D < AbstractProgram
     end
 
     methods
-        function concreteProgram(obj,varargin)
+        function start(programObj,varargin)
+            
+            % Update Config and Plot
+            programObj.launcher.updateConfigAndPlot;
             
             % Get Current Height
-            g_r_EE = obj.launcher.virtualRobot.getEndeffectorPos;
+            g_r_EE = programObj.launcher.virtualRobot.getEndeffectorPos;
             currentHeight = g_r_EE(3);
 
             % Parse optional arguments
             p = inputParser;
             addOptional(p, 'trajectoryHeight', currentHeight); % Default height is current height
-            addOptional(p, 'trajectoryTime', obj.default_trajectoryTime);
+            addOptional(p, 'trajectoryTime', programObj.default_trajectoryTime);
             parse(p, varargin{:});
             trajectoryHeight = p.Results.trajectoryHeight;
             trajectoryTime = p.Results.trajectoryTime;
 
             % Controller and Planner
-            controller = NullspaceController(obj.launcher.virtualRobot);
-            planner = PathPlanner2D(obj.launcher.virtualRobot, trajectoryHeight);
+            controller = NullspaceController(programObj.launcher.virtualRobot);
+            planner = PathPlanner2D(programObj.launcher.virtualRobot, trajectoryHeight);
             planner.userInputPath; % User inputs path
 
             % Trajectory Generator
@@ -29,30 +32,33 @@ classdef Trajectory_2D < AbstractProgram
             [x_d, v_d, t] = trajectoryGenerator.getTrajectory;
 
             % Draw the desired trajectory
-            trajectoryGenerator.draw(obj.launcher.virtualRobot.fig);
+            trajectoryGenerator.draw(programObj.launcher.virtualRobot.fig);
 
-            % Control Loop
             loopBeginTime = tic;
-            while ~obj.launcher.virtualRobot.checkSingularity && strcmp(obj.launcher.status, 'busy')
+            % Control Loop executes while the program is not deleted, the
+            % robot is not in a singularity configuration or a break
+            % condition is met (e.g. position reached)
+            while isvalid(programObj) && ~programObj.launcher.singularityWarning
                 
-                % Update virtual robot and plot
-                obj.updateConfigAndPlot;
+                % Update virtual robot and plot (contains drawnow, thus
+                % allowing interuption)
+                programObj.updateConfigAndPlot;
 
                 % Time calculations
                 elapsedRealTime = toc(loopBeginTime);
                 [~, index] = min(abs(t - elapsedRealTime));
                 if index >= length(t)
-                    fprintf("Program %s: Trajectory time elapsed. \n", class(obj))
+                    fprintf("Program %s: Trajectory time elapsed. \n", class(programObj))
                     break; % Exit loop at the end of the trajectory
                 end
 
                 % Set velocities
                 q_dot = controller.computeDesiredJointVelocity(x_d(:, index), NaN, v_d(:, index));
-                obj.launcher.realRobot.setJointVelocities(q_dot);
+                programObj.launcher.realRobot.setJointVelocities(q_dot);
 
             end
-
-            delete(obj)
+            % Delete the program upon finish
+            delete(programObj)
         end
     end
 end
