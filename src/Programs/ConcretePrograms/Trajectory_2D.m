@@ -9,6 +9,11 @@ classdef Trajectory_2D < AbstractProgram
             
             % Update Config and Plot
             programObj.launcher.updateConfigAndPlot;
+
+            if programObj.launcher.singularityWarning
+                delete(programObj);
+                return
+            end
             
             % Get Current Height
             g_r_EE = programObj.launcher.virtualRobot.getEndeffectorPos;
@@ -38,12 +43,8 @@ classdef Trajectory_2D < AbstractProgram
             % Control Loop executes while the program is not deleted, the
             % robot is not in a singularity configuration or a break
             % condition is met (e.g. position reached)
-            while isvalid(programObj) && ~programObj.launcher.singularityWarning
-                
-                % Update virtual robot and plot (contains drawnow, thus
-                % allowing interuption)
-                programObj.updateConfigAndPlot;
-
+            while ~programObj.launcher.singularityWarning
+               
                 % Time calculations
                 elapsedRealTime = toc(loopBeginTime);
                 [~, index] = min(abs(t - elapsedRealTime));
@@ -55,6 +56,9 @@ classdef Trajectory_2D < AbstractProgram
                 % Set velocities
                 q_dot = controller.computeDesiredJointVelocity(x_d(:, index), NaN, v_d(:, index));
                 programObj.launcher.realRobot.setJointVelocities(q_dot);
+    
+                % Update Config and Plot
+                programObj.launcher.updateConfigAndPlot;
 
             end
             % Delete the program upon finish

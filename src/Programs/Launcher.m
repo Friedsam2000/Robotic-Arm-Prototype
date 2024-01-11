@@ -16,7 +16,7 @@ classdef Launcher < handle
 
         % An optional reference to a matlab app which controls the launcher
         matlabAppObj;
-
+       
     end
 
 
@@ -86,6 +86,7 @@ classdef Launcher < handle
 
                 % Set Zero Positoin
                 obj.realRobot.setZeroPositionToCurrentPosition;
+
                 obj.singularityWarning = true;
                 fprintf("Launcher: Zero Position Set. \n");
 
@@ -101,20 +102,20 @@ classdef Launcher < handle
             fprintf("Launcher: Disconnecting... \n")
 
             % Stop any running program
-            delete(obj.currentProgramInstance);   
+            delete(obj.currentProgramInstance);
             % If the launcher is connected
-            if ~isempty(obj.realRobot)         
-    
+            if ~isempty(obj.realRobot)
+
                 % Stop the UpdateConfigTimer
                 fprintf("Launcher: Stopping Plotting Timer. \n");
                 stop(obj.configUpdateTimer);
-                
+
                 % Break connection by deleting realRobot object
                 delete(obj.realRobot)
                 obj.realRobot = [];
             end
         end
-        
+
         function delete(obj)
             obj.disconnect;
             fprintf("Launcher: Deleting Plotting Timer.\n")
@@ -158,14 +159,14 @@ classdef Launcher < handle
             catch
 
             end
-            
+
         end
 
         function programDeleteCallback(obj)
             % Callback function that gets called by the program after
             % stopping or error and before it delets itself
             fprintf('Launcher: Program ended.\n');
-  
+
             % Clear the reference to it
             obj.currentProgramInstance = [];
 
@@ -196,12 +197,10 @@ classdef Launcher < handle
                 obj.matlabAppObj.updateConfigCallback;
             end
         end
-    end
 
-    methods (Static, Hidden)
+        function [is_valid, error_msg] = checkProgramArgs(~,programName, arguments)
 
-        function [is_valid, error_msg] = checkProgramArgs(programName, arguments)
-
+            error_msg = [];
             switch programName
                 case 'Set_Joints'
                     % Expecting 4 doubles (including negatives) separated by commas or semicolons
@@ -226,9 +225,13 @@ classdef Launcher < handle
                 case 'Trajectory_2D'
                     % No arguments needed for Trajectory_2D
                     is_valid = true;
-                    error_msg = [];
             end
         end
+    end
+
+
+    methods (Static, Hidden)
+
 
         function programs = getPrograms()
             % Get Current Dir of Launcher.m file
