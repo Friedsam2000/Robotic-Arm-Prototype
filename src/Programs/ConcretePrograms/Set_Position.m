@@ -51,7 +51,7 @@ classdef Set_Position < AbstractProgram
                         breakTimerValue = tic;
                         breakTimerStarted = true;
                     elseif toc(breakTimerValue) >= 3 % 3 Seconds within precision
-                        fprintf("Program %s: Position Reached within Tolerance \n", class(obj))
+                        fprintf("Program %s: Position reached within Tolerance \n", class(obj))
                         break;
                     end
                 else

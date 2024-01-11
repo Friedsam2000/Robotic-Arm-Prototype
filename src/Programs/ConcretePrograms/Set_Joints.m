@@ -41,7 +41,7 @@ classdef Set_Joints < AbstractProgram
 
                 % Check if joints converged
                 if all(abs(currentError) <= precision_rad)
-                    fprintf("Program %s: Position Reached within Tolerance \n", class(programObj))
+                    fprintf("Program %s: Position reached within Tolerance \n", class(programObj))
                     break;
                 end
             end

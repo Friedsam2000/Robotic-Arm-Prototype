@@ -53,7 +53,7 @@ classdef Launcher < handle
 
             % Create the configUpdateTimer
             obj.configUpdateTimer = timer('ExecutionMode', 'fixedRate', 'Period', 0.1, ...
-                'BusyMode', 'queue', 'TimerFcn', @(~,~) obj.updateConfigAndPlot);
+                'BusyMode', 'drop', 'TimerFcn', @(~,~) obj.updateConfigAndPlot);
 
             % Load all available Programs
             obj.programNames = obj.getPrograms;
@@ -90,7 +90,7 @@ classdef Launcher < handle
                 fprintf("Launcher: Zero Position Set. \n");
 
                 % Start the Plotting timer
-                fprintf("Launcher: Starting Timer. \n");
+                fprintf("Launcher: Starting Plotting Timer. \n");
                 start(obj.configUpdateTimer);
             end
 
@@ -106,7 +106,7 @@ classdef Launcher < handle
             if ~isempty(obj.realRobot)         
     
                 % Stop the UpdateConfigTimer
-                fprintf("Launcher: Stopping Timer. \n");
+                fprintf("Launcher: Stopping Plotting Timer. \n");
                 stop(obj.configUpdateTimer);
                 
                 % Break connection by deleting realRobot object
@@ -117,7 +117,7 @@ classdef Launcher < handle
         
         function delete(obj)
             obj.disconnect;
-            fprintf("Launcher: Deleting Timer.\n")
+            fprintf("Launcher: Deleting Plotting Timer.\n")
             delete(obj.configUpdateTimer);
             obj.configUpdateTimer = [];
             fprintf("Launcher: Deleting.\n")
@@ -125,9 +125,10 @@ classdef Launcher < handle
 
         function launchProgram(obj, programName, varargin)
 
-            % Check if in ready state
-            if isempty(obj.realRobot)   
+            % Check connection
+            if ~obj.realRobot.servoChain.checkConnection
                 fprintf("Launcher: Not Connected.\n");
+                obj.disconnect;
                 return;
             end
 
@@ -141,35 +142,38 @@ classdef Launcher < handle
             delete(obj.currentProgramInstance);
 
             % Stop the configUpdateTimer
-            fprintf("Launcher: Stopping Timer. \n");
+            fprintf("Launcher: Stopping Plotting Timer. \n");
             stop(obj.configUpdateTimer)
+
+            % Create and Store an Instance of the Program and pass the
+            % launcher object by reference
+            obj.currentProgramInstance = feval(programName, obj);
+
+            fprintf('Launcher: Program %s starting...\n', class(obj.currentProgramInstance));
 
             % Try to launch
             try
-                % Create and Store an Instance of the Program and pass the
-                % launcher object by reference
-                obj.currentProgramInstance = feval(programName, obj);
-
                 % Start the Program
-                fprintf('Launcher: Program %s starting...\n', class(obj.currentProgramInstance));
                 obj.currentProgramInstance.start(varargin{:});
+            catch
 
-            catch ME
-                fprintf('Launcher: Failed to launch Program: %s. Error: %s. \n', programName, ME.message);
-                delete(obj.currentProgramInstance)
             end
+            
         end
 
-        function programDeleteCallback(obj, deletedProgram)
+        function programDeleteCallback(obj)
             % Callback function that gets called by the program after
             % stopping or error and before it delets itself
-            fprintf('Launcher: Program %s ended.\n', class(deletedProgram));
+            fprintf('Launcher: Program ended.\n');
   
             % Clear the reference to it
             obj.currentProgramInstance = [];
 
+            % Stop
+            obj.realRobot.setJointVelocities([0;0;0;0])
+
             % Restart the plotting timer
-            fprintf("Launcher: Starting Timer. \n");
+            fprintf("Launcher: Starting Plotting Timer. \n");
             start(obj.configUpdateTimer);
 
         end

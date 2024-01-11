@@ -17,8 +17,10 @@ classdef (Abstract) AbstractProgram < handle
 
         % Delete method
         function delete(programObj)
+
             % Execute the callback in the launcher before deleting itself
-            programObj.launcher.programDeleteCallback          
+            programObj.launcher.programDeleteCallback;
+
         end
 
     end
