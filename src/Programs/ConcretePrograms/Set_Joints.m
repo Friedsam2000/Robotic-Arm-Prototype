@@ -26,7 +26,7 @@ classdef Set_Joints < AbstractProgram
 
             % Control Loop executes while the program is not deleted or a break
             % condition is met (e.g. position reached)
-            while isvalid(programObj)
+            while 1
 
                 % Update virtual robot and plot
                 programObj.launcher.updateConfigAndPlot;
