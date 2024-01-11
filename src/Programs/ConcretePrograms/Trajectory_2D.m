@@ -1,7 +1,7 @@
 classdef Trajectory_2D < AbstractProgram
 
     properties (Constant)
-        default_trajectoryTime = 15; % [s]
+        default_trajectoryTime = 7.5; % [s]
     end
 
     methods
