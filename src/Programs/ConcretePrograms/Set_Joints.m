@@ -8,8 +8,7 @@ classdef Set_Joints < AbstractProgram
 
     methods
 
-        function start(programObj,varargin)
-            
+        function start(programObj, varargin)
             % Update Config and Plot
             programObj.launcher.updateConfigAndPlot;
 
@@ -20,13 +19,27 @@ classdef Set_Joints < AbstractProgram
             addParameter(p, 'precision_deg', programObj.default_precision_deg);
             parse(p, varargin{:});
             q_desired = p.Results.q_desired;
-            Kp = p.Results.Kp;
+            Kp_final = p.Results.Kp;
             precision_deg = p.Results.precision_deg;
             precision_rad = deg2rad(precision_deg);
+
+            % Initialize Kp ramp
+            Kp = 0;
+            ramp_duration = 1; % Ramp duration in seconds
+            start_time = tic; % Start timer
 
             % Control Loop executes while the program is not deleted or a break
             % condition is met (e.g. position reached)
             while 1
+                % Calculate elapsed time
+                elapsed_time = toc(start_time);
+
+                % Ramp Kp
+                if elapsed_time < ramp_duration
+                    Kp = Kp_final * (elapsed_time / ramp_duration);
+                else
+                    Kp = Kp_final;
+                end
 
                 % Update virtual robot and plot
                 programObj.launcher.updateConfigAndPlot;
@@ -44,6 +57,9 @@ classdef Set_Joints < AbstractProgram
                     fprintf("Program %s: Position reached within Tolerance \n", class(programObj))
                     break;
                 end
+
+                % Optional: Add a small pause for loop stability
+                pause(0.01);
             end
             delete(programObj)
         end
