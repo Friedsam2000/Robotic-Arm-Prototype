@@ -20,7 +20,7 @@ classdef RealRobot < handle
         % x / 60 --> rev / s
         % (x / 60 ) * 2 * pi --> rad /s
         % Servo revs are joint revs 
-        q_dot_max = [0.5;0.5;2;1];
+        q_dot_max = [0.7;0.7;3;3];
 
         %Transmission ratios
         i_shoulder = 5;
