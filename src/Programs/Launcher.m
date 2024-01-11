@@ -13,15 +13,19 @@ classdef Launcher < handle
 
         % ConfigUpdateTimer
         configUpdateTimer;
+
+        % An optional reference to a matlab app which controls the launcher
+        matlabAppObj;
+
     end
 
 
     methods (Static)
         % Static method to get the instance of the class
-        function single_instance = getInstance()
+        function single_instance = getInstance(varargin)
             persistent instance;
             if isempty(instance) || ~isvalid(instance)
-                instance = Launcher();
+                instance = Launcher(varargin{:});
             end
 
             single_instance = instance;
@@ -31,7 +35,15 @@ classdef Launcher < handle
 
     methods (Access = private)
 
-        function obj = Launcher()
+        function obj = Launcher(varargin)
+
+            % Optionally Link a Matlab app
+            if nargin < 1
+                obj.matlabAppObj = [];
+            else
+                % Use the provided port
+                obj.matlabAppObj = varargin{1};
+            end
 
             % Add all relevant folders to MATLAB PATH
             Launcher.initPath;
@@ -175,6 +187,10 @@ classdef Launcher < handle
 
             % Update Singularity Status
             obj.singularityWarning = obj.virtualRobot.checkSingularity;
+
+            if ~isempty(obj.matlabAppObj)
+                obj.matlabAppObj.updateConfigCallback;
+            end
         end
     end
 
