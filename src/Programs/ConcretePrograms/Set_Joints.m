@@ -25,7 +25,7 @@ classdef Set_Joints < AbstractProgram
 
             % Initialize Kp ramp
             Kp = 0.1;
-            ramp_duration = 1.5; % Ramp duration in seconds
+            ramp_duration = 1; % Ramp duration in seconds
             start_time = tic; % Start timer
 
             % Control Loop executes while the program is not deleted or a break
@@ -58,8 +58,6 @@ classdef Set_Joints < AbstractProgram
                     break;
                 end
 
-                % Optional: Add a small pause for loop stability
-                pause(0.01);
             end
             delete(programObj)
         end
