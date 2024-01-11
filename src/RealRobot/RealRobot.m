@@ -37,6 +37,7 @@ classdef RealRobot < handle
         %ServoChain Object
         servoChain;
 
+        torqueEnabled;
     end
     
 
@@ -44,6 +45,8 @@ classdef RealRobot < handle
         function obj = RealRobot(dynamixel_lib_path, PORT)
             obj.servoChain = [];
             obj.servoChain = ServoChain(dynamixel_lib_path, PORT);
+            % Enable torque on start
+            obj.torqueEnable;
         end
 
         function torqueDisable(obj)
@@ -51,6 +54,7 @@ classdef RealRobot < handle
             for ID = 1:4
                 obj.servoChain.torqueEnableDisable(ID,0);
             end
+            obj.torqueEnabled = false;
         end
 
         function torqueEnable(obj)
@@ -59,6 +63,7 @@ classdef RealRobot < handle
             for ID = 1:4
                 obj.servoChain.torqueEnableDisable(ID,1);
             end
+            obj.torqueEnabled = true;
         end
 
         function setZeroPositionToCurrentPosition(obj)

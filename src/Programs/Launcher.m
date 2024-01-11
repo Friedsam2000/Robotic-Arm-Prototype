@@ -77,10 +77,6 @@ classdef Launcher < handle
                 obj.singularityWarning = true;
                 fprintf("Launcher: Zero Position Set. \n");
 
-                % Set the Torque to enabled
-                obj.realRobot.torqueEnable;
-                fprintf("Launcher: Torque Enabled. \n");
-
                 % Start the Plotting timer
                 fprintf("Launcher: Starting Timer. \n");
                 start(obj.configUpdateTimer);
