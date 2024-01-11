@@ -126,12 +126,6 @@ classdef Launcher < handle
 
         function launchProgram(obj, programName, varargin)
 
-            % Check connection
-            if ~obj.realRobot.servoChain.checkConnection
-                fprintf("Launcher: Not Connected.\n");
-                obj.disconnect;
-                return;
-            end
 
             % Check if program is in the list of available programs
             if ~ismember(programName, obj.programNames)

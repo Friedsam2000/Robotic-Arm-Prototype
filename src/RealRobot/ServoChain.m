@@ -101,9 +101,8 @@ classdef ServoChain < handle
         end
 
         function delete(obj)
-                fprintf("ServoChain: Closing port. Unloading library. \n")
+                fprintf("ServoChain: Closing port.\n")
                 calllib(obj.lib_name, 'closePort', obj.port_num);
-                unloadlibrary(obj.lib_name);
         end
 
         function is_connected = checkConnection(obj)
