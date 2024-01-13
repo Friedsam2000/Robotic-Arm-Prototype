@@ -103,6 +103,7 @@ classdef Launcher < handle
 
             % Stop any running program
             delete(obj.currentProgramInstance);
+            obj.currentProgramInstance = [];
             % If the launcher is connected
             if ~isempty(obj.realRobot)
 
@@ -150,8 +151,6 @@ classdef Launcher < handle
             try
                 % Start the Program
                 obj.currentProgramInstance.start(varargin{:});
-            catch
-
             end
 
         end
@@ -270,7 +269,7 @@ classdef Launcher < handle
             addpath(fullfile(parentDir, 'Programs'));
             addpath(fullfile(parentDir, 'Programs\ConcretePrograms'));
 
-            dynamixel_lib_path = fullfile(parentDir, 'DynamixelLib\c\');
+            dynamixel_lib_path = fullfile(parentDir, 'DynamixelLib\c');
         end
     end
 end
