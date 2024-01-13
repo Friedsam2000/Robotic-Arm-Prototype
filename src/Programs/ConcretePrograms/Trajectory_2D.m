@@ -21,8 +21,8 @@ classdef Trajectory_2D < AbstractProgram
 
             % Parse optional arguments
             p = inputParser;
+            addRequired(p, 'trajectoryTime', @(x) isscalar(x) && isnumeric(x));
             addOptional(p, 'trajectoryHeight', currentHeight); % Default height is current height
-            addOptional(p, 'trajectoryTime', programObj.default_trajectoryTime);
             parse(p, varargin{:});
             trajectoryHeight = p.Results.trajectoryHeight;
             trajectoryTime = p.Results.trajectoryTime;
