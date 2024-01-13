@@ -22,30 +22,26 @@ classdef ServoChain < handle
     methods
         function obj = ServoChain(dynamixel_lib_path, PORT)
 
-            addpath(genpath([dynamixel_lib_path, 'include\dynamixel_sdk']))
+            % Add the include directory
+            addpath(fullfile(dynamixel_lib_path, 'c\include\dynamixel_sdk'));
 
-            % Getting the parent directory of the specified path
-            [parentDir, ~, ~] = fileparts(dynamixel_lib_path);
-
-            % Adding the parent directory to the MATLAB path
-            addpath(parentDir);
             %Checks your OS and adds the correct built library
             %Pre-built for windows, you need to build yourself on Linux and
             %Mac. There is a Makefile in the linked folder.
             if strcmp(computer, 'PCWIN')
                 obj.lib_name = 'dxl_x86_c';
-                addpath(genpath([dynamixel_lib_path, '\build\win32\']))
+                addpath(genpath(fullfile(dynamixel_lib_path, 'c\build\win32\')))
             elseif strcmp(computer, 'PCWIN64')
-                addpath(genpath([dynamixel_lib_path, '\build\win64\']))
+                addpath(genpath(fullfile(dynamixel_lib_path, 'c\build\win64\')))
                 obj.lib_name = 'dxl_x64_c';
             elseif strcmp(computer, 'GLNX86')
-                addpath(genpath([dynamixel_lib_path, '\build\linux32\']))
+                addpath(genpath(fullfile(dynamixel_lib_path, 'c\build\linux32\')))
                 obj.lib_name = 'libdxl_x86_c';
             elseif strcmp(computer, 'GLNXA64')
-                addpath(genpath([dynamixel_lib_path, '\build\linux64\']))
+                addpath(genpath(fullfile(dynamixel_lib_path, 'c\build\linux64\')))
                 obj.lib_name = 'libdxl_x64_c';
             elseif strcmp(computer, 'MACI64')
-                addpath(genpath([dynamixel_lib_path, '\build\mac\']))
+                addpath(genpath(fullfile(dynamixel_lib_path, 'c\build\mac\')))
                 obj.lib_name = 'libdxl_mac_c';
             end
 

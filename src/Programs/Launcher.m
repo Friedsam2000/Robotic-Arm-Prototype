@@ -268,8 +268,9 @@ classdef Launcher < handle
             addpath(fullfile(parentDir, 'Controller'));
             addpath(fullfile(parentDir, 'Programs'));
             addpath(fullfile(parentDir, 'Programs\ConcretePrograms'));
+            addpath(fullfile(parentDir, 'DynamixelLib'));
 
-            dynamixel_lib_path = fullfile(parentDir, 'DynamixelLib\c');
+            dynamixel_lib_path = fullfile(parentDir, 'DynamixelLib');
         end
     end
 end
