@@ -51,7 +51,7 @@ classdef ServoChain < handle
 
             % Load Libraries
             if ~libisloaded(obj.lib_name)
-                [notfound, warnings] = loadlibrary(obj.lib_name, 'dynamixel_sdk.h', 'addheader', 'port_handler.h', 'addheader', 'packet_handler.h', 'addheader', 'group_bulk_read.h', 'addheader', 'group_bulk_write.h');
+               [notfound, warnings] = loadlibrary(obj.lib_name, 'dynamixel_proto');
                 disp(warnings);
                 if isempty(notfound) && isempty(warnings)
                     fprintf("Succeeded to load the dynamixel library \n");
