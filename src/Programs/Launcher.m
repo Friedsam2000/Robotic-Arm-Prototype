@@ -126,6 +126,7 @@ classdef Launcher < handle
 
         function delete(obj)
             obj.disconnect;
+
             fprintf("Launcher: Deleting Plotting Timer.\n")
             delete(obj.configUpdateTimer);
             obj.configUpdateTimer = [];
@@ -195,6 +196,7 @@ classdef Launcher < handle
             if ~isempty(obj.matlabAppObj)
                 obj.matlabAppObj.updateConfigCallback;
             end
+            drawnow limitrate;
         end
 
         function [is_valid, error_msg] = checkProgramArgs(~,programName, arguments)

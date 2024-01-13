@@ -187,8 +187,6 @@ classdef VirtualRobot < handle
             tcp_pos = obj.getEndeffectorPos();
             tcp_pos_str = sprintf('End-Effector Position: [%.2f, %.2f, %.2f]', tcp_pos(1), tcp_pos(2), tcp_pos(3));
             set(obj.tcpTextHandle, 'String', tcp_pos_str);
-
-            drawnow limitrate;
         end
 
         function initTrajectoryPlot(obj)
