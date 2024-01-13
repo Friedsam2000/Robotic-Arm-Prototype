@@ -64,7 +64,6 @@ classdef ServoChain < handle
             if (calllib(obj.lib_name, 'openPort', obj.port_num))
                 fprintf('Succeeded to open the port!\n');
             else
-                unloadlibrary(obj.lib_name);
                 delete(obj)
                 error("Failed to open the port!");
             end
