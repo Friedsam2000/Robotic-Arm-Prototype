@@ -77,22 +77,19 @@ classdef Launcher < handle
             % Connect
             dynamixel_lib_path = Launcher.initPath;
             obj.realRobot = RealRobot(dynamixel_lib_path,PORT);
-            if ~isvalid(obj.realRobot)
-                obj.realRobot = [];
-                warning("Launcher: Connection Failed on USB Port %s \n", PORT);
-                return;
-            end
 
             % Check Connection
-            if ~obj.realRobot.servoChain.checkConnection
+            if ~isvalid(obj.realRobot) || ~obj.realRobot.servoChain.checkConnection
                 warning("Launcher: Connection Failed on USB Port %s \n", PORT);
-                delete(obj.realRobot)
-                obj.realRobot = [];
+                obj.disconnect;
             else
                 fprintf("Launcher: Successfully connected on USB Port %s \n", PORT);
 
                 % Set Zero Positoin
                 obj.realRobot.setZeroPositionToCurrentPosition;
+
+                % Enable torque
+                obj.realRobot.torqueEnable;
 
                 obj.singularityWarning = true;
                 fprintf("Launcher: Zero Position Set. \n");
@@ -141,6 +138,13 @@ classdef Launcher < handle
                 return
             end
 
+            % Check Connection
+            if ~obj.realRobot.servoChain.checkConnection
+                warning("Launcher: Connection Failed.\n");
+                obj.disconnect;
+                return
+            end
+
             % Stop and Delete any running program
             delete(obj.currentProgramInstance);
 
@@ -169,6 +173,13 @@ classdef Launcher < handle
 
             % Clear the reference to it
             obj.currentProgramInstance = [];
+
+            % Check Connection
+            if ~obj.realRobot.servoChain.checkConnection
+                warning("Launcher: Connection Failed.\n");
+                obj.disconnect;
+                return
+            end
 
             % Stop
             obj.realRobot.setJointVelocities([0;0;0;0])
