@@ -79,8 +79,7 @@ classdef Launcher < handle
             obj.realRobot = RealRobot(dynamixel_lib_path,PORT);
 
             % Check Connection
-            if ~isvalid(obj.realRobot) || ~obj.realRobot.servoChain.checkConnection
-                warning("Launcher: Connection Failed on USB Port %s \n", PORT);
+            if ~obj.checkConnection
                 obj.disconnect;
             else
                 fprintf("Launcher: Successfully connected on USB Port %s \n", PORT);
@@ -102,28 +101,23 @@ classdef Launcher < handle
         end
 
         function disconnect(obj)
-
             fprintf("Launcher: Disconnecting... \n")
 
             % Stop any running program
             delete(obj.currentProgramInstance);
             obj.currentProgramInstance = [];
-            % If the launcher is connected
-            if ~isempty(obj.realRobot)
 
-                % Stop the UpdateConfigTimer
-                fprintf("Launcher: Stopping Plotting Timer. \n");
-                stop(obj.configUpdateTimer);
+            % Stop the UpdateConfigTimer
+            fprintf("Launcher: Stopping Plotting Timer. \n");
+            stop(obj.configUpdateTimer);
 
-                % Break connection by deleting realRobot object
-                delete(obj.realRobot)
-                obj.realRobot = [];
-            end
+            % Break connection by deleting realRobot object
+            delete(obj.realRobot)
+            obj.realRobot = [];
         end
 
         function delete(obj)
             obj.disconnect;
-
             fprintf("Launcher: Deleting Plotting Timer.\n")
             delete(obj.configUpdateTimer);
             obj.configUpdateTimer = [];
@@ -139,8 +133,7 @@ classdef Launcher < handle
             end
 
             % Check Connection
-            if ~obj.realRobot.servoChain.checkConnection
-                warning("Launcher: Connection Failed.\n");
+            if ~obj.checkConnection
                 obj.disconnect;
                 return
             end
@@ -163,7 +156,6 @@ classdef Launcher < handle
                 % Start the Program
                 obj.currentProgramInstance.start(varargin{:});
             end
-
         end
 
         function programDeleteCallback(obj)
@@ -175,18 +167,16 @@ classdef Launcher < handle
             obj.currentProgramInstance = [];
 
             % Check Connection
-            if ~obj.realRobot.servoChain.checkConnection
-                warning("Launcher: Connection Failed.\n");
+            if obj.checkConnection
+                % Stop
+                obj.realRobot.setJointVelocities([0;0;0;0])
+
+                % Restart the plotting timer
+                fprintf("Launcher: Starting Plotting Timer. \n");
+                start(obj.configUpdateTimer);
+            else
                 obj.disconnect;
-                return
             end
-
-            % Stop
-            obj.realRobot.setJointVelocities([0;0;0;0])
-
-            % Restart the plotting timer
-            fprintf("Launcher: Starting Plotting Timer. \n");
-            start(obj.configUpdateTimer);
         end
 
         function updateConfigAndPlot(obj)
@@ -247,6 +237,16 @@ classdef Launcher < handle
                     end
             end
         end
+
+        function is_valid = checkConnection(obj)
+            if isempty(obj.realRobot) || ~isvalid(obj.realRobot) || ~obj.realRobot.servoChain.checkConnection
+                warning("Launcher: Connection Failed.\n");
+                is_valid = false;
+            else
+                is_valid = true;
+            end
+        end
+
     end
 
 
