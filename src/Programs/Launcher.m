@@ -77,10 +77,17 @@ classdef Launcher < handle
             % Connect
             dynamixel_lib_path = Launcher.initPath;
             obj.realRobot = RealRobot(dynamixel_lib_path,PORT);
+            if ~isvalid(obj.realRobot)
+                obj.realRobot = [];
+                warning("Launcher: Connection Failed on USB Port %s \n", PORT);
+                return;
+            end
 
             % Check Connection
             if ~obj.realRobot.servoChain.checkConnection
                 warning("Launcher: Connection Failed on USB Port %s \n", PORT);
+                delete(obj.realRobot)
+                obj.realRobot = [];
             else
                 fprintf("Launcher: Successfully connected on USB Port %s \n", PORT);
 
@@ -127,7 +134,6 @@ classdef Launcher < handle
 
         function launchProgram(obj, programName, varargin)
 
-
             % Check if program is in the list of available programs
             if ~ismember(programName, obj.programNames)
                 fprintf('Launcher: Program %s not found in available programs. \n', programName);
@@ -169,7 +175,6 @@ classdef Launcher < handle
             % Restart the plotting timer
             fprintf("Launcher: Starting Plotting Timer. \n");
             start(obj.configUpdateTimer);
-
         end
 
         function updateConfigAndPlot(obj)

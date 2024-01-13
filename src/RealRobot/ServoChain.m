@@ -52,7 +52,9 @@ classdef ServoChain < handle
                 if isempty(notfound) && isempty(warnings)
                     fprintf("Succeeded to load the dynamixel library \n");
                 else
-                    error("Failed to load the dynamixel library \n");
+                    frpintf("Failed to load the dynamixel library \n");
+                    delete(obj)
+                    return
                 end
             end
 
@@ -63,18 +65,20 @@ classdef ServoChain < handle
             % Open port
             obj.port_num = calllib(obj.lib_name, 'portHandler', PORT);
             if (calllib(obj.lib_name, 'openPort', obj.port_num))
-                fprintf('Succeeded to open the port!\n');
+                fprintf('ServoChain: Succeeded to open the port!\n');
             else
+                fprintf("ServoChain: Failed to open the port!\n");
                 delete(obj)
-                error("Failed to open the port!");
+                return
             end
 
             % Set port baudrate
             if (calllib(obj.lib_name, 'setBaudRate', obj.port_num, BAUDRATE))
-                fprintf('Succeeded to change the baudrate!\n');
+                fprintf('ServoChain: Succeeded to change the baudrate!\n');
             else
+                fprintf("ServoChain: Failed to change the baudrate!\n");
                 delete(obj)
-                error("Failed to change the baudrate!");
+                return
             end
 
             % Initialize PacketHandler Structs
@@ -84,25 +88,29 @@ classdef ServoChain < handle
             % Try to broadcast ping the Dynamixel
             calllib(obj.lib_name, 'broadcastPing', obj.port_num, obj.PROTOCOL_VERSION);
             
-            fprintf('Detected Dynamixel : \n');
+            fprintf('ServoChain: Detected Dynamixel : \n');
             for ID = 0 : MAX_ID
               if calllib(obj.lib_name, 'getBroadcastPingResult', obj.port_num, obj.PROTOCOL_VERSION, ID)
-                fprintf('Available ID: %d \n', ID);
+                fprintf('ServoChain: Available ID: %d \n', ID);
                 % Store the available IDs
                 obj.availableIDs = [obj.availableIDs, ID];
               end
             end
             if length(obj.availableIDs) < 4
-                error("Not all 4 dynamixel servos detected!")
+                fprintf("ServoChain: Not all 4 dynamixel servos detected!\n")
+                delete(obj)
+                return
             else
-                fprintf("All Servos Detected. Ready.\n")
+                fprintf("ServoChain: All Servos Detected. Ready.\n")
             end
 
         end
 
         function delete(obj)
                 fprintf("ServoChain: Closing port.\n")
-                calllib(obj.lib_name, 'closePort', obj.port_num);
+                try
+                    calllib(obj.lib_name, 'closePort', obj.port_num);
+                end
         end
 
         function is_connected = checkConnection(obj)
@@ -134,9 +142,8 @@ classdef ServoChain < handle
         end
 
         function checkIDAvailable(obj, ID)
-            % Throws an error if the ID of a Servo is not available
             if ~ismember(ID, obj.availableIDs)
-                error("Servo not available");
+                fprintf("ServoChain: Servo not available.\n");
             end
         end
 
