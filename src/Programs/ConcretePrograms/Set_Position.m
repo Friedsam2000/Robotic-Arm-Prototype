@@ -3,7 +3,6 @@ classdef Set_Position < AbstractProgram
 
     properties (Constant)
         default_Kp = 2;
-        default_weight_preffered_config = 3;
         default_precision = 5; % mm
     end
 
@@ -18,22 +17,19 @@ classdef Set_Position < AbstractProgram
             p = inputParser;
             addRequired(p, 'x_desired', @(x) isvector(x) && length(x) == 3 && all(isnumeric(x)) && iscolumn(x));
             addOptional(p, 'Kp', programObj.default_Kp); % Default Kp value
-            addOptional(p, 'weight_preffered_config', programObj.default_weight_preffered_config);
             addOptional(p, 'precision', programObj.default_precision);
             parse(p, varargin{:});
             x_desired = p.Results.x_desired;
             Kp_final = p.Results.Kp; % Final Kp value
-            weight_preffered_config = p.Results.weight_preffered_config;
             precision = p.Results.precision;
 
             % Initialize Kp ramp
             Kp = 0;
-            ramp_duration = 1.5; % Ramp duration in seconds
+            ramp_duration = 1; % Ramp duration in seconds
             start_time = tic; % Start timer
 
             % Controller
             controller = NullspaceController(programObj.launcher.virtualRobot);
-            controller.weight_preffered_config = weight_preffered_config;
 
             % Plot desired position
             scatter3(x_desired(1), x_desired(2), x_desired(3), 'm', 'filled');

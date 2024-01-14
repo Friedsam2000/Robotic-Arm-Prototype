@@ -24,7 +24,7 @@ classdef Set_Joints < AbstractProgram
             precision_rad = deg2rad(precision_deg);
 
             % Initialize Kp ramp
-            Kp = 0.1;
+            Kp = 0;
             ramp_duration = 1; % Ramp duration in seconds
             start_time = tic; % Start timer
 
