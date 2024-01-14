@@ -14,14 +14,15 @@ classdef Set_Joints < AbstractProgram
 
             % Parse optional arguments
             p = inputParser;
-            addRequired(p, 'q_desired', @(x) isvector(x) && length(x) == 4 && all(isnumeric(x)) && iscolumn(x));
+            addRequired(p, 'q_desired_deg', @(x) isvector(x) && length(x) == 4 && all(isnumeric(x)) && iscolumn(x));
             addParameter(p, 'Kp', programObj.default_Kp);
             addParameter(p, 'precision_deg', programObj.default_precision_deg);
             parse(p, varargin{:});
-            q_desired = p.Results.q_desired;
+            q_desired_deg = p.Results.q_desired_deg;
             Kp_final = p.Results.Kp;
             precision_deg = p.Results.precision_deg;
             precision_rad = deg2rad(precision_deg);
+            q_desired = deg2rad(q_desired_deg);
 
             % Initialize Kp ramp
             Kp = 0;
