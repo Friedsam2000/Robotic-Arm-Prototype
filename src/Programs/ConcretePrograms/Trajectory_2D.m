@@ -1,7 +1,6 @@
 classdef Trajectory_2D < AbstractProgram
 
     properties (Constant)
-        default_trajectoryTime = 7.5; % [s]
         default_Kp = 2;
     end
 
@@ -35,7 +34,6 @@ classdef Trajectory_2D < AbstractProgram
             % Initialize Kp ramp
             Kp = 0;
             ramp_duration = 1; % Ramp duration in seconds
-            start_time = tic; % Start timer
 
             % Controller and Planner
             controller = NullspaceController(programObj.launcher.virtualRobot);
@@ -52,6 +50,7 @@ classdef Trajectory_2D < AbstractProgram
             % Control Loop executes while the program is not deleted, the
             % robot is not in a singularity configuration or a break
             % condition is met (e.g. position reached)
+            start_time = tic; % Start timer
             while ~programObj.launcher.singularityWarning
                
                 % Calculate elapsed time
