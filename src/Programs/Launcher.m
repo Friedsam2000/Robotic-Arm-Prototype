@@ -200,43 +200,37 @@ classdef Launcher < handle
             drawnow limitrate;
         end
 
-        function [is_valid, error_msg] = checkProgramArgs(~,programName, arguments)
-
+        function [is_valid, error_msg] = checkProgramArgs(obj, programName, arguments)
             error_msg = [];
+            is_valid = false;  % Default to false
+
             switch programName
                 case 'Set_Joints'
-                    % Expecting 4 doubles (including negatives) separated
-                    % by commas or semicolons
+                    % Expecting 4 doubles (including negatives) separated by commas or semicolons
                     expression = '^(-?\d+(\.\d+)?[,;] *){3}-?\d+(\.\d+)?$';
                     if regexp(arguments, expression)
-                        is_valid = true;
-                    else
-                        is_valid = false;
-                        error_msg = 'Please enter 4 joint angles (including negatives) separated by commas or semicolons.';
-                    end
+                        % Split the arguments into an array of numbers
+                        joint_angles = str2double(split(regexprep(arguments, '[,;]', ' ')));
 
-                case 'Set_Position'
-                    % Expecting 3 doubles (including negatives) separated
-                    % by commas or semicolons
-                    expression = '^(-?\d+(\.\d+)?[,;] *){2}-?\d+(\.\d+)?$';
-                    if regexp(arguments, expression)
-                        is_valid = true;
+                        % Check if the joint angles are within the limits
+                        joint_limits = rad2deg(obj.virtualRobot.joint_limits);
+                        if all(joint_angles >= joint_limits(:,1)) && all(joint_angles <= joint_limits(:,2))
+                            is_valid = true;
+                        else
+                            % Convert joint limits to degrees and make them positive
+                            positive_joint_limits_deg = joint_limits(:,2);
+                            % Format the limits as integer values
+                            % Convert to a flat char array with spaces
+                            formatted_limits = sprintf('%d,', positive_joint_limits_deg(:));
+
+                            error_msg = ['The joint limits in are: ' formatted_limits(1:end-1), ' °'];
+                        end
                     else
-                        is_valid = false;
-                        error_msg = 'Please enter 3 position coordinates (x, y, z) including negatives, separated by commas or semicolons.';
-                    end
-                case 'Trajectory_2D'
-                    % Expecting a string that can be converted to a single double
-                    % First, try to convert the argument to a numeric value
-                    num = str2double(arguments);
-                    if ~isnan(num) && isscalar(num)
-                        is_valid = true;
-                    else
-                        is_valid = false;
-                        error_msg = 'Please enter a valid numeric value.';
+                        error_msg = 'Please enter 4 joint angles (including negatives) separated by commas or semicolons.';
                     end
             end
         end
+
 
         function is_valid = checkConnection(obj)
             if isempty(obj.realRobot) || ~isvalid(obj.realRobot) || ~obj.realRobot.servoChain.checkConnection
