@@ -2,12 +2,12 @@ classdef NullspaceController < handle
 
     properties
 
-        Kp = 0.2;
+        Kp = 2;
         Ki = 0;
 
         % Weights of the Null-Space Tasks (only one can be Non-Zero)
         weight_z = 0; % Weight of the preferred z-Axis Vector
-        weight_preffered_config = 0.2; % Weight of the preferred joint configuration
+        weight_preffered_config = 2; % Weight of the preferred joint configuration
     end
 
 

@@ -228,6 +228,27 @@ classdef Launcher < handle
                     else
                         error_msg = 'Please enter 4 joint angles (including negatives) separated by commas or semicolons.';
                     end
+
+                case 'Set_Position'
+                    % Expecting 3 doubles (including negatives) separated
+                    % by commas or semicolons
+                    expression = '^(-?\d+(\.\d+)?[,;] *){2}-?\d+(\.\d+)?$';
+                    if regexp(arguments, expression)
+                        is_valid = true;
+                    else
+                        is_valid = false;
+                        error_msg = 'Please enter 3 position coordinates (x, y, z) including negatives, separated by commas or semicolons.';
+                    end
+                case 'Trajectory_2D'
+                    % Expecting a string that can be converted to a single double
+                    % First, try to convert the argument to a numeric value
+                    num = str2double(arguments);
+                    if ~isnan(num) && isscalar(num)
+                        is_valid = true;
+                    else
+                        is_valid = false;
+                        error_msg = 'Please enter a valid numeric value.';
+                    end
             end
         end
 
