@@ -223,7 +223,7 @@ classdef Launcher < handle
                             % Convert to a flat char array with spaces
                             formatted_limits = sprintf('%d,', positive_joint_limits_deg(:));
 
-                            error_msg = ['The joint limits in are: ' formatted_limits(1:end-1), ' °'];
+                            error_msg = ['The joint limits are: ' formatted_limits(1:end-1), ' °'];
                         end
                     else
                         error_msg = 'Please enter 4 joint angles (including negatives) separated by commas or semicolons.';
