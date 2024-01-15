@@ -8,7 +8,7 @@ classdef Frame < handle
     properties
         relativePosition               % (p_r_pf) Position vector from the parent frames origin to this frames origin in the parent frames coordinate system
         relativeRotation               % (relativeRotation) Rotation Matrix transforming from the frame to the parent frame 
-        rotationAxisLabel   % String label for the allowed local rotation axis
+        rotationAxis   % String label for the allowed local rotation axis
         parent              % Reference to the parent Frame object
         children            % Array of references to the child Frame objects
 
@@ -21,7 +21,7 @@ classdef Frame < handle
 
     methods
         %% Constructor
-       function obj = Frame(relativePosition, parent, label, rotationAxisLabel)
+       function obj = Frame(relativePosition, parent, label, rotationAxis)
 
             obj.relativePosition = relativePosition;
 
@@ -31,7 +31,7 @@ classdef Frame < handle
 
             % The origin frame (frame without a parent) must not have a
             % rotation axis
-            if isempty(parent) && ~isempty(rotationAxisLabel)
+            if isempty(parent) && ~isempty(rotationAxis)
                 error('Origin Frame must not have a rotation axis.')
             end
 
@@ -46,11 +46,11 @@ classdef Frame < handle
             obj.axisHandles = [gobjects(1,1), gobjects(1,1), gobjects(1,1)];
             obj.axisTextHandles = [gobjects(1,1), gobjects(1,1), gobjects(1,1)];
             
-            % Validate rotationAxisLabel
-            if isempty(rotationAxisLabel) || any(strcmp(rotationAxisLabel, {'x', 'y', 'z'}))
-                obj.rotationAxisLabel = rotationAxisLabel;
+            % Validate rotationAxis
+            if isempty(rotationAxis) || any(strcmp(rotationAxis, {'x', 'y', 'z'}))
+                obj.rotationAxis = rotationAxis;
             else
-                error('CustomFrame: rotationAxisLabel must be ''x'', ''y'', ''z'', or []');
+                error('CustomFrame: rotationAxis must be ''x'', ''y'', ''z'', or []');
             end   
         end
         
@@ -59,7 +59,7 @@ classdef Frame < handle
             
             % Set the rotation of the Frame Around Its Local Axis
 
-            switch lower(obj.rotationAxisLabel)
+            switch lower(obj.rotationAxis)
                 case 'x'
                     obj.relativeRotation = Frame.rotx(angle);
                 case 'y'
