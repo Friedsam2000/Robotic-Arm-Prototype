@@ -57,7 +57,7 @@ classdef Set_Position < AbstractProgram
                 programObj.launcher.realRobot.setJointVelocities(q_dot);
 
                 % Print the distance to the goal
-                distance_to_goal = norm(x_desired - programObj.launcher.virtualRobot.getEndeffectorPos);
+                distance_to_goal = norm(x_desired - programObj.launcher.virtualRobot.forwardKinematics);
 
                 if distance_to_goal < precision
                     if ~breakTimerStarted

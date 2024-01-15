@@ -188,7 +188,7 @@ classdef Launcher < handle
 
             % Common method to update the virtual robots configuration and
             % update the plot
-            obj.virtualRobot.setQ(obj.realRobot.getQ);
+            obj.virtualRobot.setJointAngles(obj.realRobot.getQ);
             obj.virtualRobot.updateRobotPlot;
 
             % Update Singularity Status

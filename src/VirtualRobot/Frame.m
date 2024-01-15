@@ -1,4 +1,4 @@
-classdef CustomFrame < handle
+classdef Frame < handle
 
     properties(Constant)
         AXES_COLORS = ['r', 'g', 'b'];
@@ -8,30 +8,38 @@ classdef CustomFrame < handle
     properties
         p_r_f               % Position vector from the parent frames origin to this frames origin in the parent frames coordinate system
         p_A_f               % Rotation Matrix transforming from the frame to the parent frame
-        label               % String label for the frame
         rotationAxisLabel   % String label for the allowed local rotation axis
         parent              % Reference to the parent Frame object
         children            % Array of references to the child Frame objects
-        % Graphics handles in arrays
+
+        % Plotting
+        label               % String label for the frame
         axisHandles       % Graphics handles for X, Y, Z axes
         axisTextHandles   % Graphics handles for X, Y, Z axis labels
         textHandle        % Graphics handle for the frame label
     end
 
     methods
-       function obj = CustomFrame(p_r_f, parent, label, rotationAxisLabel)
+        %% Constructor
+       function obj = Frame(p_r_f, parent, label, rotationAxisLabel)
 
             obj.p_r_f = p_r_f;
 
-            obj.p_A_f = eye(3); % Upon instantiation, the frames orientation is the same as the parent frames orientation
+            obj.p_A_f = eye(3); % Upon instantiation, the frames rotation is the same as the parent frames rotation
 
-            obj.parent = parent; % Register the parent to this frame
-            obj.label = label;
+            obj.label = label; 
 
-            if ~isempty(parent)
-                parent.children = [parent.children; obj]; % Add this frame to the parent frames children
+            % The origin frame (frame without a parent) must not have a
+            % rotation axis
+            if isempty(parent) && ~isempty(rotationAxisLabel)
+                error('Origin Frame must not have a rotation axis.')
             end
-            
+
+            % Setup Parent Child relationship
+            obj.parent = parent; % Register the parent to this frame
+            if ~isempty(parent)
+                parent.children = [parent.children; obj]; % Register this frame to the parent frames children
+            end
             obj.children = [];
             
             % Initialize graphics handle arrays with empty handles
@@ -42,22 +50,37 @@ classdef CustomFrame < handle
             if isempty(rotationAxisLabel) || any(strcmp(rotationAxisLabel, {'x', 'y', 'z'}))
                 obj.rotationAxisLabel = rotationAxisLabel;
             else
-                error('rotationAxisLabel must be ''x'', ''y'', ''z'', or []');
+                error('CustomFrame: rotationAxisLabel must be ''x'', ''y'', ''z'', or []');
             end   
         end
         
-       function newObj = copy(obj)
-            % Creating a new instance with shallow copy
-            newObj = CustomFrame(obj.p_r_f, [], obj.label, obj.rotationAxisLabel);
-            % Do not copy children here. It will be handled in VirtualRobot's copy method.
+        %% Calculation
+        function updateRotationMatrix(obj, angle)
+            
+            % Set the rotation of the Frame Around Its Local Axis
+
+            switch lower(obj.rotationAxisLabel)
+                case 'x'
+                    obj.p_A_f = Frame.rotx(angle);
+                case 'y'
+                    obj.p_A_f = Frame.roty(angle);
+                case 'z'
+                    obj.p_A_f = Frame.rotz(angle);
+                otherwise
+                    error('Error setting angle for frame: %s\ninvalid rotation axis label', obj.label);
+            end
+            
         end
 
-        % Calculate the position vector from the global origin to this
-        % frames origin in the global frames coordinate system
         function g_r_f = getGlobalPosition(obj)
+
+            % Calculate the position vector from the global origin to this
+            % frames origin in the global frames coordinate system
+
             currentFrame = obj;
             g_r_f = currentFrame.p_r_f; % Initialize with position relative to parent
         
+            % Iterate backwards through the kinematic chain
             while ~isempty(currentFrame.parent)
                 % Apply the parent's rotation matrix to the current position vector
                 g_r_f = currentFrame.parent.p_A_f * g_r_f;
@@ -70,12 +93,16 @@ classdef CustomFrame < handle
             end
         end
 
-        % Calculate the rotation matrix transforming from this frame to the
-        % global frame
+
         function g_A_f = getGlobalRotationMatrix(obj)
+
+            % Calculate the rotation matrix transforming from this frame to the
+            % global frame
+
             currentFrame = obj;
             g_A_f = currentFrame.p_A_f; % Initialize with the frame's own rotation matrix
         
+            % Iterate backwards through the kinematic chain
             while ~isempty(currentFrame.parent)
                 % Multiply the accumulated rotation matrix with the parent's rotation matrix
                 g_A_f = currentFrame.parent.p_A_f * g_A_f;
@@ -85,23 +112,7 @@ classdef CustomFrame < handle
             end
         end
  
-        % Set the rotation of the Frame Around Its Local Axis
-        function setAngle(obj, angle)
-            
-            % Update the rotation matrix relative to the frames parent
-            % p_A_f
-            switch lower(obj.rotationAxisLabel)
-                case 'x'
-                    obj.p_A_f = CustomFrame.rotx(angle);
-                case 'y'
-                    obj.p_A_f = CustomFrame.roty(angle);
-                case 'z'
-                    obj.p_A_f = CustomFrame.rotz(angle);
-                otherwise
-                    error('Error setting angle for frame: %s\ninvalid rotation axis label', obj.label);
-            end
-            
-        end
+        %% Plotting Methods
 
         function initFramePlot(obj)
             scale_factor = 50;
@@ -154,7 +165,7 @@ classdef CustomFrame < handle
 
     methods(Static)
     
-        %% Definition of the basis rotation matrices
+        %% Definition of the basis rotation matrices (See Wikipedia 'Rotation Matrix')
         function rotx = rotx(alpha)
             rotx = [1 0 0; 0 cos(alpha) -sin(alpha); 0 sin(alpha) cos(alpha)];
         end

@@ -16,7 +16,7 @@ classdef Trajectory_2D < AbstractProgram
             end
             
             % Get Current Height
-            g_r_EE = programObj.launcher.virtualRobot.getEndeffectorPos;
+            g_r_EE = programObj.launcher.virtualRobot.forwardKinematics;
             currentHeight = g_r_EE(3);
 
             % Parse optional arguments

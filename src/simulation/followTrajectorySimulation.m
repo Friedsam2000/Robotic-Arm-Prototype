@@ -23,7 +23,7 @@ addpath(controllerDir);
 virtualRobot = VirtualRobot;
 
 % Set the virtualRobot to a non-singularity position
-virtualRobot.setQ([0.3; 0.3; 0.5; 0.5])
+virtualRobot.setJointAngles([0.3; 0.3; 0.5; 0.5])
 
 % Initialize the controller
 controller = NullspaceController(virtualRobot);
@@ -58,7 +58,7 @@ previousTime = 0;  % Initialize previous time
 
 while true
     % Simulation
-    q = virtualRobot.getQ;
+    q = virtualRobot.getJointAngles;
     
     % Calculate elapsed time and the time increment (dt)
     elapsedRealTime = toc(loopBeginTime);
@@ -89,10 +89,11 @@ while true
     end
 
     % Update the simulated robot's joint configuration
-    virtualRobot.setQ(q + q_dot * dt);
+    virtualRobot.setJointAngles(q + q_dot * dt);
 
     % Update and draw the end-effector trajectory and the robot
     virtualRobot.updateRobotPlot;
 
+    drawnow limitrate
 
 end

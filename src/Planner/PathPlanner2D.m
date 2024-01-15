@@ -65,7 +65,7 @@ classdef PathPlanner2D < handle
             end
         
             % Get current virtualRobot position in the XY-plane
-            currentPosition = obj.virtualRobot.getEndeffectorPos;
+            currentPosition = obj.virtualRobot.forwardKinematics;
             currentX = currentPosition(1);
             currentY = currentPosition(2);
         
@@ -122,8 +122,8 @@ classdef PathPlanner2D < handle
             % Calculate the intersection of the robot's workspace with the plane defined by z
 
             segments = {};
-            for i = 1:size(obj.virtualRobot.workspace.boundaryK, 1)
-                tri = obj.virtualRobot.workspace.boundaryVertices(obj.virtualRobot.workspace.boundaryK(i, :), :);  % Extract triangle vertices
+            for i = 1:size(obj.virtualRobot.workspace.boundaryTriangulation, 1)
+                tri = obj.virtualRobot.workspace.uniqueWorkspaceSamples(obj.virtualRobot.workspace.boundaryTriangulation(i, :), :);  % Extract triangle vertices
                 
                 % Check if the triangle intersects the plane
                 isAbove = tri(:, 3) > obj.height;

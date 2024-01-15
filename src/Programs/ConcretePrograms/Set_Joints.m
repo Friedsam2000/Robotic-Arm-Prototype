@@ -44,7 +44,7 @@ classdef Set_Joints < AbstractProgram
 
                 % Update virtual robot and plot
                 programObj.launcher.updateConfigAndPlot;
-                q = programObj.launcher.virtualRobot.getQ;
+                q = programObj.launcher.virtualRobot.getJointAngles;
 
                 % Calculate remaining errors
                 currentError = q_desired - q;

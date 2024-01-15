@@ -45,8 +45,8 @@ classdef NullspaceController < handle
         function q_dot = computeDesiredJointVelocity(obj, x_desired, z_desired, v_desired)
 
             % Get current end-effector position and virtualRobot configuration once
-            q = obj.virtualRobot.getQ;
-            x_current = obj.virtualRobot.getEndeffectorPos;
+            q = obj.virtualRobot.getJointAngles;
+            x_current = obj.virtualRobot.forwardKinematics;
             
             % Compute desired effective workspace velocity
             v_d_eff = obj.computeEffectiveVelocity(x_desired, x_current, v_desired);
@@ -64,7 +64,7 @@ classdef NullspaceController < handle
             end
 
             % Compute Jacobian and pseudoinverse
-            J = obj.virtualRobot.getJacobianNumeric;
+            J = obj.virtualRobot.getJacobian();;
             pinvJ = pinv(J);
 
             q_dot = obj.computeQdotPseudoinverse(J, pinvJ, v_d_eff, dHdQ);
