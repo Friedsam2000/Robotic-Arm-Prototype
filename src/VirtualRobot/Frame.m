@@ -94,7 +94,7 @@ classdef Frame < handle
         end
 
 
-        function g_A_f = getGlobalRotationMatrix(obj)
+        function g_A_f = getGlobalRotation(obj)
 
             % Calculate the rotation matrix transforming from this frame to the
             % global frame
@@ -117,7 +117,7 @@ classdef Frame < handle
         function initFramePlot(obj)
             scale_factor = 50;
             g_r_f = obj.getGlobalPosition;
-            g_A_f = obj.getGlobalRotationMatrix;
+            g_A_f = obj.getGlobalRotation;
             
             for i = 1:3
                 endPos = g_r_f + scale_factor * g_A_f(:, i);
@@ -142,7 +142,7 @@ classdef Frame < handle
         function updateFramePlot(obj)
             scale_factor = 50;
             g_r_f = obj.getGlobalPosition;
-            g_A_f = obj.getGlobalRotationMatrix;
+            g_A_f = obj.getGlobalRotation;
         
             for i = 1:3
                 endPos = g_r_f + scale_factor * g_A_f(:, i);
