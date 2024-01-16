@@ -2,7 +2,7 @@ classdef SetPosition < Program
 
 
     properties (Constant)
-        default_Kp = 2;
+        default_Kp = 1;
         default_precision = 5; % mm
     end
 
@@ -67,7 +67,7 @@ classdef SetPosition < Program
             obj.controller.Kp = Kp;
 
             % Set velocities
-            q_dot = obj.controller.computeDesiredJointVelocity(obj.x_desired, NaN, 0);
+            q_dot = obj.controller.calcJointVelocity(obj.x_desired, 0);
             obj.launcher.realRobot.setJointVelocities(q_dot);
 
             % Print the distance to the goal

@@ -128,7 +128,7 @@ classdef Launcher < handle
 
             % Stop the jointSyncTimer
             fprintf("Launcher: Stopping Plotting Timer. \n");
-            stop(obj.jointSyncTimer)
+            stop(obj.jointSyncTimer);
 
             % Create and Store an Instance of the Program and pass the
             % launcher object by reference

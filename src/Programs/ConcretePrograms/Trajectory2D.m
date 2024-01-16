@@ -6,7 +6,6 @@ classdef Trajectory2D < Program
 
     properties
         controller
-        
         Kp_final
         trajectoryHeight
         ramp_duration
@@ -78,12 +77,12 @@ classdef Trajectory2D < Program
 
             [~, index] = min(abs(obj.t - elapsed_time));
             if index >= length(obj.t)
-                fprintf("Program %s: Trajectory time elapsed. \n", class(obj))
+                fprintf("Program %s: Trajectory time elapsed. \n", class(obj));
                 obj.stopCondition = true;
             end
 
             % Set velocities
-            q_dot = obj.controller.computeDesiredJointVelocity(obj.x_d(:, index), NaN, obj.v_d(:, index));
+            q_dot = obj.controller.calcJointVelocity(obj.x_d(:, index), obj.v_d(:, index));
             obj.launcher.realRobot.setJointVelocities(q_dot);
         end
     end

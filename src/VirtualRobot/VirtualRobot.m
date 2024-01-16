@@ -14,7 +14,7 @@ classdef VirtualRobot < handle
         
         % Small change in joint angles for numeric differentiation of
         % forward kinematics for jacobian calculation
-        delta_q = 1e-6;
+        delta_q = 0.001;
 
     end
 

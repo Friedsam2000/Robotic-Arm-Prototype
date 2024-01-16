@@ -70,9 +70,9 @@ classdef PathPlanner2D < handle
             currentY = currentPosition(2);
         
             % Set the starting point of the path to directly below the current endeffector position
-            obj.pathX = [currentX];
-            obj.pathY = [currentY];
-            obj.pathZ = [obj.height];
+            obj.pathX = currentX;
+            obj.pathY = currentY;
+            obj.pathZ = obj.height;
         
             % Plot the starting point on the figure
             plot(currentX, currentY, 'o', 'MarkerSize', 6, 'MarkerFaceColor', 'r');
