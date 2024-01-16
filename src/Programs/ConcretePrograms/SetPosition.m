@@ -21,6 +21,10 @@ classdef SetPosition < Program
 
         function setup(obj, varargin)
 
+            if obj.launcher.virtualRobot.checkSingularity
+                delete(obj);
+            end
+
             % Parse input arguments
             p = inputParser;
             addRequired(p, 'x_desired', @(x) isvector(x) && length(x) == 3 && all(isnumeric(x)) && iscolumn(x));

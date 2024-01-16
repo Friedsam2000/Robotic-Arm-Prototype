@@ -22,9 +22,7 @@ classdef Trajectory2D < Program
         function setup(obj,varargin)
 
             if obj.launcher.virtualRobot.checkSingularity
-                obj.stopCondition
                 delete(obj);
-                return
             end
 
             % Get Current Height

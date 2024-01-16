@@ -194,7 +194,7 @@ classdef Launcher < handle
                         joint_angles = str2double(split(regexprep(arguments, '[,;]', ' ')));
 
                         % Check if the joint angles are within the limits
-                        joint_limits = rad2deg(obj.virtualRobot.joint_limits);
+                        joint_limits = rad2deg(obj.virtualRobot.JOINT_ANGLE_LIMITS);
                         if all(joint_angles >= joint_limits(:,1)) && all(joint_angles <= joint_limits(:,2))
                             is_valid = true;
                         else
