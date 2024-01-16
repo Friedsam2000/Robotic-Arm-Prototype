@@ -32,18 +32,18 @@ controller = NullspaceController(virtualRobot);
 JOINT_VELOCITY_LIMITS = [0.6;0.6;2;2];
 
 %% Create a trajectory
-trajectory_time = 10; % s
-trajectory_height = 400;
+trajectoryTime = 10; % s
+trajectoryHeight = 400;
 
 % Initialize the planner
-planner = PathPlanner2D(virtualRobot, trajectory_height);
+planner = PathPlanner(virtualRobot, trajectoryHeight);
 
 % Initialize the trajectory generator
-trajectoryGenerator = TrajectoryGenerator(planner.path, trajectory_time);
-x_d = trajectoryGenerator.x_d;
-v_d = trajectoryGenerator.v_d;
+trajectoryGenerator = TrajectoryGenerator();
+trajectoryGenerator.generateTrajectory(planner.path,trajectoryTime)
+x_d = trajectoryGenerator.desiredPosition;
+v_d = trajectoryGenerator.desiredVelocity;
 t = trajectoryGenerator.t;
-
 
 % Plot the desired trajectory
 virtualRobot.initRobotPlot

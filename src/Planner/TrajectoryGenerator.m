@@ -1,48 +1,43 @@
 classdef TrajectoryGenerator < handle
-    properties
-        totalTime % [s]
+    properties (Constant)
         timeIncrement = 0.01; % [s]
+    end
 
-        path % [mm] col: point
-
-        x_d % [mm] col: point
-        v_d % [mm/s] col: velocity
+    properties
+        desiredPosition % [mm] col: point
+        desiredVelocity % [mm/s] col: velocity
         t % [s] row
     end
     
     methods
 
-        function obj = TrajectoryGenerator(path, totalTime)
-            % Assuming waypoint_list is a 3xN matrix with each column representing a waypoint
-            obj.path = path; % Combine X, Y, Z into a single matrix
-            obj.totalTime = totalTime;
+        function obj = TrajectoryGenerator()
 
-            obj.generateTrajectory;
         end
         
 
-        function generateTrajectory(obj)
+        function generateTrajectory(obj, path,trajectoryTime)
             disp("Generating Trajectory")
             
             % Create spline interpolations
-            s = cumsum([0; sqrt(sum(diff(obj.path').^2, 2))]); % cumulative arclength
-            totalTimesteps = ceil(obj.totalTime / obj.timeIncrement) + 1;
-            s_d = linspace(0, s(end), totalTimesteps); % desired time steps
-            x_d_spline = spline(s, obj.path(1,:), s_d);
-            y_d_spline = spline(s, obj.path(2,:), s_d);
-            z_d_spline = spline(s, obj.path(3,:), s_d);
+            s = cumsum([0; sqrt(sum(diff(path').^2, 2))]); % cumulative arclength
+            trajectoryTimesteps = ceil(trajectoryTime / obj.timeIncrement) + 1;
+            s_d = linspace(0, s(end), trajectoryTimesteps); % desired time steps
+            desiredPosition_spline = spline(s, path(1,:), s_d);
+            y_d_spline = spline(s, path(2,:), s_d);
+            z_d_spline = spline(s, path(3,:), s_d);
             
             % Calculate desired velocities using finite differences
-            v_x = diff(x_d_spline) / obj.timeIncrement;
+            v_x = diff(desiredPosition_spline) / obj.timeIncrement;
             v_y = diff(y_d_spline) / obj.timeIncrement;
             v_z = diff(z_d_spline) / obj.timeIncrement;
             
-            obj.t = obj.timeIncrement:obj.timeIncrement:totalTimesteps*obj.timeIncrement;
-            obj.v_d = [v_x; v_y; v_z];
-            obj.x_d = [x_d_spline; y_d_spline; z_d_spline];
+            obj.t = obj.timeIncrement:obj.timeIncrement:trajectoryTimesteps*obj.timeIncrement;
+            obj.desiredVelocity = [v_x; v_y; v_z];
+            obj.desiredPosition = [desiredPosition_spline; y_d_spline; z_d_spline];
             
-            % Append zero vector to obj.v_d to finish with zero velocity.
-            obj.v_d = [obj.v_d, [0;0;0]];
+            % Append zero vector to obj.desiredVelocity to finish with zero velocity.
+            obj.desiredVelocity = [obj.desiredVelocity, [0;0;0]];
         end
 
 
@@ -54,10 +49,10 @@ classdef TrajectoryGenerator < handle
             end
 
             % Draw the generated trajectory in the specified figure
-            if ~isempty(obj.x_d)
+            if ~isempty(obj.desiredPosition)
                 figure(fig);
                 hold on;
-                plot3(obj.x_d(1,:), obj.x_d(2,:), obj.x_d(3,:), 'm-', 'LineWidth', 1);
+                plot3(obj.desiredPosition(1,:), obj.desiredPosition(2,:), obj.desiredPosition(3,:), 'm-', 'LineWidth', 1);
             else
                 warning('TrajectoryGenerator: No trajectory data to plot.');
             end

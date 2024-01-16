@@ -1,4 +1,4 @@
-classdef PathPlanner2D < handle
+classdef PathPlanner < handle
     properties
         
         path          % col : point
@@ -10,7 +10,7 @@ classdef PathPlanner2D < handle
     end
 
     methods
-        function obj = PathPlanner2D(virtualRobot, z)
+        function obj = PathPlanner(virtualRobot, z)
             % Constructor
             obj.virtualRobot = virtualRobot;
             obj.height = z;
