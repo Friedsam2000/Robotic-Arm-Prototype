@@ -41,9 +41,9 @@ planner = PathPlanner(virtualRobot, trajectoryHeight);
 % Initialize the trajectory generator
 trajectoryGenerator = TrajectoryGenerator();
 trajectoryGenerator.generateTrajectory(planner.path,trajectoryTime)
-x_d = trajectoryGenerator.desiredPosition;
-v_d = trajectoryGenerator.desiredVelocity;
-t = trajectoryGenerator.t;
+x_d = trajectoryGenerator.desiredPositionsArray;
+v_d = trajectoryGenerator.desiredVelocitiesArray;
+t = trajectoryGenerator.timeArray;
 
 % Plot the desired trajectory
 virtualRobot.initRobotPlot
@@ -53,20 +53,13 @@ trajectoryGenerator.draw(virtualRobot.fig)
 %% Control Loop
 
 % Variables for time tracking
-loopBeginTime = tic;  % Start the timer
-previousTime = 0;  % Initialize previous time
+dt = 0.1;
 
+index = 0;
 while true
+    index = index +10;
     % Simulation
     q = virtualRobot.getJointAngles;
-    
-    % Calculate elapsed time and the time increment (dt)
-    elapsedRealTime = toc(loopBeginTime);
-    dt = elapsedRealTime - previousTime;
-    previousTime = elapsedRealTime;  % Update the previous time for the next loop iteration
-
-    % Find the index in the trajectory that corresponds to the elapsed time
-    [~, index] = min(abs(t - elapsedRealTime));
 
     % Break the loop if the end of the trajectory is reached
     if index >= length(t)
@@ -95,5 +88,6 @@ while true
     virtualRobot.updateRobotPlot;
 
     drawnow limitrate
+    pause(0.1)
 
 end

@@ -21,14 +21,14 @@ classdef NullspaceController < handle
             obj.integralError = [0; 0; 0];
         end
         
-        function q_dot = calcJointVelocity(obj, x_desired, v_desired)
+        function q_dot = calcJointVelocity(obj, desiredPosition, desiredVelocity)
 
             % Get current end-effector position and virtualRobot configuration once
             q = obj.virtualRobot.getJointAngles;
-            x_current = obj.virtualRobot.forwardKinematics();
+            currentPosition = obj.virtualRobot.forwardKinematics();
             
             % Compute desired effective workspace velocity
-            v = obj.calcTaskspaceVelocity(x_desired, x_current, v_desired);
+            v = obj.calcTaskspaceVelocity(desiredPosition, currentPosition, desiredVelocity);
            
             % Cost function for preffered configuration q = [0;0;0;0]
             % H = 1/2 (q - q_desired)^2 
@@ -50,16 +50,16 @@ classdef NullspaceController < handle
             q_dot = obj.limitJointAngles(q, q_dot);
         end
 
-        function v = calcTaskspaceVelocity(obj, x_desired, x_current, v_desired)
+        function v = calcTaskspaceVelocity(obj, desiredPosition, currentPosition, desiredVelocity)
             
             % Calculate taskspaceVelocity (Driftkompensation)
             
             % Calculate errors
-            currentError = x_desired-x_current; % As they should become 0
+            currentError = desiredPosition-currentPosition; % As they should become 0
             obj.integralError = obj.integralError + currentError;
            
             % Compute effective workspace velocity
-            v = currentError * obj.Kp   + obj.integralError * obj.Ki + v_desired;
+            v = currentError * obj.Kp   + obj.integralError * obj.Ki + desiredVelocity;
             
         end
 
