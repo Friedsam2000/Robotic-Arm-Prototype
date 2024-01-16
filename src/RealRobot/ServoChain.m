@@ -1,26 +1,22 @@
 classdef ServoChain < handle
-% The 'ServoChain' class provides an interface for interacting with connected servos. It is
-% designed to establish a connection to a specified port and list all the servos available at that port.
-% The class allows the user to retrieve the angles of each connected servo and set their velocities.
-% Additionally, it provides functionality to enable and disable the torque for each servo.
-% The Servos class relies on the DynamixelSDK library, which is a C-based library. Throughout the class, 
-% numerous 'calllibrary()' functions are utilized, which necessitate the correct path to the DynamixelSDK 
-% library. To ensure the correct operation of the Servos class, it is essential that the absolute path to
-% the DynamixelSDK library is accurately configured within the class constructor.
+
+    properties (Constant)
+        PROTOCOL_VERSION = 2;
+    end
 
     properties
-        lib_name;
-        port_num;
+
+        % IDs of available Dynamixel Servos 
         availableIDs = [];
 
-        %Global Definitions
-        PROTOCOL_VERSION = 2;
-        COMM_SUCCESS = 0;
+        lib_name;
+        port_num;
 
     end
-    
+
     methods
-        function obj = ServoChain(dynamixel_lib_path, PORT)
+        %% Constructor = Connection Attempt, Calls destructor if failed
+        function obj = ServoChain(dynamixel_lib_path, port)
 
             % Add the include directory
             addpath(fullfile(dynamixel_lib_path, 'c\include\dynamixel_sdk'));
@@ -47,7 +43,7 @@ classdef ServoChain < handle
 
             % Load Libraries
             if ~libisloaded(obj.lib_name)
-               [notfound, warnings] = loadlibrary(obj.lib_name, 'dynamixel_proto');
+                [notfound, warnings] = loadlibrary(obj.lib_name, 'dynamixel_proto');
                 disp(warnings);
                 if isempty(notfound) && isempty(warnings)
                     fprintf("Succeeded to load the dynamixel library \n");
@@ -63,7 +59,7 @@ classdef ServoChain < handle
             BAUDRATE = 1000000;
 
             % Open port
-            obj.port_num = calllib(obj.lib_name, 'portHandler', PORT);
+            obj.port_num = calllib(obj.lib_name, 'portHandler', port);
             if (calllib(obj.lib_name, 'openPort', obj.port_num))
                 fprintf('ServoChain: Succeeded to open the port!\n');
             else
@@ -87,14 +83,14 @@ classdef ServoChain < handle
             %Scan available IDs
             % Try to broadcast ping the Dynamixel
             calllib(obj.lib_name, 'broadcastPing', obj.port_num, obj.PROTOCOL_VERSION);
-            
+
             fprintf('ServoChain: Detected Dynamixel : \n');
             for ID = 0 : MAX_ID
-              if calllib(obj.lib_name, 'getBroadcastPingResult', obj.port_num, obj.PROTOCOL_VERSION, ID)
-                fprintf('ServoChain: Available ID: %d \n', ID);
-                % Store the available IDs
-                obj.availableIDs = [obj.availableIDs, ID];
-              end
+                if calllib(obj.lib_name, 'getBroadcastPingResult', obj.port_num, obj.PROTOCOL_VERSION, ID)
+                    fprintf('ServoChain: Available ID: %d \n', ID);
+                    % Store the available IDs
+                    obj.availableIDs = [obj.availableIDs, ID];
+                end
             end
             if length(obj.availableIDs) < 4
                 fprintf("ServoChain: Not all 4 dynamixel servos detected!\n")
@@ -106,52 +102,19 @@ classdef ServoChain < handle
 
         end
 
+        %% Destructor = Closing Port
         function delete(obj)
-                fprintf("ServoChain: Closing port.\n")
-                try
-                    calllib(obj.lib_name, 'closePort', obj.port_num);
-                end
-        end
-
-        function is_connected = checkConnection(obj)
-            VALUE = calllib(obj.lib_name, 'pingGetModelNum', obj.port_num, obj.PROTOCOL_VERSION, 4);
-            if VALUE ~= 1010
-                is_connected = false;
-            else
-                is_connected = true;
+            fprintf("ServoChain: Closing port.\n")
+            try
+                calllib(obj.lib_name, 'closePort', obj.port_num);
             end
         end
 
-        function torqueEnableDisable(obj,ID,enable_bool)
-            % Enable / Disable the Torque of a servo.
-
-           checkIDAvailable(obj, ID);
-
-            %Local Definitions
-            ADDR_PRO_TORQUE_ENABLE       = 64;         % Control table address is different in Dynamixel model
-            TORQUE_ENABLE               = 1;            % Value for enabling the torque
-            TORQUE_DISABLE              = 0;            % Value for disabling the torque
-
-            % Enable / Disable torque
-            if(enable_bool)
-                calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE);
-            else
-                calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE);
-            end
-
-        end
-
-        function checkIDAvailable(obj, ID)
-            if ~ismember(ID, obj.availableIDs)
-                fprintf("ServoChain: Servo not available.\n");
-            end
-        end
+        %% Send/Receive 
 
         function servoAngle = getServoAngle(obj,ID)
             %Receive the current Position of a servo in RAD. Can be multi
             %rotation and supports negative angles.
-
-           checkIDAvailable(obj, ID);
 
             %Local Definitions
             ADDR_PRO_PRESENT_POSITION    = 132;
@@ -159,16 +122,15 @@ classdef ServoChain < handle
             % Get the present position
             % This should give a value in 4 byte (256^4) continuous range
             dxl1_present_position = calllib(obj.lib_name, 'read4ByteTxRx', obj.port_num , obj.PROTOCOL_VERSION, ID, ADDR_PRO_PRESENT_POSITION);
-            
+
             % Define the conversion factor and midpoint
-            conversionFactor = 0.087891;
-            maxrange = 4294967295; % 4-byte
+            conversionFactor = 0.087891; % (see Dynamixel Wizard)
+
+            maxrange = 2^(4*8)-1; % 4-byte range
             midpoint = maxrange/2;
-        
+
             % Check and Convert the position
-            if dxl1_present_position == maxrange || dxl1_present_position == 0 % 0xFFFFFFFF || 0x00000000 in decimal
-                servoAngle = 0;
-            elseif dxl1_present_position > midpoint
+            if dxl1_present_position > midpoint
                 % Convert to a negative value
                 servoAngle = (dxl1_present_position - maxrange) * conversionFactor;
             else
@@ -179,17 +141,16 @@ classdef ServoChain < handle
             servoAngle = deg2rad(servoAngle);
 
         end
-    
+
         function setServoVelocity(obj, ID, servoVelocity)
 
             % Set a Servos velocity in rev/min
-           checkIDAvailable(obj, ID);
 
             % Local Definitions
             ADDR_PRO_GOAL_VELOCITY      = 104;
 
             % Convert desired rev/min to dynamixel decimal
-            VELOCITY_VAL = (servoVelocity)/0.229; % Convert rev/min to decimal 
+            VELOCITY_VAL = (servoVelocity)/0.229; % Convert rev/min to decimal
 
             %Round VELOCITY_VAL since dynamixel accepts only integers here
             VELOCITY_VAL = round(VELOCITY_VAL);
@@ -197,15 +158,39 @@ classdef ServoChain < handle
             % VELOCITY_VAL is a value in 4 byte (256^4) continuous range
             % A value of (256^4) / 2 is zero, values bigger are positive,
             % values smaller are negative.
-            maxrange = 256^4; % 4-byte
+            maxrange = 2^(4*8)-1; % 4-byte range
             if VELOCITY_VAL < 0
                 VELOCITY_VAL = maxrange+VELOCITY_VAL;
             end
 
-            
             calllib(obj.lib_name, 'write4ByteTxRx', obj.port_num , obj.PROTOCOL_VERSION, ID, ADDR_PRO_GOAL_VELOCITY, VELOCITY_VAL);
-            
         end
+    
+        function setServoTorque(obj,ID,state)
+            % Enable / Disable the Torque of a servo.
+
+            %Local Definitions
+            ADDR_PRO_TORQUE_ENABLE       = 64;         % Control table address is different in Dynamixel model
+            TORQUE_ENABLE               = 1;            % Value for enabling the torque
+            TORQUE_DISABLE              = 0;            % Value for disabling the torque
+
+            % Enable / Disable torque
+            if(state)
+                calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE);
+            else
+                calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE);
+            end
+        end
+
+        function isConnected = checkConnection(obj)
+            VALUE = calllib(obj.lib_name, 'pingGetModelNum', obj.port_num, obj.PROTOCOL_VERSION, 4);
+            if VALUE ~= 1010
+                isConnected = false;
+            else
+                isConnected = true;
+            end
+        end
+
     end
 end
 

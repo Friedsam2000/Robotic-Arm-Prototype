@@ -8,7 +8,7 @@ classdef Frame < handle
     properties
         relativePosition               % (p_r_pf) Position vector from the parent frames origin to this frames origin in the parent frames coordinate system
         relativeRotation               % (relativeRotation) Rotation Matrix transforming from the frame to the parent frame 
-        rotationAxis   % String label for the allowed local rotation axis
+        rotationAxis   % Char label for the allowed local rotation axis
         parent              % Reference to the parent Frame object
         children            % Array of references to the child Frame objects
 

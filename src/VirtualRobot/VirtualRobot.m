@@ -2,7 +2,7 @@ classdef VirtualRobot < handle
 
     properties (Constant)
 
-        joint_limits = [-pi/4, pi/4;
+        JOINT_ANGLE_LIMITS = [-pi/4, pi/4;
             -pi/4, pi/4;
             -(14/8)*pi, (14/8)*pi;
             -(5/6)*pi, (5/6)*pi];
@@ -62,7 +62,7 @@ classdef VirtualRobot < handle
             obj.workspace = Workspace(obj);
 
             % Create the trajectory object with reference to this virtualRobot
-            obj.trajectory = Trajectory(obj);
+            obj.trajectory = Trajectory();
         end
 
         %% Calculation
@@ -162,7 +162,7 @@ classdef VirtualRobot < handle
             obj.frames(end).initFramePlot();
 
             % Initialize the trajectory plot
-            obj.trajectory.initTrajectoryPlot();
+            obj.trajectory.initTrajectoryPlot(obj.forwardKinematics());
 
             % Initialize the workspace plot
             obj.workspace.initWorkspacePlot();
@@ -180,7 +180,7 @@ classdef VirtualRobot < handle
             obj.frames(end).updateFramePlot();
 
             % Update the trajectory plot
-            obj.trajectory.updateTrajectoryPlot();
+            obj.trajectory.updateTrajectoryPlot(obj.forwardKinematics);
 
         end
     end

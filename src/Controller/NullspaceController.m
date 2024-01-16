@@ -34,8 +34,8 @@ classdef NullspaceController < handle
     methods
         function obj = NullspaceController(virtualRobot)
             obj.virtualRobot = virtualRobot;
-            obj.q_max = virtualRobot.joint_limits(:,2);
-            obj.q_min = virtualRobot.joint_limits(:,1);
+            obj.q_max = virtualRobot.JOINT_ANGLE_LIMITS(:,2);
+            obj.q_min = virtualRobot.JOINT_ANGLE_LIMITS(:,1);
             obj.lastPrintTime = tic;
             obj.integralError = [0; 0; 0];
 

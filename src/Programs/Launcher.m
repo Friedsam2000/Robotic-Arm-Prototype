@@ -1,25 +1,17 @@
 classdef Launcher < handle
     properties
-        % Instances
+
+        jointSyncTimer;
+
         virtualRobot;
         realRobot; % if empty -> not connected
-        currentProgramInstance; % if empty -> not running
-
-        % Singularity warning: true or false
-        singularityWarning;
-
-        % List of all available concrete programs
-        programNames;
-
-        % ConfigUpdateTimer
-        configUpdateTimer;
+        activeProgram; % if empty -> not running
 
         % An optional reference to a matlab app which controls the launcher
-        matlabAppObj;
-
+        matlabApp;
     end
 
-
+    %% Constructor
     methods (Static)
         % Static method to get the instance of the class
         function single_instance = getInstance(varargin)
@@ -32,180 +24,169 @@ classdef Launcher < handle
         end
     end
 
-
     methods (Access = private)
 
         function obj = Launcher(varargin)
 
             % Optionally Link a Matlab app
             if nargin < 1
-                obj.matlabAppObj = [];
+                obj.matlabApp = [];
             else
                 % Use the provided port
-                obj.matlabAppObj = varargin{1};
+                obj.matlabApp = varargin{1};
             end
 
             % Add all relevant folders to MATLAB PATH
-            Launcher.initPath;
+            obj.initPath;
 
             % Create the Virtual Robot Object
             obj.virtualRobot = VirtualRobot;
 
-            % Create the configUpdateTimer
-            obj.configUpdateTimer = timer('ExecutionMode', 'fixedRate', 'Period', 0.1, ...
-                'BusyMode', 'drop', 'TimerFcn', @(~,~) obj.updateConfigAndPlot);
+            % Create the jointSyncTimer
+            obj.jointSyncTimer = timer('ExecutionMode', 'fixedRate', 'Period', 0.1, ...
+                'BusyMode', 'drop', 'TimerFcn', @(~,~) obj.syncJointsAndPlot);
 
             % Load all available Programs
-            obj.programNames = obj.getPrograms;
-            obj.currentProgramInstance = [];
+            obj.activeProgram = [];
 
         end
     end
 
+
     methods
 
+        %% Destructor
+        function delete(obj)
+            obj.disconnect;
+            fprintf("Launcher: Deleting jointSyncTimer.\n")
+            delete(obj.jointSyncTimer);
+            obj.jointSyncTimer = [];
+            fprintf("Launcher: Deleting.\n")
+        end
+
+        %% Connection Management
         function connect(obj, varargin)
             % Check if the constructor was called with a specified port
             if nargin < 2
                 % If not, use 'COM3' as a default port
-                PORT = 'COM3';
+                port = 'COM3';
             else
                 % Use the provided port
-                PORT = varargin{1};
+                port = varargin{1};
             end
 
             % Connect
-            dynamixel_lib_path = Launcher.initPath;
-            obj.realRobot = RealRobot(dynamixel_lib_path,PORT);
+            dynamixel_lib_path = obj.initPath;
+            obj.realRobot = RealRobot(dynamixel_lib_path,port);
 
             % Check Connection
-            if ~obj.checkConnection
+            if ~obj.realRobot.servoChain.checkConnection
                 obj.disconnect;
             else
-                fprintf("Launcher: Successfully connected on USB Port %s \n", PORT);
+                fprintf("Launcher: Successfully connected on USB Port %s \n", port);
 
                 % Set Zero Positoin
-                obj.realRobot.setZeroPositionToCurrentPosition;
-
-                % Enable torque
-                obj.realRobot.torqueEnable;
-
-                obj.singularityWarning = true;
+                obj.realRobot.zeroAtCurrent;
                 fprintf("Launcher: Zero Position Set. \n");
 
-                % Start the Plotting timer
+                % Enable torque
+                obj.realRobot.setRobotTorque(1);
                 fprintf("Launcher: Starting Plotting Timer. \n");
-                start(obj.configUpdateTimer);
-            end
 
+                % Start the Plotting timer
+                start(obj.jointSyncTimer);
+            end
         end
 
         function disconnect(obj)
             fprintf("Launcher: Disconnecting... \n")
 
             % Stop any running program
-            delete(obj.currentProgramInstance);
-            obj.currentProgramInstance = [];
+            delete(obj.activeProgram);
+            obj.activeProgram = [];
 
-            % Stop the UpdateConfigTimer
-            fprintf("Launcher: Stopping Plotting Timer. \n");
-            stop(obj.configUpdateTimer);
+            % Stop the jointSyncTimer
+            fprintf("Launcher: Stopping jointSyncTimer. \n");
+            stop(obj.jointSyncTimer);
 
             % Break connection by deleting realRobot object
             delete(obj.realRobot)
             obj.realRobot = [];
         end
 
-        function delete(obj)
-            obj.disconnect;
-            fprintf("Launcher: Deleting Plotting Timer.\n")
-            delete(obj.configUpdateTimer);
-            obj.configUpdateTimer = [];
-            fprintf("Launcher: Deleting.\n")
-        end
-
+        %% Program
         function launchProgram(obj, programName, varargin)
 
-            % Check if program is in the list of available programs
-            if ~ismember(programName, obj.programNames)
-                fprintf('Launcher: Program %s not found in available programs. \n', programName);
-                return
-            end
-
             % Check Connection
-            if ~obj.checkConnection
+            if ~obj.realRobot.servoChain.checkConnection
                 obj.disconnect;
                 return
             end
 
             % Stop and Delete any running program
-            delete(obj.currentProgramInstance);
+            delete(obj.activeProgram);
 
-            % Stop the configUpdateTimer
+            % Stop the jointSyncTimer
             fprintf("Launcher: Stopping Plotting Timer. \n");
-            stop(obj.configUpdateTimer)
+            stop(obj.jointSyncTimer)
 
             % Create and Store an Instance of the Program and pass the
             % launcher object by reference
-            obj.currentProgramInstance = feval(programName, obj);
+            obj.activeProgram = feval(programName, obj);
 
-            fprintf('Launcher: Program %s starting...\n', class(obj.currentProgramInstance));
-
-            % Try to launch
-            try
-                % Start the Program
-                obj.currentProgramInstance.start(varargin{:});
-            end
+            fprintf('Launcher: Program %s starting...\n', class(obj.activeProgram));
+        
+            % Start the Program
+            obj.activeProgram.start(varargin{:});
+        
         end
 
-        function programDeleteCallback(obj)
+        function programTerminationCallback(obj)
             % Callback function that gets called by the program after
             % stopping or error and before it delets itself
             fprintf('Launcher: Program ended.\n');
 
-            % Clear the reference to it
-            obj.currentProgramInstance = [];
+            % Stop any Motion
+            obj.realRobot.setJointVelocities([0;0;0;0])
 
-            % Check Connection
-            if obj.checkConnection
-                % Stop
-                obj.realRobot.setJointVelocities([0;0;0;0])
+            % Restart the plotting timer
+            fprintf("Launcher: Starting Plotting Timer. \n");
+            start(obj.jointSyncTimer);
 
-                % Restart the plotting timer
-                fprintf("Launcher: Starting Plotting Timer. \n");
-                start(obj.configUpdateTimer);
-            else
-                obj.disconnect;
-            end
+            % Clear the reference to the activeProgram
+            obj.activeProgram = [];
         end
 
-        function updateConfigAndPlot(obj)
+        function syncJointsAndPlot(obj)
+
+            % Sync Joints of virtualRobot and realRobot
+            obj.virtualRobot.setJointAngles(obj.realRobot.getJointAngles);
+
+            % Update the App
+            if ~isempty(obj.matlabApp)
+                obj.matlabApp.updateCallback;
+            end
+
+            % Plotting
             % Check if figure is still valid
             if isempty(obj.virtualRobot.fig) || ~isvalid(obj.virtualRobot.fig)
                 % If not reopen the plot
                 obj.virtualRobot.initRobotPlot;
+            else
+                obj.virtualRobot.updateRobotPlot;
             end
-
-            % Common method to update the virtual robots configuration and
-            % update the plot
-            obj.virtualRobot.setJointAngles(obj.realRobot.getQ);
-            obj.virtualRobot.updateRobotPlot;
-
-            % Update Singularity Status
-            obj.singularityWarning = obj.virtualRobot.checkSingularity;
-
-            if ~isempty(obj.matlabAppObj)
-                obj.matlabAppObj.updateConfigCallback;
-            end
+            
             drawnow limitrate;
         end
 
+
+        %% Utility
         function [is_valid, error_msg] = checkProgramArgs(obj, programName, arguments)
             error_msg = [];
             is_valid = false;  % Default to false
 
             switch programName
-                case 'Set_Joints'
+                case 'SetJoints'
                     % Expecting 4 doubles (including negatives) separated by commas or semicolons
                     expression = '^(-?\d+(\.\d+)?[,;] *){3}-?\d+(\.\d+)?$';
                     if regexp(arguments, expression)
@@ -229,7 +210,7 @@ classdef Launcher < handle
                         error_msg = 'Please enter 4 joint angles (including negatives) separated by commas or semicolons.';
                     end
 
-                case 'Set_Position'
+                case 'SetPosition'
                     % Expecting 3 doubles (including negatives) separated
                     % by commas or semicolons
                     expression = '^(-?\d+(\.\d+)?[,;] *){2}-?\d+(\.\d+)?$';
@@ -239,7 +220,7 @@ classdef Launcher < handle
                         is_valid = false;
                         error_msg = 'Please enter 3 position coordinates (x, y, z) including negatives, separated by commas or semicolons.';
                     end
-                case 'Trajectory_2D'
+                case 'Trajectory2D'
                     % Expecting a string that can be converted to a single double
                     % First, try to convert the argument to a numeric value
                     num = str2double(arguments);
@@ -252,23 +233,7 @@ classdef Launcher < handle
             end
         end
 
-
-        function is_valid = checkConnection(obj)
-            if isempty(obj.realRobot) || ~isvalid(obj.realRobot) || ~obj.realRobot.servoChain.checkConnection
-                warning("Launcher: Connection Failed.\n");
-                is_valid = false;
-            else
-                is_valid = true;
-            end
-        end
-
-    end
-
-
-    methods (Static, Hidden)
-
-
-        function programs = getPrograms()
+        function programs = getPrograms(~)
             % Get Current Dir of Launcher.m file
             currentFile = mfilename('fullpath');
             [currentDir, ~, ~] = fileparts(currentFile);
@@ -286,7 +251,7 @@ classdef Launcher < handle
             end
         end
 
-        function dynamixel_lib_path = initPath()
+        function dynamixel_lib_path = initPath(~)
 
             % Get Current Dir of Launcher.m file (Programs)
             currentFile = mfilename('fullpath');

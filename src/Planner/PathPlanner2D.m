@@ -4,7 +4,7 @@ classdef PathPlanner2D < handle
     % path) as a waypoint list. The first waypoint is the current
     % endeffector position of the virtual robot
 
-    properties (Access = private)
+    properties
         virtualRobot  % Referenced instance of VirtualRobot
         height        % Given height z for the 2D slice
         pathX         % X coordinates of the drawn path
@@ -117,22 +117,22 @@ classdef PathPlanner2D < handle
         
     end
 
-    methods (Access = private)
+    methods
         function segments = calculateWorkspaceSlice(obj)
             % Calculate the intersection of the robot's workspace with the plane defined by z
 
             segments = {};
-            for i = 1:size(obj.virtualRobot.workspace.boundaryTriangulation, 1)
-                tri = obj.virtualRobot.workspace.uniqueWorkspaceSamples(obj.virtualRobot.workspace.boundaryTriangulation(i, :), :);  % Extract triangle vertices
+            for i = 1:size(obj.virtualRobot.workspace.surfaceMesh, 2)
+                tri = obj.virtualRobot.workspace.workspacePoints(:,obj.virtualRobot.workspace.surfaceMesh(:,i));  % Extract triangle vertices
                 
                 % Check if the triangle intersects the plane
-                isAbove = tri(:, 3) > obj.height;
-                isBelow = tri(:, 3) < obj.height;
+                isAbove = tri(3,:) > obj.height;
+                isBelow = tri(3,:) < obj.height;
                 if any(isAbove) && any(isBelow)  % At least one vertex is above and one is below
                     % Triangle intersects the plane
                     
                     % Compute the two intersection points with the plane
-                    intersectedLine = obj.computeIntersection(tri);
+                    intersectedLine = obj.computeIntersection(tri');
                     if ~isempty(intersectedLine)
                         segments{end+1} = intersectedLine;
                     end
