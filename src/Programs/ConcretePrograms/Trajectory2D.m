@@ -44,11 +44,13 @@ classdef Trajectory2D < Program
             % Controller and Planner
             obj.controller = NullspaceController(obj.launcher.virtualRobot);
             planner = PathPlanner2D(obj.launcher.virtualRobot, obj.trajectoryHeight);
-            planner.userInputPath; % User inputs path
 
             % Trajectory Generator
-            trajectoryGenerator = TrajectoryGenerator(planner.getWaypointList, trajectoryTime);
-            [obj.x_d, obj.v_d, obj.t] = trajectoryGenerator.getTrajectory;
+            trajectoryGenerator = TrajectoryGenerator(planner.path, trajectoryTime);
+            obj.x_d = trajectoryGenerator.x_d;
+            obj.v_d = trajectoryGenerator.v_d;
+            obj.t = trajectoryGenerator.t;
+
 
             % Draw the desired trajectory
             trajectoryGenerator.draw(obj.launcher.virtualRobot.fig);

@@ -10,12 +10,10 @@ currentFile = mfilename('fullpath');
 % Construct the paths to the folders one level up
 parentDir = fullfile(currentDir, '..');  % This goes one level up to src
 virtualRobotDir = fullfile(parentDir, 'VirtualRobot');
-plannerDir = fullfile(parentDir, 'Planner'); 
 controllerDir = fullfile(parentDir, 'Controller'); 
 
 % Add these paths to the MATLAB path
 addpath(virtualRobotDir);
-addpath(plannerDir);
 addpath(controllerDir);
 
 %% Setup virtual robot, controller, planner, and trajectory generator
@@ -23,31 +21,17 @@ addpath(controllerDir);
 virtualRobot = VirtualRobot;
 
 % Set the virtualRobot to a non-singularity position
-virtualRobot.setJointAngles([pi/8;pi/8;pi/4;pi/4])
+virtualRobot.setJointAngles([0.5;0.5;0.5;0.5])
+
 
 % Initialize the controller
 controller = NullspaceController(virtualRobot);
 
 % Conifgure maximum absolut joint velocities % RAD/s
 JOINT_VELOCITY_LIMITS = [0.6;0.6;2;2];
-
-%% Create a trajectory
-trajectory_time = 10; % s
-trajectory_height = 400;
-
-% Initialize the planner
-planner = PathPlanner2D(virtualRobot, trajectory_height);
-
-% Initialize the trajectory generator
-trajectoryGenerator = TrajectoryGenerator(planner.path, trajectory_time);
-x_d = trajectoryGenerator.x_d;
-v_d = trajectoryGenerator.v_d;
-t = trajectoryGenerator.t;
-
-
-% Plot the desired trajectory
-virtualRobot.initRobotPlot
-trajectoryGenerator.draw(virtualRobot.fig)
+x_desired = [100; 100; 400];
+virtualRobot.initRobotPlot;
+scatter3(x_desired(1), x_desired(2), x_desired(3), 'm', 'filled');
 
 
 %% Control Loop
@@ -56,29 +40,14 @@ trajectoryGenerator.draw(virtualRobot.fig)
 loopBeginTime = tic;  % Start the timer
 previousTime = 0;  % Initialize previous time
 
+dt = 0.1;
+
 while true
     % Simulation
     q = virtualRobot.getJointAngles;
     
-    % Calculate elapsed time and the time increment (dt)
-    elapsedRealTime = toc(loopBeginTime);
-    dt = elapsedRealTime - previousTime;
-    previousTime = elapsedRealTime;  % Update the previous time for the next loop iteration
-
-    % Find the index in the trajectory that corresponds to the elapsed time
-    [~, index] = min(abs(t - elapsedRealTime));
-
-    % Break the loop if the end of the trajectory is reached
-    if index >= length(t)
-        break;
-    end
-
-    % Get the desired position and velocity for the current timestep
-    current_x_d = x_d(:, index);
-    current_v_d = v_d(:, index);
-
     % Compute the desired joint velocity
-    q_dot = controller.calcJointVelocity(current_x_d, current_v_d);
+    q_dot = controller.calcJointVelocity(x_desired, 0);
 
     % Ensure velocities do not exceed the configued maximum joint speed
     for ID = 1:4
@@ -94,6 +63,7 @@ while true
     % Update and draw the end-effector trajectory and the robot
     virtualRobot.updateRobotPlot;
 
+    pause(0.1)
     drawnow limitrate
 
 end

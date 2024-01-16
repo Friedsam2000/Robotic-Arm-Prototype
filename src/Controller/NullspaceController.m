@@ -6,8 +6,8 @@ classdef NullspaceController < handle
         Kp = 1;
         Ki = 0;
 
-        % Weights of the Null-Space Tasks
-        weight_preffered_config = 5;
+        % Factor of the of the Null-Space Task velocities
+        nullspaceGain = 5; % Staying cloes to the comfort configuration q = [0;0;0;0]
 
         virtualRobot  % Referenced instance of VirtualRobot
 
@@ -28,7 +28,7 @@ classdef NullspaceController < handle
             x_current = obj.virtualRobot.forwardKinematics();
             
             % Compute desired effective workspace velocity
-            v_d_eff = obj.calcEffVelocity(x_desired, x_current, v_desired);
+            v = obj.calcTaskspaceVelocity(x_desired, x_current, v_desired);
            
             % Cost function for preffered configuration q = [0;0;0;0]
             % H = 1/2 (q - q_desired)^2 
@@ -44,22 +44,22 @@ classdef NullspaceController < handle
             N = (eye(4) - pinvJ * J);
 
             % Compute joint-space velocity q_dot 
-            q_dot = pinvJ * v_d_eff - obj.weight_preffered_config * (N * dHdQ);
+            q_dot = pinvJ * v - obj.nullspaceGain * (N * dHdQ);
 
             % Ensure compliance with joint angle limits
             q_dot = obj.limitJointAngles(q, q_dot);
         end
 
-        function v_d_eff = calcEffVelocity(obj, x_desired, x_current, v_desired)
+        function v = calcTaskspaceVelocity(obj, x_desired, x_current, v_desired)
             
-            % Calculate v_d_eff (Driftkompensation)
+            % Calculate taskspaceVelocity (Driftkompensation)
             
             % Calculate errors
             currentError = x_desired-x_current; % As they should become 0
             obj.integralError = obj.integralError + currentError;
            
             % Compute effective workspace velocity
-            v_d_eff = currentError * obj.Kp   + obj.integralError * obj.Ki + v_desired;
+            v = currentError * obj.Kp   + obj.integralError * obj.Ki + v_desired;
             
         end
 
