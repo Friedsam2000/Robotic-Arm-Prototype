@@ -7,7 +7,6 @@ classdef Trajectory2D < Program
     properties
         controller
         Kp_final
-        trajectoryHeight
         ramp_duration
         start_time
         x_d
@@ -36,24 +35,26 @@ classdef Trajectory2D < Program
             parse(p, varargin{:});
             trajectoryTime = p.Results.trajectoryTime;
             obj.Kp_final = p.Results.Kp; % Final Kp value
-            obj.trajectoryHeight = p.Results.trajectoryHeight;
+            trajectoryHeight = p.Results.trajectoryHeight;
 
             % Initialize Kp ramp
             obj.ramp_duration = 1; % Ramp duration in seconds
 
-            % Controller and Planner
+            % Initialize the controller
             obj.controller = NullspaceController(obj.launcher.virtualRobot);
-            planner = PathPlanner2D(obj.launcher.virtualRobot, obj.trajectoryHeight);
 
-            % Trajectory Generator
-            trajectoryGenerator = TrajectoryGenerator(planner.path, trajectoryTime);
-            obj.x_d = trajectoryGenerator.x_d;
-            obj.v_d = trajectoryGenerator.v_d;
-            obj.t = trajectoryGenerator.t;
+            % Initialize the planner
+            planner = PathPlanner(obj.launcher.virtualRobot, trajectoryHeight);
+            
+            % Initialize the trajectory generator
+            trajectoryGenerator = TrajectoryGenerator();
+            trajectoryGenerator.generateTrajectory(planner.path,trajectoryTime)
+            obj.x_d = trajectoryGenerator.desiredPositionsArray;
+            obj.v_d = trajectoryGenerator.desiredVelocitiesArray;
+            obj.t = trajectoryGenerator.timeArray;
 
-
-            % Draw the desired trajectory
-            trajectoryGenerator.draw(obj.launcher.virtualRobot.fig);
+            % Plot the desired trajectory
+            trajectoryGenerator.draw(obj.launcher.virtualRobot.fig)
 
             % Control Loop executes while the program is not deleted, the
             % robot is not in a singularity configuration or a break
