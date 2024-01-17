@@ -32,7 +32,7 @@ controller = NullspaceController(virtualRobot);
 JOINT_VELOCITY_LIMITS = [0.6;0.6;2;2];
 
 %% Create a trajectory
-trajectoryTime = 10; % s
+trajectoryTime = 30; % s
 trajectoryHeight = 400;
 
 % Initialize the planner
@@ -51,18 +51,22 @@ trajectoryGenerator.draw(virtualRobot.fig)
 
 
 %% Control Loop
-
 % Variables for time tracking
-dt = 0.1;
+start_time = tic;
+last_update_time = tic; % Track when the last update was done
+desired_frame_time = 1/30; % Desired time per frame for 30 FPS
 
-index = 0;
 while true
-    index = index +10;
+    loop_start_time = tic;
+
+    elapsed_time = toc(start_time);
+
     % Simulation
     q = virtualRobot.getJointAngles;
 
-    % Break the loop if the end of the trajectory is reached
+    [~, index] = min(abs(t - elapsed_time));
     if index >= length(t)
+        fprintf("Trajectory time elapsed. \n");
         break;
     end
 
@@ -73,21 +77,28 @@ while true
     % Compute the desired joint velocity
     q_dot = controller.calcJointVelocity(current_x_d, current_v_d);
 
-    % Ensure velocities do not exceed the configued maximum joint speed
+    % Ensure velocities do not exceed the configured maximum joint speed
     for ID = 1:4
         if abs(q_dot(ID)) > JOINT_VELOCITY_LIMITS(ID)
             q_dot(ID) = JOINT_VELOCITY_LIMITS(ID) * sign(q_dot(ID));
-            fprintf("Limited q_dot by sim : Joint %d \n", ID)
+            % fprintf("Limited q_dot by sim : Joint %d \n", ID)
         end
     end
 
+   % Check if enough time has passed since the last update
+    if toc(last_update_time) >= desired_frame_time
+        % Update and draw the robot
+        virtualRobot.updateRobotPlot;
+        drawnow
+
+        % Reset the last update time
+        last_update_time = loop_start_time;
+    end
+
+    % Calculate the time taken for this loop iteration
+    dt = toc(loop_start_time);
+
     % Update the simulated robot's joint configuration
     virtualRobot.setJointAngles(q + q_dot * dt);
-
-    % Update and draw the end-effector trajectory and the robot
-    virtualRobot.updateRobotPlot;
-
-    drawnow limitrate
-    pause(0.1)
 
 end

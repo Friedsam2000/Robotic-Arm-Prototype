@@ -167,6 +167,11 @@ classdef VirtualRobot < handle
             % Initialize the workspace plot
             obj.workspace.initWorkspacePlot();
 
+            ax = gca;
+            disableDefaultInteractivity(ax)
+
+            set(obj.fig, 'Renderer', 'OpenGL');
+
         end
 
         function updateRobotPlot(obj)
@@ -176,7 +181,7 @@ classdef VirtualRobot < handle
             end
 
             % Update the frame plots of first and last frame
-            obj.frames(1).updateFramePlot();
+            % obj.frames(1).updateFramePlot();
             obj.frames(end).updateFramePlot();
 
             % Update the trajectory plot

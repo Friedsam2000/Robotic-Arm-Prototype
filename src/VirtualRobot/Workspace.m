@@ -1,7 +1,7 @@
 classdef Workspace < handle
 
     properties (Constant)
-        workspaceResolution = 0.2; % Angular resolution for workspace sampling in radians.
+        workspaceResolution = 0.1; % Angular resolution for workspace sampling in radians.
         workspaceTolerance = 0.02; % Tolerance for filtering near-identical workspace samples.
     end
 
