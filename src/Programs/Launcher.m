@@ -1,38 +1,23 @@
 classdef Launcher < handle
     properties
 
-        jointSyncTimer;
-
-        virtualRobot;
-        realRobot; % if empty -> not connected
-        activeProgram; % if empty -> not running
+        jointSyncTimer = [];
+        virtualRobot = [];
+        realRobot = [];     
+        activeProgram = [];
 
         % An optional reference to a matlab app which controls the launcher
-        matlabApp;
+        matlabApp = [];
     end
 
-    %% Constructor
-    methods (Static)
-        % Static method to get the instance of the class
-        function single_instance = getInstance(varargin)
-            persistent instance;
-            if isempty(instance) || ~isvalid(instance)
-                instance = Launcher(varargin{:});
-            end
 
-            single_instance = instance;
-        end
-    end
+    methods
 
-    methods (Access = private)
-
+        %% Constructor
         function obj = Launcher(varargin)
 
             % Optionally Link a Matlab app
-            if nargin < 1
-                obj.matlabApp = [];
-            else
-                % Use the provided port
+            if nargin == 1
                 obj.matlabApp = varargin{1};
             end
 
@@ -44,23 +29,19 @@ classdef Launcher < handle
 
             % Create the jointSyncTimer
             obj.jointSyncTimer = timer('ExecutionMode', 'fixedRate', 'Period', 0.1, ...
-                'BusyMode', 'drop', 'TimerFcn', @(~,~) obj.syncJointsAndPlot);
-
-            % Load all available Programs
-            obj.activeProgram = [];
+                'BusyMode', 'drop', 'TimerFcn', @(~,~) obj.syncJointsAndPlot, 'ErrorFcn', @(~,~) obj.delete);
 
         end
-    end
-
-
-    methods
 
         %% Destructor
         function delete(obj)
+
             obj.disconnect;
+
             fprintf("Launcher: Deleting jointSyncTimer.\n")
             delete(obj.jointSyncTimer);
             obj.jointSyncTimer = [];
+
             fprintf("Launcher: Deleting.\n")
         end
 
@@ -79,23 +60,22 @@ classdef Launcher < handle
             dynamixel_lib_path = obj.initPath;
             obj.realRobot = RealRobot(dynamixel_lib_path,port);
 
-            % Check Connection
-            if ~obj.realRobot.servoChain.checkConnection
-                obj.disconnect;
-            else
-                fprintf("Launcher: Successfully connected on USB Port %s \n", port);
-
-                % Set Zero Positoin
-                obj.realRobot.zeroAtCurrent;
-                fprintf("Launcher: Zero Position Set. \n");
-
-                % Enable torque
-                obj.realRobot.setRobotTorque(1);
-                fprintf("Launcher: Starting Plotting Timer. \n");
-
-                % Start the Plotting timer
-                start(obj.jointSyncTimer);
+            if ~obj.checkConnection()
+                return;
             end
+
+            fprintf("Launcher: Successfully connected on USB Port %s \n", port);
+
+            % Set Zero Position
+            obj.realRobot.zeroAtCurrent;
+            fprintf("Launcher: Zero Position Set. \n");
+
+            % Enable torque
+            obj.realRobot.setRobotTorque(1);
+            fprintf("Launcher: Starting Plotting Timer. \n");
+
+            % Start the Plotting timer
+            start(obj.jointSyncTimer);
         end
 
         function disconnect(obj)
@@ -117,10 +97,8 @@ classdef Launcher < handle
         %% Program
         function launchProgram(obj, programName, varargin)
 
-            % Check Connection
-            if ~obj.realRobot.servoChain.checkConnection
-                obj.disconnect;
-                return
+            if ~obj.checkConnection()
+                return;
             end
 
             % Stop and Delete any running program
@@ -130,21 +108,26 @@ classdef Launcher < handle
             fprintf("Launcher: Stopping Plotting Timer. \n");
             stop(obj.jointSyncTimer);
 
-            % Create and Store an Instance of the Program and pass the
-            % launcher object by reference
+            % Instantiate the Program
             obj.activeProgram = feval(programName, obj);
 
-            fprintf('Launcher: Program %s starting...\n', class(obj.activeProgram));
-        
             % Start the Program
+            fprintf('Launcher: Program %s starting...\n', class(obj.activeProgram));
             obj.activeProgram.start(varargin{:});
-        
+
         end
 
         function programTerminationCallback(obj)
             % Callback function that gets called by the program after
             % stopping or error and before it delets itself
             fprintf('Launcher: Program ended.\n');
+
+            % Clear the reference to the activeProgram
+            obj.activeProgram = [];
+
+            if ~obj.checkConnection()
+                return;
+            end
 
             % Stop any Motion
             obj.realRobot.setJointVelocities([0;0;0;0])
@@ -153,16 +136,19 @@ classdef Launcher < handle
             fprintf("Launcher: Starting Plotting Timer. \n");
             start(obj.jointSyncTimer);
 
-            % Clear the reference to the activeProgram
-            obj.activeProgram = [];
+
         end
 
         function syncJointsAndPlot(obj)
 
+            if ~obj.checkConnection()
+                return;
+            end
+
             % Sync Joints of virtualRobot and realRobot
             obj.virtualRobot.setJointAngles(obj.realRobot.getJointAngles);
 
-            % Update the App
+            % Update the App if specified
             if ~isempty(obj.matlabApp)
                 obj.matlabApp.updateCallback;
             end
@@ -175,7 +161,7 @@ classdef Launcher < handle
             else
                 obj.virtualRobot.updateRobotPlot;
             end
-            
+
             drawnow limitrate;
         end
 
@@ -269,6 +255,19 @@ classdef Launcher < handle
             addpath(fullfile(parentDir, 'DynamixelLib'));
 
             dynamixel_lib_path = fullfile(parentDir, 'DynamixelLib');
+        end
+    end
+
+    
+    methods (Access = private)
+
+        function state = checkConnection(obj)
+            state = true;
+            if isempty(obj.realRobot) || ~isvalid(obj.realRobot)
+                state = false;
+                obj.realRobot = [];
+                return;
+            end
         end
     end
 end

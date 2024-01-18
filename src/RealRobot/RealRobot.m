@@ -2,8 +2,8 @@ classdef RealRobot < handle
 
     properties (Constant)
 
-        % Servo IDs (Can be configured in Dynamixel Wizard)
-        % ID 1 : ShoulderServoOne
+        % Expected Servo IDs (Can be configured in Dynamixel Wizard)
+        % ID 1 : ShoulderServoOne  --> located in x-direction  (front)
         % ID 2 : ShoulderServoTwo
         % ID 3 : YawServo
         % ID 4 : ElbowServo
@@ -17,13 +17,11 @@ classdef RealRobot < handle
     properties
 
         %ServoChain Object
-        servoChain;
+        servoChain = [];
 
         % The Servo Angles that correspond to Joint Angles q = [0;0;0;0]
         servoZeroAngles = [-inf,-inf,-inf,-inf];
 
-        % A bool to store if the robots torque is enabled
-        robotTorqueEnabled;
     end
 
 
@@ -31,14 +29,20 @@ classdef RealRobot < handle
         %% Constructor = Connection Attempt, Calls destructor if failed
         function obj = RealRobot(dynamixel_lib_path, port)
             obj.servoChain = [];
-            obj.servoChain = ServoChain(dynamixel_lib_path, port);
-            if isempty(obj.servoChain) || ~isvalid(obj.servoChain)
-                delete(obj)
-            end
+            obj.servoChain = ServoChain.getInstance(dynamixel_lib_path, port);
+        end
+
+        %% Destructor
+        function delete(obj)
+           
+            fprintf("RealRobot: Destructor called.\n")
+            delete(obj.servoChain)
+            obj.servoChain = [];
         end
 
         %% Send/Receive 
         function [jointAngles] = getJointAngles(obj)
+
             %Get the angles of the joints q in RAD
 
             % joint1 : bevel rotation around fixed y-Axis
@@ -52,9 +56,9 @@ classdef RealRobot < handle
             end
 
             % Get all servo angles phi in RAD
-            servoAngles = [-inf; -inf; -inf; -inf];
-            for ID = 1:4
-                servoAngles(ID) = obj.servoChain.getServoAngle(ID);
+            servoAngles = obj.servoChain.getServoAngles();
+            if ~obj.checkConnection()
+                return;
             end
 
             %Convert servoAngles phi to jointAngles q
@@ -74,17 +78,16 @@ classdef RealRobot < handle
             for ID = 1:4
                 if abs(jointVelocities(ID)) > obj.JOINT_VELOCITY_LIMITS(ID)
                     jointVelocities(ID) = obj.JOINT_VELOCITY_LIMITS(ID) * sign(jointVelocities(ID));
-                    fprintf("Joint %d velocity limited by RealRobot\n", ID)
+                    fprintf("RealRobot: Joint %d velocity limited to: \n", ID, obj.JOINT_VELOCITY_LIMITS(ID));
                 end
             end
 
             % Convert joint velocities q_dot to servo velocities omega
-            servoVelocity = obj.convertJointVelocitiesToServoVelocites(jointVelocities);
+            servoVelocities = obj.convertJointVelocitiesToServoVelocites(jointVelocities);
 
-            for ID = 1:4
-                % Ser ServoVelocities in rev/min
-                obj.servoChain.setServoVelocity(ID, servoVelocity(ID))
-            end
+            % Ser ServoVelocities in rev/min
+            obj.servoChain.setServoVelocities(servoVelocities)
+            obj.checkConnection();
 
         end
 
@@ -92,15 +95,23 @@ classdef RealRobot < handle
             % Enable / Disable the torque of the whole robot.
             for ID = 1:4
                 obj.servoChain.setServoTorque(ID,state);
+                if ~obj.checkConnection()
+                    return;
+                end
             end
-            obj.robotTorqueEnabled = state;
+        end
+
+        function state = getRobotTorque(obj)
+            % Enable / Disable the torque of the whole robot.
+            state = obj.servoChain.getServoTorque(1);
+            % Sync Torque of all Servos
+            obj.setRobotTorque(state);
         end
 
         function zeroAtCurrent(obj)
             % Store the current servo angles as zero angles
-            for ID = 1:4
-                obj.servoZeroAngles(ID) = obj.servoChain.getServoAngle(ID);
-            end
+            obj.servoZeroAngles = obj.servoChain.getServoAngles();
+            obj.checkConnection();
         end
 
         %% Conversio between Joint Angles and Servo Angles (from Thesis Zeitler 2023)
@@ -151,6 +162,17 @@ classdef RealRobot < handle
             % Convert rad/s to rev/min
             servoVelocities = 60*(servoVelocities_rad_s)/(2*pi);
 
+        end
+    
+    end
+        methods (Access = private)
+        function state = checkConnection(obj)
+            state = true;
+            if isempty(obj.servoChain) || ~isvalid(obj.servoChain) || (length(obj.servoChain.availableIDs) ~= 4)
+                state = false;
+                delete(obj)
+                return;
+            end
         end
     end
 end
