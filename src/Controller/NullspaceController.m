@@ -2,6 +2,16 @@ classdef NullspaceController < handle
 
     properties
 
+         % this time is used to predict the maximum change in joint
+         % angles in limitJointAngles(). It should be larger then any given
+         % control loop time (~  about 150 ms)
+
+        dt_max = 0.2; % [s]
+
+    end
+
+    properties
+
         % PID Gains
         Kp = 1;
         Ki = 0;
@@ -65,7 +75,7 @@ classdef NullspaceController < handle
 
         function q_dot = limitJointAngles(obj, q, q_dot)
             % Predicted next joint configuration
-            q_next = q + q_dot * 0.3; % this timestep should be bigger then the control loop dt
+            q_next = q + q_dot * obj.dt_max;
         
             % Check if the predicted next configuration violates the joint limits
             for idx = 1:length(q)
