@@ -28,7 +28,6 @@ classdef RealRobot < handle
     methods
         %% Constructor = Connection Attempt, Calls destructor if failed
         function obj = RealRobot(dynamixel_lib_path, port)
-            obj.servoChain = [];
             obj.servoChain = ServoChain.getInstance(dynamixel_lib_path, port);
         end
 
@@ -78,7 +77,6 @@ classdef RealRobot < handle
             for ID = 1:4
                 if abs(jointVelocities(ID)) > obj.JOINT_VELOCITY_LIMITS(ID)
                     jointVelocities(ID) = obj.JOINT_VELOCITY_LIMITS(ID) * sign(jointVelocities(ID));
-                    fprintf("RealRobot: Joint %d velocity limited to: \n", ID, obj.JOINT_VELOCITY_LIMITS(ID));
                 end
             end
 

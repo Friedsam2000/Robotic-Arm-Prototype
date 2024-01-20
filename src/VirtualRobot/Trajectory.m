@@ -6,12 +6,12 @@ classdef Trajectory < handle
 
     properties
 
-        storedPositions;       % Stores the trajectory
+        storedPositions = [];       % Stores the trajectory
 
-        Index;    % Current index in the trajectory buffer
+        Index = [];    % Current index in the trajectory buffer
 
         % Plotting
-        PlotHandle;   % Handle for the trajectory plot
+        PlotHandle = [];   % Handle for the trajectory plot
     end
 
     methods

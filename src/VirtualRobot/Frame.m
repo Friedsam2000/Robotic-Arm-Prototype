@@ -6,17 +6,17 @@ classdef Frame < handle
     end
 
     properties
-        relativePosition               % (p_r_pf) Position vector from the parent frames origin to this frames origin in the parent frames coordinate system
-        relativeRotation               % (relativeRotation) Rotation Matrix transforming from the frame to the parent frame 
-        rotationAxis   % Char label for the allowed local rotation axis
-        parent              % Reference to the parent Frame object
-        children            % Array of references to the child Frame objects
+        relativePosition = [];               % (p_r_pf) Position vector from the parent frames origin to this frames origin in the parent frames coordinate system
+        relativeRotation = [];               % (relativeRotation) Rotation Matrix transforming from the frame to the parent frame 
+        rotationAxis = [];   % Char label for the allowed local rotation axis
+        parent = [];              % Reference to the parent Frame object
+        children = [];            % Array of references to the child Frame objects
 
         % Plotting
-        label               % String label for the frame
-        axisHandles       % Graphics handles for X, Y, Z axes
-        axisTextHandles   % Graphics handles for X, Y, Z axis labels
-        textHandle        % Graphics handle for the frame label
+        label = [];               % String label for the frame
+        axisHandles = [];       % Graphics handles for X, Y, Z axes
+        axisTextHandles = [];   % Graphics handles for X, Y, Z axis labels
+        textHandle = [];        % Graphics handle for the frame label
     end
 
     methods
@@ -28,12 +28,6 @@ classdef Frame < handle
             obj.relativeRotation = eye(3); % Upon instantiation, the frames rotation is the same as the parent frames rotation
 
             obj.label = label; 
-
-            % The origin frame (frame without a parent) must not have a
-            % rotation axis
-            if isempty(parent) && ~isempty(rotationAxis)
-                error('Origin Frame must not have a rotation axis.')
-            end
 
             % Setup Parent Child relationship
             obj.parent = parent; % Register the parent to this frame
@@ -92,7 +86,6 @@ classdef Frame < handle
                 currentFrame = currentFrame.parent;
             end
         end
-
 
         function globalRotation = getGlobalRotation(obj)
 

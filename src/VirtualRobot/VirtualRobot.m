@@ -22,13 +22,13 @@ classdef VirtualRobot < handle
 
         q = [0;0;0;0]; % Current Joint Angles
 
-        links;
-        frames;
-        workspace;
-        trajectory;
+        links = [];
+        frames = [];
+        workspace = [];
+        trajectory = [];
 
         % Plotting
-        fig; % The figure in which everything is plotted
+        fig = []; % The figure in which everything is plotted
 
     end
 

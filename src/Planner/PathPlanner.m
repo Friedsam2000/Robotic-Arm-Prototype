@@ -1,27 +1,28 @@
 classdef PathPlanner < handle
     properties
         
-        path          % col : point
-        virtualRobot  % Referenced instance of VirtualRobot
+        path = [];          % col : point
+        virtualRobot = [];  % Referenced instance of VirtualRobot
 
-        height        % Given height z for the 2D slice
-        segments      % Segments of the workspace at the given height z
-        hFig
+        pathZ = [];        % Given height z for the 2D slice
+        segments = [];      % Segments of the workspace at the given height z
+        pathDrawingFigure = []; % A figure for the user to draw the desired path
     end
 
     methods
-        function obj = PathPlanner(virtualRobot, z)
+        function obj = PathPlanner(virtualRobot)
             % Constructor
             obj.virtualRobot = virtualRobot;
-            obj.height = z;
-            obj.segments = obj.calculateWorkspaceSlice;
-            obj.path = []; % Initialize the path matrix
-            obj.userInputPath;
         end
+            
+        function userInputPath(obj, pathZ)
 
-        function userInputPath(obj)
+            obj.pathZ = pathZ;
+
+            obj.segments = obj.calculateWorkspaceSlice;
+
             % Open a new figure window with grid on and specified limits
-            obj.hFig = figure;
+            obj.pathDrawingFigure = figure;
 
             % Determine axis limits based on the workspace slice
             allXs = cell2mat(cellfun(@(seg) seg(:, 1), obj.segments, 'UniformOutput', false));
@@ -50,7 +51,7 @@ classdef PathPlanner < handle
             currentPosition = obj.virtualRobot.forwardKinematics;
 
             % Set the starting point of the path to directly below the current endeffector position
-            obj.path = [currentPosition(1); currentPosition(2); obj.height];
+            obj.path = [currentPosition(1); currentPosition(2); obj.pathZ];
 
             % Plot the starting point on the figure
             plot(currentPosition(1), currentPosition(2), 'o', 'MarkerSize', 6, 'MarkerFaceColor', 'r');
@@ -76,7 +77,7 @@ classdef PathPlanner < handle
 
                 % Add the point to the path matrix
                 if button == 1 && (isempty(obj.path) || (xi ~= obj.path(end, 1) || yi ~= obj.path(end, 2)))  % Check if left-click and not a duplicate
-                    obj.path = [obj.path, [xi; yi; obj.height]];
+                    obj.path = [obj.path, [xi; yi; obj.pathZ]];
 
                     % Plot the point immediately
                     plot(xi, yi, 'o', 'MarkerSize', 6, 'MarkerFaceColor', 'r');
@@ -87,7 +88,7 @@ classdef PathPlanner < handle
                     end
                 end
             end
-            close(obj.hFig);
+            close(obj.pathDrawingFigure);
         end
 
 
@@ -100,8 +101,8 @@ classdef PathPlanner < handle
                 tri = obj.virtualRobot.workspace.workspacePoints(:,obj.virtualRobot.workspace.surfaceMesh(:,i));  % Extract triangle vertices
 
                 % Check if the triangle intersects the plane
-                isAbove = tri(3,:) > obj.height;
-                isBelow = tri(3,:) < obj.height;
+                isAbove = tri(3,:) > obj.pathZ;
+                isBelow = tri(3,:) < obj.pathZ;
                 if any(isAbove) && any(isBelow)  % At least one vertex is above and one is below
                     % Triangle intersects the plane
 
@@ -126,8 +127,8 @@ classdef PathPlanner < handle
                 p1 = tri(i, :);
                 p2 = tri(mod(i, 3) + 1, :);  % next vertex in the triangle
 
-                if (p1(3) < obj.height && p2(3) > obj.height) || (p1(3) > obj.height && p2(3) < obj.height)
-                    alpha = (obj.height - p1(3)) / (p2(3) - p1(3));  % Compute intersection ratio
+                if (p1(3) < obj.pathZ && p2(3) > obj.pathZ) || (p1(3) > obj.pathZ && p2(3) < obj.pathZ)
+                    alpha = (obj.pathZ - p1(3)) / (p2(3) - p1(3));  % Compute intersection ratio
                     intersectionPt = p1 + alpha * (p2 - p1);  % Intersection point in 3D
                     intersectedPts = [intersectedPts; intersectionPt(1:2)];  % Store only X and Y
                 end

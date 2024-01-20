@@ -1,52 +1,50 @@
 classdef SetPosition < Program
 
-
     properties (Constant)
+        % Kp Gain and ramp duration 
         default_Kp = 1;
-        default_precision = 5; % mm
+        ramp_duration = 1; % [s]
+        precision = 1; % mm
+         % The program stops if the endeffector stays within the desired
+         % position (+ tolerance) for breakTimerStopValue seconds
+        breakTimerStopValue = 2; % s
     end
 
     properties
-        x_desired
-        Kp_final
-        precision
-        ramp_duration
-        start_time
-        controller
-        breakTimerStarted
-        breakTimerValue
+        controller = [];
+        Kp = [];
+        x_d = [];
+        breakTimerStarted = false;
+        breakTimerValue = 0;
+        start_time = [];
     end
 
     methods
 
         function setup(obj, varargin)
 
+            % Dont start the program if in singularity
             if obj.launcher.virtualRobot.checkSingularity
+                obj.stopCondition = true;
                 delete(obj);
             end
 
             % Parse input arguments
             p = inputParser;
-            addRequired(p, 'x_desired', @(x) isvector(x) && length(x) == 3 && all(isnumeric(x)) && iscolumn(x));
-            addOptional(p, 'Kp', obj.default_Kp); % Default Kp value
-            addOptional(p, 'precision', obj.default_precision);
+            addRequired(p, 'x_d', @(x) isvector(x) && length(x) == 3 && all(isnumeric(x)) && iscolumn(x));
+            addOptional(p, 'Kp', obj.default_Kp);
             parse(p, varargin{:});
-            obj.x_desired = p.Results.x_desired;
-            obj.Kp_final = p.Results.Kp; % Final Kp value
-            obj.precision = p.Results.precision;
+            obj.x_d = p.Results.x_d;
+            obj.Kp = p.Results.Kp;
 
-            % Initialize Kp ramp
-            obj.ramp_duration = 1; % Ramp duration in seconds
-            obj.start_time = tic; % Start timer
-
-            % Controller
+            % Initialize the controller
             obj.controller = NullspaceController(obj.launcher.virtualRobot);
 
             % Plot desired position
-            scatter3(obj.x_desired(1), obj.x_desired(2), obj.x_desired(3), 'm', 'filled');
+            scatter3(obj.x_d(1), obj.x_d(2), obj.x_d(3), 'm', 'filled');
 
-            % Initialize break timer flag
-            obj.breakTimerStarted = false;
+            % Save program start time
+            obj.start_time = tic;
         end
 
         function loop(obj)
@@ -58,32 +56,33 @@ classdef SetPosition < Program
 
             % Ramp Kp
             if elapsed_time < obj.ramp_duration
-                Kp = obj.Kp_final * (elapsed_time / obj.ramp_duration);
+                obj.controller.Kp = obj.Kp * (elapsed_time / obj.ramp_duration);
             else
-                Kp = obj.Kp_final;
+                obj.controller.Kp = obj.Kp;
             end
 
-            % Update controller Kp
-            obj.controller.Kp = Kp;
-
-            % Set velocities
-            q_dot = obj.controller.calcJointVelocity(obj.x_desired, 0);
-            obj.launcher.realRobot.setJointVelocities(q_dot);
-
-            % Print the distance to the goal
-            distance_to_goal = norm(obj.x_desired - obj.launcher.virtualRobot.forwardKinematics);
+            % Get the distance to the goal
+            distance_to_goal = norm(obj.x_d - obj.launcher.virtualRobot.forwardKinematics);
+            fprintf("Program: Distance to Goal: %.1f \n", distance_to_goal);
             if distance_to_goal < obj.precision
                 if ~obj.breakTimerStarted
                     % Start the break timer
                     obj.breakTimerValue = tic;
                     obj.breakTimerStarted = true;
-                elseif toc(obj.breakTimerValue) >= 2 %  Seconds within precision
+                elseif toc(obj.breakTimerValue) > obj.breakTimerStopValue
+                    % End the program if within precision to goal for long enough time
                     fprintf("Program %s: Position reached within Tolerance \n", class(obj))
                     obj.stopCondition = true;
+                    return;
                 end
             else
-                obj.breakTimerStarted = false; % Reset the timer if the condition is no longer met
+                 % Reset the break timer if no longer within precision to goal
+                obj.breakTimerStarted = false;
             end
+
+            % Set velocities
+            q_dot = obj.controller.calcJointVelocities(obj.x_d, 0);
+            obj.launcher.realRobot.setJointVelocities(q_dot);
         end
     end
 end

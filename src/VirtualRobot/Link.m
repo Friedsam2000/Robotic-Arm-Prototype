@@ -1,12 +1,12 @@
 classdef Link < handle
     properties
 
-        startFrame   % Starting frame of the link
-        endFrame     % Ending frame of the link
+        startFrame = [];   % Starting frame of the link
+        endFrame = [];     % Ending frame of the link
 
         % Plotting
-        lineHandle   % Graphics handle for the link
-        color        % Link color
+        lineHandle = [];   % Graphics handle for the link
+        color = [];        % Link color
     end
     
     methods
@@ -15,7 +15,6 @@ classdef Link < handle
             obj.startFrame = startFrame;
             obj.endFrame = endFrame;
             obj.color = color;
-            obj.lineHandle = [];  % Initialize line handle as empty
        end
         
        %% Plotting

@@ -16,6 +16,13 @@ classdef Launcher < handle
         %% Constructor
         function obj = Launcher(varargin)
 
+            % Clear all timers
+            try
+                timers = timerfindall;
+                delete(timers);
+            end
+
+
             % Optionally Link a Matlab app
             if nargin == 1
                 obj.matlabApp = varargin{1};
@@ -29,14 +36,16 @@ classdef Launcher < handle
 
             % Create the jointSyncTimer
             obj.jointSyncTimer = timer('ExecutionMode', 'fixedRate', 'Period', 0.1, ...
-                'BusyMode', 'drop', 'TimerFcn', @(~,~) obj.syncJointsAndPlot, 'ErrorFcn', @(~,~) obj.delete);
+                'BusyMode', 'drop', 'TimerFcn', @(~,~) obj.syncJointsAndPlot, 'ErrorFcn', @(~,~) obj.disconnect);
 
         end
 
         %% Destructor
         function delete(obj)
 
-            obj.disconnect;
+            if ~isempty(obj.realRobot) && isvalid(obj.realRobot)
+                obj.disconnect;
+            end
 
             fprintf("Launcher: Deleting jointSyncTimer.\n")
             delete(obj.jointSyncTimer);
@@ -92,6 +101,11 @@ classdef Launcher < handle
             % Break connection by deleting realRobot object
             delete(obj.realRobot)
             obj.realRobot = [];
+
+            % Update the App if specified
+            if ~isempty(obj.matlabApp)
+                obj.matlabApp.updateGUI;
+            end
         end
 
         %% Program
@@ -114,7 +128,6 @@ classdef Launcher < handle
             % Start the Program
             fprintf('Launcher: Program %s starting...\n', class(obj.activeProgram));
             obj.activeProgram.start(varargin{:});
-
         end
 
         function programTerminationCallback(obj)
@@ -125,7 +138,12 @@ classdef Launcher < handle
             % Clear the reference to the activeProgram
             obj.activeProgram = [];
 
+            % If connection was lost during the program, dont restart the
+            % jointSyncTimer and optionally update the App
             if ~obj.checkConnection()
+                if ~isempty(obj.matlabApp)
+                    obj.matlabApp.updateGUI;
+                end
                 return;
             end
 
@@ -150,7 +168,7 @@ classdef Launcher < handle
 
             % Update the App if specified
             if ~isempty(obj.matlabApp)
-                obj.matlabApp.updateCallback;
+                obj.matlabApp.updateGUI;
             end
 
             % Plotting
@@ -210,11 +228,11 @@ classdef Launcher < handle
                     % Expecting a string that can be converted to a single double
                     % First, try to convert the argument to a numeric value
                     num = str2double(arguments);
-                    if ~isnan(num) && isscalar(num)
+                    if ~isnan(num) && isscalar(num) && (num > 0)
                         is_valid = true;
                     else
                         is_valid = false;
-                        error_msg = 'Please enter a valid numeric value.';
+                        error_msg = 'Please enter the trajectory duration in seconds.';
                     end
             end
         end

@@ -1,13 +1,13 @@
 classdef (Abstract) Program < handle
 
     properties
-        launcher  % Reference to the Launcher object
-        stopCondition % True when the Program should stop
+        launcher = [];  % Reference to the Launcher object
+        stopCondition = []; % True when the Program should stop
     end
 
     methods
         
-        % Abstract methods, defined in ConcretePrograms
+        % Abstract methods, to be defined in ConcretePrograms
         setup(obj,varargin);
         loop(obj);
 

@@ -4,9 +4,9 @@ classdef TrajectoryGenerator < handle
     end
 
     properties
-        desiredPositionsArray % [mm] col: point
-        desiredVelocitiesArray % [mm/s] col: velocity
-        timeArray % [s] row
+        desiredPositionsArray = [];% [mm] col: point
+        desiredVelocitiesArray = []; % [mm/s] col: velocity
+        timeArray = []; % [s] row
     end
     
     methods
@@ -22,10 +22,10 @@ classdef TrajectoryGenerator < handle
             % Create spline interpolations
             s = cumsum([0; sqrt(sum(diff(path').^2, 2))]); % cumulative arclength
             durationsteps = ceil(duration / obj.timeIncrement) + 1;
-            s_d = linspace(0, s(end), durationsteps); % desired time steps
-            x_d_spline = spline(s, path(1,:), s_d);
-            y_d_spline = spline(s, path(2,:), s_d);
-            z_d_spline = spline(s, path(3,:), s_d);
+            s_d = linspace(0, s(end), durationsteps); % Arclength array
+            x_d_spline = spline(s, path(1,:), s_d); % Spline Interploation for positions x array
+            y_d_spline = spline(s, path(2,:), s_d); % Spline Interploation for positions y array
+            z_d_spline = spline(s, path(3,:), s_d); % Spline Interploation for positions z array
             
             % Calculate desired velocities using finite differences
             v_x = diff(x_d_spline) / obj.timeIncrement;
