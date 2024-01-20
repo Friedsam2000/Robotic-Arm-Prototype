@@ -36,7 +36,10 @@ trajectoryTime = 30; % s
 trajectoryHeight = 400;
 
 % Initialize the planner
-planner = PathPlanner(virtualRobot, trajectoryHeight);
+planner = PathPlanner(virtualRobot);
+planner.userInputPath(trajectoryHeight);
+           
+
 
 % Initialize the trajectory generator
 trajectoryGenerator = TrajectoryGenerator();
@@ -75,7 +78,7 @@ while true
     current_v_d = v_d(:, index);
 
     % Compute the desired joint velocity
-    q_dot = controller.calcJointVelocity(current_x_d, current_v_d);
+    q_dot = controller.calcJointVelocities(current_x_d, current_v_d);
 
     % Ensure velocities do not exceed the configured maximum joint speed
     for ID = 1:4
