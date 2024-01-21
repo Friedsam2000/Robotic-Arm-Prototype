@@ -46,16 +46,15 @@ classdef VirtualRobot < handle
             endeffector_frame = Frame([0;0;220.40], joint4, 'Endeffector', []);
 
             %% Setup Links of the simulated robot
-            numLinks = 5; % Number of links
+            numLinks = 4; % Number of links
             grayLevels = linspace(0.2, 0.8, numLinks);  % Define a range of grayscale values. Start from 0.2 (dark) to 0.8 (lighter)
 
             link1 = Link(orig_frame, joint1, repmat(grayLevels(1), 1, 3));  % Link 1 with first grayscale value
-            link2 = Link(joint1, joint2, repmat(grayLevels(2), 1, 3));  % Link 2 with second grayscale value
-            link3 = Link(joint2, joint3, repmat(grayLevels(3), 1, 3));  % and so on...
-            link4 = Link(joint3, joint4, repmat(grayLevels(4), 1, 3));
-            link5 = Link(joint4, endeffector_frame, repmat(grayLevels(5), 1, 3));
+            link2 = Link(joint1, joint3, repmat(grayLevels(2), 1, 3));
+            link3 = Link(joint3, joint4, repmat(grayLevels(3), 1, 3));
+            link4 = Link(joint4, endeffector_frame, repmat(grayLevels(4), 1, 3));
 
-            obj.links = [link1, link2, link3, link4, link5];
+            obj.links = [link1, link2, link3, link4];
             obj.frames = [orig_frame, joint1, joint2, joint3, joint4, endeffector_frame];
 
             % Create the workspace object with reference to this virtualRobot
