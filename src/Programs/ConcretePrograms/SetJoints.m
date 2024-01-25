@@ -86,12 +86,6 @@ classdef SetJoints < Program
             obj.integralError = obj.integralError + currentError;
             obj.integralError = min(max(obj.integralError, -obj.integralErrorMax), obj.integralErrorMax);
 
-            disp('Ki-Gain: ')
-            disp(norm(obj.Ki * obj.integralError));
-            disp('Kp-Gain: ')
-            disp(norm(K * currentError));
-            disp('')
-
             % Set velocities (PI-Controller)
             P_velocities = K * currentError;
             I_velocities = obj.Ki * obj.integralError;
