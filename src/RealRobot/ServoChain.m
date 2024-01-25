@@ -8,6 +8,10 @@ classdef ServoChain < handle
         BAUDRATE = 1000000;
         ADDR_PRO_TORQUE_ENABLE       = 64;
         COMM_SUCCESS                = 0;
+        ADDR_PRO_VELOCITY_I_GAIN = 76;
+        ADDR_PRO_VELOCITY_P_GAIN = 78;
+        ADDR_PRO_OPERATION_MODE = 11;
+
     end
 
     properties
@@ -121,6 +125,17 @@ classdef ServoChain < handle
                     fprintf('ServoChain: Available ID: %d \n', ID);
                     % Store the available IDs
                     obj.availableIDs = [obj.availableIDs, ID];
+                end
+            end
+
+            % After scanning for available servos
+            for ID = obj.availableIDs
+                % Set Operation Mode to 1 for each servo
+                obj.setOperationMode(ID, 1);
+
+                % If the servo ID is 3, also adjust the Velocity-I Gain and Velocity-P Gain
+                if ID == 3
+                    obj.setGains(3, 5000, 600);
                 end
             end
 
@@ -268,7 +283,27 @@ classdef ServoChain < handle
                 return
             end
         end
-    end
 
+
+      function setGains(obj, ID, velocityIGain, velocityPGain)
+            % Set the Velocity-I Gain and Velocity-P Gain of a specific servo
+
+            % Write Velocity-I Gain
+            calllib(obj.lib_name, 'write2ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_VELOCITY_I_GAIN, velocityIGain);
+            obj.checkConnection();
+
+            % Write Velocity-P Gain
+            calllib(obj.lib_name, 'write2ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_VELOCITY_P_GAIN, velocityPGain);
+            obj.checkConnection();
+      end
+
+      function setOperationMode(obj, ID, operationMode)
+            % Set the Operation Mode for a specific servo
+            calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_OPERATION_MODE, operationMode);
+            obj.checkConnection();
+        end
+
+    
+    end
 end
 
