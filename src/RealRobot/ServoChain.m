@@ -130,6 +130,7 @@ classdef ServoChain < handle
 
             % After scanning for available servos
             for ID = obj.availableIDs
+                obj.setServoTorque(ID, 0);
                 % Set Operation Mode to 1 for each servo
                 obj.setOperationMode(ID, 1);
 
@@ -137,6 +138,7 @@ classdef ServoChain < handle
                 if ID == 3
                     obj.setGains(3, 5000, 600);
                 end
+                obj.setServoTorque(ID, 1);
             end
 
             % Add present position of all available servos to groupSyncRead struct
