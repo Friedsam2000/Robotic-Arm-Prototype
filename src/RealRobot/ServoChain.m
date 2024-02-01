@@ -131,14 +131,12 @@ classdef ServoChain < handle
             % After scanning for available servos
             for ID = obj.availableIDs
                 % Set Operation Mode to 1 for each servo
-                obj.setServoTorque(ID, 0);
                 obj.setOperationMode(ID, 1);
-                obj.setServoTorque(ID, 1);
 
-                % % If the servo ID is 3, also adjust the Velocity-I Gain and Velocity-P Gain
-                % if ID == 3
-                %     obj.setGains(3, 5000, 600);
-                % end
+                % If the servo ID is 3, also adjust the Velocity-I Gain and Velocity-P Gain
+                if ID == 3
+                    obj.setGains(3, 5000, 600);
+                end
             end
 
             % Add present position of all available servos to groupSyncRead struct
@@ -194,22 +192,18 @@ classdef ServoChain < handle
             % Returns true if torque is enabled, false otherwise.
             
             % Read the torque enabled state
-            if ismember(ID,obj.availableIDs)
-                torqueEnabled = calllib(obj.lib_name, 'read1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_TORQUE_ENABLE);
-                obj.checkConnection();
-            end
+            torqueEnabled = calllib(obj.lib_name, 'read1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_TORQUE_ENABLE);
+            obj.checkConnection();
         end
         
         function setServoTorque(obj,ID,state)
             % Enable / Disable the Torque of a servo.
-            if ismember(ID,obj.availableIDs)
-                if(state)
-                    calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_TORQUE_ENABLE, 1);
-                else
-                    calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_TORQUE_ENABLE, 0);
-                end
-                obj.checkConnection();
+            if(state)
+                calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_TORQUE_ENABLE, 1);
+            else
+                calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_TORQUE_ENABLE, 0);
             end
+            obj.checkConnection();
         end
 
         function servoAngles = getServoAngles(obj)
@@ -244,6 +238,11 @@ classdef ServoChain < handle
             % The servo velocities will be set with the same order as the
             % available IDs
             num_servos = length(obj.availableIDs);
+
+            if ~(length(servoVelocities) == num_servos)
+                fprintf("Error setting servo velocities: \nSize of servoVelocities does not match number of available IDs!\n");
+                return;
+            end
 
             % Convert desired rev/min to dynamixel decimal
             VELOCITIES_VAL = (servoVelocities)/0.229; % Convert rev/min to decimal

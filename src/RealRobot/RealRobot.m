@@ -8,11 +8,9 @@ classdef RealRobot < handle
         % ID 3 : YawServo
         % ID 4 : ElbowServo
 
-        % JOINT_VELOCITY_LIMITS = [0.6;0.6;2;2];
-        JOINT_VELOCITY_LIMITS = [2;2;2;2]; % For only should joint
+        JOINT_VELOCITY_LIMITS = [0.6;0.6;2;2];
         SHOULDER_GEAR_RATIO = 5;
         ELBOW_GEAR_RATIO = -2.5;
-
 
     end
 
@@ -23,8 +21,6 @@ classdef RealRobot < handle
 
         % The Servo Angles that correspond to Joint Angles q = [0;0;0;0]
         servoZeroAngles = [-inf,-inf,-inf,-inf];
-
-        q = [0;0;0;0];
 
     end
 
@@ -64,18 +60,8 @@ classdef RealRobot < handle
                 return;
             end
 
-            % Ensure servoAngles is a 4x1 column vector
-            requiredLength = 4;
-            currentLength = length(servoAngles);
-            if currentLength < requiredLength
-                servoAngles = [servoAngles; zeros(requiredLength - currentLength, 1)];
-            end
-
             %Convert servoAngles phi to jointAngles q
             jointAngles = obj.convertServoAnglesToJointAngles(servoAngles);
-
-            jointAngles(3) = obj.q(3);
-            jointAngles(4) = obj.q(4);
 
         end
 
@@ -88,7 +74,7 @@ classdef RealRobot < handle
             % joint4 : elbow rotatoin around x-Ax
 
             % Ensure velocities do not exceed the configued maximum joint speed
-            for ID = 1:length(obj.servoChain.availableIDs)
+            for ID = 1:4
                 if abs(jointVelocities(ID)) > obj.JOINT_VELOCITY_LIMITS(ID)
                     jointVelocities(ID) = obj.JOINT_VELOCITY_LIMITS(ID) * sign(jointVelocities(ID));
                 end
@@ -101,13 +87,11 @@ classdef RealRobot < handle
             obj.servoChain.setServoVelocities(servoVelocities)
             obj.checkConnection();
 
-            obj.q = obj.q + jointVelocities * 0.02;
-
         end
 
         function setRobotTorque(obj, state)
             % Enable / Disable the torque of the whole robot.
-            for ID = 1:length(obj.servoChain.availableIDs)
+            for ID = 1:4
                 obj.servoChain.setServoTorque(ID,state);
                 if ~obj.checkConnection()
                     return;
@@ -126,13 +110,6 @@ classdef RealRobot < handle
             % Store the current servo angles as zero angles
             obj.servoZeroAngles = obj.servoChain.getServoAngles();
             obj.checkConnection();
-
-            % Ensure servoAngles is a 4x1 column vector
-            requiredLength = 4;
-            currentLength = length(obj.servoZeroAngles );
-            if currentLength < requiredLength
-                obj.servoZeroAngles  = [obj.servoZeroAngles ; zeros(requiredLength - currentLength, 1)];
-            end
         end
 
         %% Conversio between Joint Angles and Servo Angles (from Thesis Zeitler 2023)
@@ -189,7 +166,7 @@ classdef RealRobot < handle
         methods (Access = private)
         function state = checkConnection(obj)
             state = true;
-            if isempty(obj.servoChain) || ~isvalid(obj.servoChain)
+            if isempty(obj.servoChain) || ~isvalid(obj.servoChain) || (length(obj.servoChain.availableIDs) ~= 4)
                 state = false;
                 delete(obj)
                 return;
