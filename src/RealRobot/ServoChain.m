@@ -5,7 +5,7 @@ classdef ServoChain < handle
         PROTOCOL_VERSION = 2;
         ADDR_PRO_PRESENT_POSITION    = 132;
         ADDR_PRO_GOAL_VELOCITY      = 104;
-        BAUDRATE = 1000000;
+        BAUDRATE = 2000000;
         ADDR_PRO_TORQUE_ENABLE       = 64;
         COMM_SUCCESS                = 0;
         ADDR_PRO_VELOCITY_I_GAIN = 76;
@@ -136,8 +136,11 @@ classdef ServoChain < handle
 
                 % If the servo ID is 3, also adjust the Velocity-I Gain and Velocity-P Gain
                 if ID == 3
-                    obj.setGains(3, 5000, 600);
+                    obj.setGains(ID, 5000, 600);
+                else
+                    obj.setGains(ID, 1920, 300);
                 end
+
                 obj.setServoTorque(ID, 1);
             end
 

@@ -4,7 +4,7 @@ classdef SetJoints < Program
         % Kp Gain and Kp Ramp duration
         default_Kp = 2;
         ramp_duration = 1; % [s]
-        default_precision_deg = 0.2; % [°]
+        default_precision_deg = 0.4; % [°]
 
 
         % Ki Gain and anti-windup limit
