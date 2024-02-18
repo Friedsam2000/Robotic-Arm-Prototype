@@ -234,6 +234,25 @@ classdef Launcher < handle
                         is_valid = false;
                         error_msg = 'Please enter the trajectory duration in seconds.';
                     end
+
+                case 'FollowCircle'
+                    % Expecting two positive numbers separated by a comma or semicolon
+                    expression = '^(\d+(\.\d+)?[,;] *)\d+(\.\d+)?$';
+                    if regexp(arguments, expression)
+                        % Split the arguments into an array of numbers
+                        args_array = str2double(split(regexprep(arguments, '[,;]', ' ')));
+
+                        % Check if there are exactly two arguments and both are positive
+                        if length(args_array) == 2 && all(args_array > 0)
+                            is_valid = true;
+                        else
+                            error_msg = 'Please enter two positive numbers: radius in mm and duration in seconds, separated by a comma or semicolon.';
+                        end
+                    else
+                        error_msg = 'Invalid format. Please enter two positive numbers: radius in mm and duration in seconds, separated by a comma or semicolon.';
+                    end
+
+
             end
         end
 
