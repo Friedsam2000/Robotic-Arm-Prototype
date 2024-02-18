@@ -6,7 +6,7 @@ classdef NullspaceController < handle
         % angles in limitJointAngles(). It should be larger then any given
         % control loop time
 
-        dt_max = 0.05; % [s]
+        dt_max = 0.03; % [s]
 
     end
 
