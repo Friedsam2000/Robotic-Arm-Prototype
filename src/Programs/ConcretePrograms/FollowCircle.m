@@ -75,13 +75,13 @@ classdef FollowCircle < Program
             % Approach the circle's starting point
             currentPos = obj.launcher.virtualRobot.forwardKinematics;
             distanceToStart = norm(currentPos - obj.circleStartPoint);
-        
+
             if distanceToStart <= obj.precision
                 obj.approaching = false; % Transition to circular path
                 obj.start_time = tic; % Reset the start time for the circular motion
                 return;
             end
-        
+
             % Calculate and set joint velocities to approach the start point
             q_dot = obj.controller.calcJointVelocities(obj.circleStartPoint, zeros(3,1));
             obj.launcher.realRobot.setJointVelocities(q_dot);
@@ -132,4 +132,15 @@ classdef FollowCircle < Program
             trajectoryGenerator.draw(obj.launcher.virtualRobot.fig)
         end
     end
+
+    methods (Static)
+        function argsInfo = getArgumentsInfo()
+            % Provides information about the required arguments for FollowCircle
+            argsInfo.name = 'Radius [mm];    Duration [s]';
+            argsInfo.placeholder = 'radius; duration';
+            % Updated pattern to allow optional spaces around semicolon
+            argsInfo.validationPattern = '^\d+\s*;\s*\d+$'; 
+        end
+    end
+
 end

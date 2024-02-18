@@ -44,6 +44,10 @@ classdef SetJoints < Program
             obj.breakTimerStopValue = p.Results.breakTimerStopValue; % New property
 
 
+            % Ensure desired joint angles are within limits
+            joint_limits = obj.launcher.virtualRobot.JOINT_ANGLE_LIMITS;
+            obj.q_desired = min(max(obj.q_desired, joint_limits(:,1)), joint_limits(:,2));
+
             % Save program start time
             obj.start_time = tic;
 
@@ -60,7 +64,7 @@ classdef SetJoints < Program
             else
                 K = obj.Kp;
             end
-
+        
             % Calculate remaining errors
             q = obj.launcher.virtualRobot.getJointAngles;
             currentError = obj.q_desired - q;
@@ -95,4 +99,13 @@ classdef SetJoints < Program
 
         end
     end
+
+    methods (Static)
+        function argsInfo = getArgumentsInfo()
+            argsInfo.name = 'Joint Angles [deg]';
+            argsInfo.placeholder = 'q1; q2; q3; q4';
+            argsInfo.validationPattern = '^(-?\d+(\.\d+)?[;] *){3}-?\d+(\.\d+)?$'; % Pattern for validation
+        end
+    end
+
 end

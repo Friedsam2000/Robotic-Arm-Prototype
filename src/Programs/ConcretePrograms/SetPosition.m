@@ -1,12 +1,12 @@
 classdef SetPosition < Program
 
     properties (Constant)
-        % Kp Gain and ramp duration 
+        % Kp Gain and ramp duration
         default_Kp = 1;
         ramp_duration = 1; % [s]
         precision = 2; % mm
-         % The program stops if the endeffector stays within the desired
-         % position (+ tolerance) for breakTimerStopValue seconds
+        % The program stops if the endeffector stays within the desired
+        % position (+ tolerance) for breakTimerStopValue seconds
         breakTimerStopValue = 2; % s
     end
 
@@ -76,13 +76,22 @@ classdef SetPosition < Program
                     return;
                 end
             else
-                 % Reset the break timer if no longer within precision to goal
+                % Reset the break timer if no longer within precision to goal
                 obj.breakTimerStarted = false;
             end
 
             % Set velocities
             q_dot = obj.controller.calcJointVelocities(obj.x_d, 0);
             obj.launcher.realRobot.setJointVelocities(q_dot);
+        end
+    end
+
+    methods (Static)
+        function argsInfo = getArgumentsInfo()
+            argsInfo.name = 'TCP Coordinates [mm]';
+            argsInfo.placeholder = 'x; y; z';
+            % Pattern to match three doubles with semicolons as separators, allowing negative values and optional spaces around separators
+            argsInfo.validationPattern = '^(-?\d+(\.\d+)?\s*;\s*){2}-?\d+(\.\d+)?$';
         end
     end
 end

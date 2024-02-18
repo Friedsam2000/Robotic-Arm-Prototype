@@ -185,76 +185,24 @@ classdef Launcher < handle
 
 
         %% Utility
-        function [is_valid, error_msg] = checkProgramArgs(obj, programName, arguments)
+        function [is_valid, error_msg] = checkProgramArgs(~, programName, arguments)
             error_msg = [];
             is_valid = false;  % Default to false
-
-            switch programName
-                case 'SetJoints'
-                    % Expecting 4 doubles (including negatives) separated by commas or semicolons
-                    expression = '^(-?\d+(\.\d+)?[,;] *){3}-?\d+(\.\d+)?$';
-                    if regexp(arguments, expression)
-                        % Split the arguments into an array of numbers
-                        joint_angles = str2double(split(regexprep(arguments, '[,;]', ' ')));
-
-                        % Check if the joint angles are within the limits
-                        joint_limits = rad2deg(obj.virtualRobot.JOINT_ANGLE_LIMITS);
-                        if all(joint_angles >= joint_limits(:,1)) && all(joint_angles <= joint_limits(:,2))
-                            is_valid = true;
-                        else
-                            % Convert joint limits to degrees and make them positive
-                            positive_joint_limits_deg = joint_limits(:,2);
-                            % Format the limits as integer values
-                            % Convert to a flat char array with spaces
-                            formatted_limits = sprintf('%d,', positive_joint_limits_deg(:));
-
-                            error_msg = ['The joint limits are: ' formatted_limits(1:end-1), ' °'];
-                        end
-                    else
-                        error_msg = 'Please enter 4 joint angles (including negatives) separated by commas or semicolons.';
-                    end
-
-                case 'SetPosition'
-                    % Expecting 3 doubles (including negatives) separated
-                    % by commas or semicolons
-                    expression = '^(-?\d+(\.\d+)?[,;] *){2}-?\d+(\.\d+)?$';
-                    if regexp(arguments, expression)
-                        is_valid = true;
-                    else
-                        is_valid = false;
-                        error_msg = 'Please enter 3 position coordinates (x, y, z) including negatives, separated by commas or semicolons.';
-                    end
-                case 'Trajectory2D'
-                    % Expecting a string that can be converted to a single double
-                    % First, try to convert the argument to a numeric value
-                    num = str2double(arguments);
-                    if ~isnan(num) && isscalar(num) && (num > 0)
-                        is_valid = true;
-                    else
-                        is_valid = false;
-                        error_msg = 'Please enter the trajectory duration in seconds.';
-                    end
-
-                case 'FollowCircle'
-                    % Expecting two positive numbers separated by a comma or semicolon
-                    expression = '^(\d+(\.\d+)?[,;] *)\d+(\.\d+)?$';
-                    if regexp(arguments, expression)
-                        % Split the arguments into an array of numbers
-                        args_array = str2double(split(regexprep(arguments, '[,;]', ' ')));
-
-                        % Check if there are exactly two arguments and both are positive
-                        if length(args_array) == 2 && all(args_array > 0)
-                            is_valid = true;
-                        else
-                            error_msg = 'Please enter two positive numbers: radius in mm and duration in seconds, separated by a comma or semicolon.';
-                        end
-                    else
-                        error_msg = 'Invalid format. Please enter two positive numbers: radius in mm and duration in seconds, separated by a comma or semicolon.';
-                    end
-
-
+        
+            % Fetch arguments information from the program
+            argsInfo = feval([programName '.getArgumentsInfo']);
+            
+            % Use the validation pattern from argsInfo
+            if regexp(arguments, argsInfo.validationPattern)
+                % Continue with your existing validation logic here,
+                % potentially customizing it based on additional info from argsInfo if necessary
+                is_valid = true;
+            else
+                error_msg = ['Invalid input. Expected: ' argsInfo.placeholder];
             end
+        
         end
+
 
         function programs = getPrograms(~)
             % Get Current Dir of Launcher.m file

@@ -5,6 +5,10 @@ classdef (Abstract) Program < handle
         stopCondition = []; % True when the Program should stop
     end
 
+    methods (Abstract, Static)
+        argsInfo = getArgumentsInfo();
+    end
+
     methods
         
         % Abstract methods, to be defined in ConcretePrograms

@@ -1,7 +1,7 @@
 classdef Trajectory2D < Program
 
     properties (Constant)
-        % Kp Gain and ramp duration 
+        % Kp Gain and ramp duration
         default_Kp = 1;
         ramp_duration = 1; % [s]
     end
@@ -42,7 +42,7 @@ classdef Trajectory2D < Program
             % Let the user draw a path in the X-Y plane at the current height
             currentPosition = obj.launcher.virtualRobot.forwardKinematics;
             planner.userInputPath(currentPosition(3));
-            
+
             % Initialize the trajectory generator
             trajectoryGenerator = TrajectoryGenerator();
             % Generate a spline interpolated trajectory for the given path and duration
@@ -59,7 +59,7 @@ classdef Trajectory2D < Program
         end
 
         function loop(obj)
-            
+
             % Stop if approaching singularity
             if obj.launcher.virtualRobot.checkSingularity
                 obj.stopCondition = true;
@@ -88,6 +88,15 @@ classdef Trajectory2D < Program
             % Set velocities
             q_dot = obj.controller.calcJointVelocities(obj.x_d(:, index), obj.v_d(:, index));
             obj.launcher.realRobot.setJointVelocities(q_dot);
+        end
+    end
+
+    methods (Static)
+        function argsInfo = getArgumentsInfo()
+            argsInfo.name = 'Trajectory Duration [s]';
+            argsInfo.placeholder = 'duration';
+            % Pattern to match a positive double
+            argsInfo.validationPattern = '^\d+(\.\d+)?$';
         end
     end
 end
