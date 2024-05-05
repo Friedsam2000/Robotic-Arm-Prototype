@@ -10,7 +10,7 @@ classdef RealRobot < handle
 
         JOINT_VELOCITY_LIMITS = [0.6;0.6;2;2];
         SHOULDER_GEAR_RATIO = 5;
-        ELBOW_GEAR_RATIO = -2.5;
+        ELBOW_GEAR_RATIO = 2.5;
 
     end
 
@@ -90,6 +90,8 @@ classdef RealRobot < handle
         end
 
         function setRobotTorque(obj, state)
+    
+            
             % Enable / Disable the torque of the whole robot.
             for ID = 1:4
                 obj.servoChain.setServoTorque(ID,state);
@@ -134,7 +136,7 @@ classdef RealRobot < handle
             q_2 = -(delta_phi_1 + delta_phi_2)/obj.SHOULDER_GEAR_RATIO;
 
             q_3 = phi_3 - phi_3_0;
-            q_4 = -(phi_4 - phi_4_0)/obj.ELBOW_GEAR_RATIO;
+            q_4 = (phi_4 - phi_4_0)/obj.ELBOW_GEAR_RATIO;
 
             jointAngles = [q_1;q_2;q_3;q_4];
 
@@ -149,7 +151,7 @@ classdef RealRobot < handle
 
             % Calculation according to Thesis
             omega_3 = q_3_dot;
-            omega_4 = -q_4_dot*obj.ELBOW_GEAR_RATIO;
+            omega_4 = q_4_dot*obj.ELBOW_GEAR_RATIO;
 
             omega_1 = 0.5*(q_2_dot-q_1_dot) * obj.SHOULDER_GEAR_RATIO;
             omega_2 = +0.5*(q_2_dot+q_1_dot) * obj.SHOULDER_GEAR_RATIO;
