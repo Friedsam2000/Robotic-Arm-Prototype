@@ -87,7 +87,7 @@ classdef Workspace < handle
             % Reduce the number of workspace points using uniquetol
             obj.workspacePoints = uniquetol(workspaceSamples, obj.workspaceTolerance, 'ByRows', true).';
 
-            % Compute a 3D boundary (convex hull) of the robot's reduced workspace
+            % Compute a 3D boundary of the robot's reduced workspace
             obj.surfaceMesh = boundary(obj.workspacePoints(1, :)', obj.workspacePoints(2, :)', obj.workspacePoints(3, :)').';
 
             fprintf("Serial Workspace Calculation took %.2f seconds\n" + ...
