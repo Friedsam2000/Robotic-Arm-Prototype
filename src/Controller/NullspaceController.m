@@ -86,19 +86,16 @@ classdef NullspaceController < handle
         end
 
         function q_dot = limitJointAngles(obj, q, q_dot)
-            % Predicted next joint configuration
-            q_next = q + q_dot * obj.dt_max;
 
-            % Check if the predicted next configuration violates the joint limits
-            for idx = 1:length(q)
-                if q_next(idx) < obj.virtualRobot.JOINT_ANGLE_LIMITS(idx,1) && q_dot(idx) < 0
-                    % If joint is moving towards lower limit and is too close, only allow motion away from the limit
-                    q_dot(idx) = 0;
-                    fprintf('Warning: Joint %d is approaching lower limit. Angle: %.2f °.\n', idx, rad2deg(q(idx)));
-                elseif q_next(idx) > obj.virtualRobot.JOINT_ANGLE_LIMITS(idx,2) && q_dot(idx) > 0
-                    % If joint is moving towards upper limit and is too close, only allow motion away from the limit
-                    q_dot(idx) = 0;
-                    fprintf('Warning: Joint %d is approaching upper limit. Angle: %.2f °.\n', idx, rad2deg(q(idx)));
+            for i = 1:length(q)
+                if q(i) < obj.virtualRobot.JOINT_ANGLE_LIMITS(i,1) && q_dot(i) < 0
+                    % If joint is in lower limit and keeps moving in this direction, only allow motion away from the limit
+                    q_dot(i) = 0;
+                    fprintf('Warning: Joint %d is approaching lower limit. Angle: %.2f °.\n', i, rad2deg(q(i)));
+                elseif q(i) > obj.virtualRobot.JOINT_ANGLE_LIMITS(i,2) && q_dot(i) > 0
+                    % If joint is in upper limit and keeps moving in this direction, only allow motion away from the limit
+                    q_dot(i) = 0;
+                    fprintf('Warning: Joint %d is approaching upper limit. Angle: %.2f °.\n', i, rad2deg(q(i)));
                 end
             end
         end
