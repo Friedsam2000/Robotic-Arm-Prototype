@@ -40,11 +40,10 @@ classdef NullspaceController < handle
             v = obj.calcTaskspaceVelocity(desiredPosition, currentPosition, desiredVelocity);
 
             % Cost function for preffered configuration q = [0;0;0;0]
-            % H = 1/2 (q - q_desired)^2
-            % --> dHdQ = q
+            % H = 1/2 (q/q_lim - q_desired)^2
+            % --> dHdQ = q/(q_lim^2)
             dHdQ = obj.virtualRobot.getJointAngles;
-            % Normalize with range
-            dHdQ = dHdQ./obj.virtualRobot.JOINT_ANGLE_LIMITS(:,2);
+            dHdQ = dHdQ./(obj.virtualRobot.JOINT_ANGLE_LIMITS(:,2).^2);
 
             % Compute Jacobian and pseudoinverse
             J = obj.virtualRobot.getJacobian();
