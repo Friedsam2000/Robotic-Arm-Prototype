@@ -4,7 +4,7 @@ classdef Trajectory2D < Program
     properties
         controller = [];
         Kp = [];
-        default_Kp = 1;
+        default_Kp = 1.5;
         % Desired trajectory (pos, velocity, time)
         x_d = [];
         v_d = [];

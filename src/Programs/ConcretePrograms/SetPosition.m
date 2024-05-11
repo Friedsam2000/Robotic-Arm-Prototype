@@ -2,8 +2,8 @@ classdef SetPosition < Program
 
     properties (Constant)
         % Kp Gain and ramp duration
-        default_Kp = 1;
-        precision = 2; % mm
+        default_Kp = 1.5;
+        precision = 3; % mm
         % The program stops if the endeffector stays within the desired
         % position (+ tolerance) for breakTimerStopValue seconds
         breakTimerStopValue = 2; % s
