@@ -12,6 +12,10 @@ classdef ServoChain < handle
         ADDR_PRO_VELOCITY_P_GAIN = 78;
         ADDR_PRO_OPERATION_MODE = 11;
 
+        ADDR_PRO_DRIVE_MODE = 10;    % Address for the Drive Mode
+        TIME_BASED_PROFILE = 4;      % Value to set for Time-Based Profile (Bit 2 set)
+        ADDR_PRO_PROFILE_ACCELERATION = 108; % Address for Profile Acceleration
+
     end
 
     properties
@@ -128,13 +132,14 @@ classdef ServoChain < handle
                 end
             end
 
-            % After scanning for available servos
+            % After scanning for available servos set some settings
             for ID = obj.availableIDs
-                obj.setServoTorque(ID, 0);
-                % Set Operation Mode to 1 for each servo
-                obj.setOperationMode(ID, 1);
+                obj.setServoTorque(ID, 0); % Set Torque Off
+                obj.setOperationMode(ID, 1); %Set Velocity Control
+                obj.setDriveMode(ID, obj.TIME_BASED_PROFILE);  % Set Time-Based Profile
+                obj.setProfileAcceleration(ID, 50);  % Set for Profile Acceleration to 300 ms acceleration time
 
-                % If the servo ID is 3, also adjust the Velocity-I Gain and Velocity-P Gain
+                %If the servo ID is the yaw servo, also adjust the Velocity-I Gain and Velocity-P Gain
                 if ID == 3
                     obj.setGains(ID, 5000, 600);
                 else
@@ -306,7 +311,23 @@ classdef ServoChain < handle
             % Set the Operation Mode for a specific servo
             calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_OPERATION_MODE, operationMode);
             obj.checkConnection();
+      end
+
+
+
+        function setDriveMode(obj, ID, modeValue)
+            % Set Drive Mode to Time-Based Profile
+            calllib(obj.lib_name, 'write1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_DRIVE_MODE, modeValue);
+            obj.checkConnection();
         end
+    
+        function setProfileAcceleration(obj, ID, acceleration)
+            % Set Profile Acceleration
+            calllib(obj.lib_name, 'write4ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_PROFILE_ACCELERATION, acceleration);
+            obj.checkConnection();
+        end
+   
+
 
     
     end

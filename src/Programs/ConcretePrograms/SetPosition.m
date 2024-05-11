@@ -3,7 +3,6 @@ classdef SetPosition < Program
     properties (Constant)
         % Kp Gain and ramp duration
         default_Kp = 1;
-        ramp_duration = 1; % [s]
         precision = 2; % mm
         % The program stops if the endeffector stays within the desired
         % position (+ tolerance) for breakTimerStopValue seconds
@@ -16,7 +15,6 @@ classdef SetPosition < Program
         x_d = [];
         breakTimerStarted = false;
         breakTimerValue = 0;
-        start_time = [];
     end
 
     methods
@@ -39,27 +37,15 @@ classdef SetPosition < Program
 
             % Initialize the controller
             obj.controller = NullspaceController(obj.launcher.virtualRobot);
+            obj.controller.Kp = obj.Kp;
 
             % Plot desired position
             scatter3(obj.x_d(1), obj.x_d(2), obj.x_d(3), 'm', 'filled');
-
-            % Save program start time
-            obj.start_time = tic;
         end
 
         function loop(obj)
 
             obj.stopCondition = obj.launcher.virtualRobot.checkSingularity;
-
-            % Calculate elapsed time
-            elapsed_time = toc(obj.start_time);
-
-            % Ramp Kp
-            if elapsed_time < obj.ramp_duration
-                obj.controller.Kp = obj.Kp * (elapsed_time / obj.ramp_duration);
-            else
-                obj.controller.Kp = obj.Kp;
-            end
 
             % Get the distance to the goal
             distance_to_goal = norm(obj.x_d - obj.launcher.virtualRobot.forwardKinematics);

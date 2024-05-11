@@ -1,14 +1,10 @@
 classdef Trajectory2D < Program
 
-    properties (Constant)
-        % Kp Gain and ramp duration
-        default_Kp = 1;
-        ramp_duration = 1; % [s]
-    end
 
     properties
         controller = [];
         Kp = [];
+        default_Kp = 1;
         % Desired trajectory (pos, velocity, time)
         x_d = [];
         v_d = [];
@@ -36,6 +32,7 @@ classdef Trajectory2D < Program
 
             % Initialize the controller
             obj.controller = NullspaceController(obj.launcher.virtualRobot);
+            obj.controller.Kp = obj.Kp;
 
             % Initialize the planner
             planner = PathPlanner(obj.launcher.virtualRobot);
@@ -68,13 +65,6 @@ classdef Trajectory2D < Program
 
             % Calculate elapsed time
             elapsed_time = toc(obj.start_time);
-
-            % Ramp Kp
-            if elapsed_time < obj.ramp_duration
-                obj.controller.Kp = obj.Kp * (elapsed_time / obj.ramp_duration);
-            else
-                obj.controller.Kp = obj.Kp;
-            end
 
             % Calculate which trajectory index (timestep) matches with the
             % elapsed time

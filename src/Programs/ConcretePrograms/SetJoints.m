@@ -3,7 +3,6 @@ classdef SetJoints < Program
     properties (Constant)
         % Kp Gain and Kp Ramp duration
         default_Kp = 2;
-        ramp_duration = 1; % [s]
         default_precision_deg = 0.4; % [°]
 
 
@@ -48,22 +47,11 @@ classdef SetJoints < Program
             joint_limits = obj.launcher.virtualRobot.JOINT_ANGLE_LIMITS;
             obj.q_desired = min(max(obj.q_desired, joint_limits(:,1)), joint_limits(:,2));
 
-            % Save program start time
-            obj.start_time = tic;
 
         end
 
         function loop(obj)
 
-            % Calculate elapsed time
-            elapsed_time = toc(obj.start_time);
-
-            % Ramp Kp
-            if elapsed_time < obj.ramp_duration
-                K = obj.Kp * (elapsed_time / obj.ramp_duration);
-            else
-                K = obj.Kp;
-            end
         
             % Calculate remaining errors
             q = obj.launcher.virtualRobot.getJointAngles;
@@ -91,7 +79,7 @@ classdef SetJoints < Program
             obj.integralError = min(max(obj.integralError, -obj.integralErrorMax), obj.integralErrorMax);
 
             % Set velocities (PI-Controller)
-            P_velocities = K * currentError;
+            P_velocities = obj.Kp * currentError;
             I_velocities = obj.Ki * obj.integralError;
             PID_velocities = P_velocities + I_velocities;
 

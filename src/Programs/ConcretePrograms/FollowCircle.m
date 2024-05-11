@@ -2,7 +2,6 @@ classdef FollowCircle < Program
     properties (Constant)
         % Constants for controller configuration
         default_Kp = 1; % Default proportional gain
-        ramp_duration = 1; % [s] Duration for ramping up Kp
         precision = 2; % mm [Tolerance for reaching the circle's starting point]
     end
 
@@ -90,7 +89,7 @@ classdef FollowCircle < Program
 
         function followCircularPath(obj)
             % Calculate elapsed time since starting the circular path
-            elapsed_time = toc(obj.start_time) - obj.ramp_duration; % Adjust if there was a ramp-up time
+            elapsed_time = toc(obj.start_time);
 
             % Determine the current index based on elapsed time
             [~, index] = min(abs(obj.t - elapsed_time));
