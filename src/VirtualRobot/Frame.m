@@ -10,7 +10,6 @@ classdef Frame < handle
         relativeRotation = [];               % (relativeRotation) Rotation Matrix transforming from the frame to the parent frame 
         rotationAxis = [];   % Char label for the allowed local rotation axis
         parent = [];              % Reference to the parent Frame object
-        children = [];            % Array of references to the child Frame objects
 
         % Plotting
         label = [];               % String label for the frame
@@ -31,10 +30,6 @@ classdef Frame < handle
 
             % Setup Parent Child relationship
             obj.parent = parent; % Register the parent to this frame
-            if ~isempty(parent)
-                parent.children = [parent.children; obj]; % Register this frame to the parent frames children
-            end
-            obj.children = [];
             
             % Initialize graphics handle arrays with empty handles
             obj.axisHandles = [gobjects(1,1), gobjects(1,1), gobjects(1,1)];
