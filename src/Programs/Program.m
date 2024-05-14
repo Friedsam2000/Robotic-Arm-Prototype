@@ -38,7 +38,7 @@ classdef (Abstract) Program < handle
                 end
             catch ME
                 % Output the error message with the program name
-                % fprintf('Error in %s: %s\n', class(obj), getReport(ME, 'basic'));
+                fprintf('Error in %s: %s\n', class(obj), getReport(ME, 'basic'));
             end
             delete(obj);
         end
