@@ -28,6 +28,7 @@ classdef RealRobot < handle
     methods
         %% Constructor = Connection Attempt, Calls destructor if failed
         function obj = RealRobot(dynamixel_lib_path, port)
+            % default command r = RealRobot('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\src\DynamixelLib', 'COM4')
             obj.servoChain = ServoChain.getInstance(dynamixel_lib_path, port);
         end
 
@@ -106,6 +107,16 @@ classdef RealRobot < handle
             state = obj.servoChain.getServoTorque(1);
             % Sync Torque of all Servos
             obj.setRobotTorque(state);
+        end
+
+        function [currentLoads] = getCurrentLoads(obj)
+            
+            currentLoads = zeros(4,1);
+            for ID = 1:4
+                currentLoads(ID) = obj.servoChain.getServoLoad(ID);
+            end
+
+
         end
 
         function zeroAtCurrent(obj)

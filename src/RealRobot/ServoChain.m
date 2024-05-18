@@ -16,6 +16,9 @@ classdef ServoChain < handle
         TIME_BASED_PROFILE = 4;      % Value to set for Time-Based Profile (Bit 2 set)
         ADDR_PRO_PROFILE_ACCELERATION = 108; % Address for Profile Acceleration
 
+        % Current / Load
+        ADDR_PRO_PRESENT_CURRENT_LOAD = 126;
+        ADDR_PRO_CURRENT_LIMIT = 38;
     end
 
     properties
@@ -26,8 +29,8 @@ classdef ServoChain < handle
         port_num = [];
 
         % Group number for sync operations
-        groupwrite_num = [];
-        groupread_num = [];
+        velocity_groupwrite_num = [];
+        position_groupread_num = [];
     end
 
     methods (Static)
@@ -47,6 +50,7 @@ classdef ServoChain < handle
         %% Constructor = Connection Attempt, Calls destructor if failed
         function obj = ServoChain(dynamixel_lib_path, port)
 
+            % default command s = ServoChain.getInstance('C:\Users\samue\Documents\Git\Robotic-Arm-Prototype\src\DynamixelLib', 'COM4')
             % Add the library directory to PATH
             addpath(fullfile(dynamixel_lib_path, 'c\include\dynamixel_sdk'));
 
@@ -94,10 +98,10 @@ classdef ServoChain < handle
             obj.port_num = calllib(obj.lib_name, 'portHandler', port);
 
             % Initialize groupSyncWrite Struct
-            obj.groupwrite_num = calllib(obj.lib_name, 'groupSyncWrite', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_GOAL_VELOCITY, 4);
+            obj.velocity_groupwrite_num = calllib(obj.lib_name, 'groupSyncWrite', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_GOAL_VELOCITY, 4);
 
             % Initialize groupSyncRead Structs
-            obj.groupread_num = calllib(obj.lib_name, 'groupSyncRead', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_PRESENT_POSITION,4);
+            obj.position_groupread_num = calllib(obj.lib_name, 'groupSyncRead', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_PRESENT_POSITION,4);
 
             % Open port
             if (calllib(obj.lib_name, 'openPort', obj.port_num))
@@ -152,8 +156,8 @@ classdef ServoChain < handle
             % Add present position of all available servos to groupSyncRead struct
             % Add goal velocity of all available servos to groupSyncWrite struct
             for ID = obj.availableIDs
-                if ~ (calllib(obj.lib_name,'groupSyncReadAddParam', obj.groupread_num, ID) ...
-                        && calllib(obj.lib_name,'groupSyncWriteAddParam', obj.groupwrite_num, ID, 0, 4))
+                if ~ (calllib(obj.lib_name,'groupSyncReadAddParam', obj.position_groupread_num, ID) ...
+                        && calllib(obj.lib_name,'groupSyncWriteAddParam', obj.velocity_groupwrite_num, ID, 0, 4))
 
                     fprintf('ServoChain: groupSyncRead addparam failed');
                     delete(obj)
@@ -169,13 +173,13 @@ classdef ServoChain < handle
         function delete(obj)
             fprintf('ServoChain: Destructor called.\n')
             if  ~isempty(obj.port_num)
-                if ~isempty(obj.groupread_num)
+                if ~isempty(obj.position_groupread_num)
                     % Clear syncread parameter storage
-                    calllib(obj.lib_name, 'groupSyncReadClearParam', obj.groupread_num);
+                    calllib(obj.lib_name, 'groupSyncReadClearParam', obj.position_groupread_num);
                 end
-                if ~isempty(obj.groupwrite_num)
+                if ~isempty(obj.velocity_groupwrite_num)
                     % Clear syncread parameter storage
-                    calllib(obj.lib_name, 'groupSyncWriteClearParam', obj.groupwrite_num);
+                    calllib(obj.lib_name, 'groupSyncWriteClearParam', obj.velocity_groupwrite_num);
                 end
                 % Try to close the port
                 try
@@ -205,6 +209,55 @@ classdef ServoChain < handle
             torqueEnabled = calllib(obj.lib_name, 'read1ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_TORQUE_ENABLE);
             obj.checkConnection();
         end
+        function currentLoad = getServoLoad(obj,ID)
+            
+            % get the current percentage of the max load of the servos
+            % servo xl 430 w250 t has 2 byte present load param at addr 126
+            % servo xh 430 w210 t has 2 byte present current param at addr 126
+            % servo xh 430 w210 t has 2 byte current current limit at addr 38
+            % servo xh 430 w210 t is at yaw joint with ID 3
+
+            raw_current_load = calllib(obj.lib_name, 'read2ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_PRESENT_CURRENT_LOAD);
+                   
+            maxrange = 2^(2*8)-1; % 2-byte range
+            midpoint = maxrange/2;
+
+            if raw_current_load > midpoint
+                    % Convert to a negative value
+                raw_current_load = (raw_current_load - maxrange);
+            else
+                % Convert to a positive value
+                raw_current_load = (raw_current_load);
+            end
+
+
+            if ID == 3
+
+                raw_current_limit = calllib(obj.lib_name, 'read2ByteTxRx', obj.port_num, obj.PROTOCOL_VERSION, ID, obj.ADDR_PRO_CURRENT_LIMIT);
+
+                if raw_current_limit > midpoint
+                    % Convert to a negative value
+                    raw_current_limit = (raw_current_limit - maxrange);
+                else
+                    % Convert to a positive value
+                    raw_current_limit = (raw_current_limit);
+                end
+
+                conversion_factor_current = 2.69; % mA
+                current_limit = raw_current_limit * conversion_factor_current;
+                present_current = raw_current_load * conversion_factor_current;
+
+                % fprintf('Present current at ID 3 : %.2f', present_current);
+                % fprintf('Current limit at ID 3 : %.2f', current_limit);
+
+                currentLoad = present_current/current_limit;
+
+            else
+                
+                conversion_factor_load = 0.001; %
+                currentLoad = raw_current_load * conversion_factor_load;
+            end
+        end
         
         function setServoTorque(obj,ID,state)
             % Enable / Disable the Torque of a servo.
@@ -219,7 +272,7 @@ classdef ServoChain < handle
         function servoAngles = getServoAngles(obj)
 
             % Syncread present position
-            calllib(obj.lib_name,'groupSyncReadTxRxPacket', obj.groupread_num);
+            calllib(obj.lib_name,'groupSyncReadTxRxPacket', obj.position_groupread_num);
 
             num_servos = length(obj.availableIDs);
             servoAngles = zeros(num_servos,1);
@@ -229,7 +282,7 @@ classdef ServoChain < handle
             midpoint = maxrange/2;
 
             for i = 1:num_servos
-                raw_angle = calllib(obj.lib_name, 'groupSyncReadGetData', obj.groupread_num, obj.availableIDs(i), obj.ADDR_PRO_PRESENT_POSITION, 4);
+                raw_angle = calllib(obj.lib_name, 'groupSyncReadGetData', obj.position_groupread_num, obj.availableIDs(i), obj.ADDR_PRO_PRESENT_POSITION, 4);
                 % Check and Convert the position
                 if raw_angle > midpoint
                     % Convert to a negative value
@@ -272,11 +325,11 @@ classdef ServoChain < handle
                 if VEL < 0
                     VEL = maxrange+VEL;
                 end
-                calllib(obj.lib_name,'groupSyncWriteChangeParam', obj.groupwrite_num, obj.availableIDs(i), VEL, 4,0);
+                calllib(obj.lib_name,'groupSyncWriteChangeParam', obj.velocity_groupwrite_num, obj.availableIDs(i), VEL, 4,0);
             end
 
             % Syncwrite goal position
-            calllib(obj.lib_name,'groupSyncWriteTxPacket',obj.groupwrite_num);
+            calllib(obj.lib_name,'groupSyncWriteTxPacket',obj.velocity_groupwrite_num);
             obj.checkConnection();
         end
 
