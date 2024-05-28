@@ -165,7 +165,7 @@ classdef RealRobot < handle
         end
     
     end
-        methods (Access = private)
+        methods
         function state = checkConnection(obj)
             state = true;
             if isempty(obj.servoChain) || ~isvalid(obj.servoChain) || (length(obj.servoChain.availableIDs) ~= 4)

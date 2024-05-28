@@ -55,7 +55,8 @@ classdef Launcher < handle
         end
 
         %% Connection Management
-        function connect(obj, varargin)
+        function success = connect(obj, varargin)
+            success = true;
             % Check if the constructor was called with a specified port
             if nargin < 2
                 % If not, use 'COM3' as a default port
@@ -70,6 +71,7 @@ classdef Launcher < handle
             obj.realRobot = RealRobot(dynamixel_lib_path,port);
 
             if ~obj.checkConnection()
+                success = false;
                 return;
             end
 
@@ -248,7 +250,7 @@ classdef Launcher < handle
 
         function state = checkConnection(obj)
             state = true;
-            if isempty(obj.realRobot) || ~isvalid(obj.realRobot)
+            if ~obj.realRobot.checkConnection()
                 state = false;
                 obj.realRobot = [];
                 return;
