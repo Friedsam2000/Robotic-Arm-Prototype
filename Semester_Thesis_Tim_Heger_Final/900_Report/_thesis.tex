@@ -1,0 +1,36 @@
+\documentclass[a4paper, 11pt, twocolumn, ngerman, english]{article}
+% Remove ngerman for English version
+
+\input{setup/packages}
+\input{setup/metadata}
+\input{setup/customcommands}
+\input{setup/settings}
+\input{setup/blockschaltbilder}
+
+\input{auxfiles/abbreviationsAndAcronyms}
+
+\begin{document}
+
+  %\input{auxfiles/__frontMatter}
+  \input{auxfiles/article_frontMatter}
+
+  % ==================================================================
+  % Main matter
+  % ==================================================================
+  %\mainmatter
+  %\pagestyle{fancy}
+  \input{chapters/introduction}
+  \input{chapters/hardware}
+  \input{chapters/torque}
+  \input{chapters/control}
+  \input{chapters/conclusion}
+  %\input{chapters/howTo}
+  %\listoftodos
+
+
+  % ==================================================================
+
+  %\input{auxfiles/__backMatter}
+  \printbibliography[title=\nameCaReferences]
+
+\end{document}

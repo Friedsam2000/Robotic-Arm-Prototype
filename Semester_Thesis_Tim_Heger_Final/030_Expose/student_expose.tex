@@ -1,0 +1,144 @@
+\documentclass[a4paper, oneside, 11pt, english, ngerman]{article}
+
+\input{setup/packages}
+\input{../900_Report/setup/metadata}
+\input{setup/customcommands}
+\input{setup/settings}
+
+% EDIT THESE FIELDS
+
+% Type of theses
+% English: Master's Thesis, Term Paper, IDP, Bachelor's Thesis
+% German:  Master's Thesis, Semesterarbeit, IDP, Bachelor's Thesis
+\def\exposeThesisType{Master's Thesis}
+
+% Date of the Exposé
+\def\exposeDate{01.01.2023}
+
+% SET THE REMAINING METADATA IN THE METADATA FILE IN THE REPORT TEMPLATE UNDER
+% 900_Report/setup/metadata
+
+
+\begin{document}
+   
+\input{setup/__titlePage}
+
+\subsection*{How to Use this Template}
+
+\begin{itemize}
+   \item Please edit the file \verb|900_Report/setup/metadata.tex| to personalize this document.
+   It is the same file that will be later used for your report/thesis document.
+   
+   \item Also edit the commands \verb|\exposeThesisType| and \verb|\exposeDate| in this document accordingly.
+   
+   \item To change the language, edit the first line this document:
+   For German, use\\
+   \verb|\documentclass[<...>, ngerman, english]{article}|\\
+   and for English, use\\
+   \verb|\documentclass[<...>, english, ngerman]{article}|.
+      
+\end{itemize}
+
+This template is based on the
+\href{https://gitlab.lrz.de/AM/TUMlatex/-/tree/develop/source/MW/ZL/Templates/ZLStudentExpose}{student exposé template}
+from the
+\href{https://gitlab.lrz.de/AM/TUMlatex/}{TUMLatex project}
+and the remarks below are taken from there.
+
+\subsubsection*{Citations}
+
+Please place your literature in the file \verb|./bibtex/literature.bib| and make sure to compile this document with \textit{Biber} selected as your bibliography tool.
+You can cite references in text form (e.g.: See \textcite{Gantmacher2000a,Follinger2013}) or as short citations \cite{Adamy2009,Follinger2013}.
+
+
+
+\subsection*{About the Exposé / Concept Paper}
+
+{\color{tum blue 4}
+   A concept paper is a document in which you define the scholarly framework for your thesis at an early stage and develop a realistic working plan.
+   Since it is very hard to predict the framework conditions as well as your own research in the context of scientific work, the concept paper will
+   need to be modified on a regular basis. Ideally, the concept paper provides the basis for the thesis. Depending on the topic, style and preliminary
+   work, a concept paper can be approximately 6 to 10 pages long.
+  
+   \emph{Ein Exposé („Konzeptpapier“) ist ein Dokument, in dem Sie zu einem frühen Zeitpunkt den wissenschaftlichen Rahmen Ihrer Abschlussarbeit eingrenzen
+   und einen realistischen Arbeitsplan entwickeln. Im Idealfall liefert das Exposé bereits den Grundstock für Ihre Abschlussarbeit. Ihr Exposée sollte
+   zwischen 6 und 10 Seiten reinen Text (ohne Aufgabenstellungen) umfassen.}
+}
+
+
+
+\section{\nameCaTopic}
+
+Concisely describe (no more than half a page) the issue that you want to work on. The relevance of the topic should be apparent.
+
+\emph{Beschreiben Sie prägnant (nicht mehr als eine halbe Seite) die Fragestellung, die Sie bearbeiten möchten. Erkennbar sollte die Relevanz des Themas sein.}
+
+
+
+\section{\nameCaStateOfScience}
+
+Try to gain as comprehensive an overview of the state of science and technology for your topic as possible, and provide sources as evidence.
+For the literature research, use your colleagues’ citation lists in the PhD dissertation (and read the texts!) as well as performing your own free
+database searches. Correctly and fully understanding how your own work is positioned within the international state of science and technology as well
+as the institute’s research traditions is an important element of high-quality academic work.
+
+\emph{Versuchen Sie, ein möglichst umfassendes Bild über den Stand der Wissenschaft und Technik zu Ihrem Thema zu erhalten und belegen Sie dies mit Quellen.
+Nutzen Sie für die Literaturrecherche sowohl eigene Suchen in Datenbanken als auch die Zitierlisten der Promotionsarbeiten Ihres Lehrstuhls (und
+lesen Sie diese Arbeiten!). Die korrekte und vollständige Einordnung der eigenen Arbeit in den internationalen Stand der Wissenschaft und Technik
+und die Forschungstraditionen des Lehrstuhls ist ein entscheidendes Qualitätsmerkmal für wissenschaftliche Arbeiten. Wissenschaft ohne Neuigkeitscharakter
+ist keine.}
+
+
+
+\section{\nameCaObjective}
+
+Demonstrate how you plan to proceed with your scientific project to achieve the goal. Show the chosen procedure and the selected examination methods.
+Describe the aspects/areas in which your contribution will go beyond the state of technology described above.
+
+\emph{Stellen Sie dar, wie Sie bei Ihrem wissenschaftlichen Projekt vorgehen, um das Ziel zu erreichen. Zeigen Sie die Untersuchungsmethoden auf, das Vorgehen
+und die Methodenwahl. Beschreiben Sie, in welchen Aspekten/Bereichen Ihr Beitrag über den oben beschriebenen Stand der Technik hinausgehen soll.
+}
+
+
+
+\section{\nameCaWorkPlan}
+
+Try to create a timeframe for your thesis now. Consider by what time frame and conditions you are bound and where you are dependent on your supervisor.
+To demonstrate your working plan create a “Gantt chart”. Describe which methods you will use to test your statements and why these methods are especially
+suitable. Describe which resources (e.g. experimental resources) you will need for your task.
+
+\emph{Versuchen Sie, bereits jetzt einen Zeitplan für Ihre Abschlussarbeit zu erstellen. Überlegen Sie, an welche terminlichen Rahmenbedingungen Sie gebunden
+Sie und an welchen Stellen es Abhängigkeiten von Ihrem Betreuer gibt. Bitte erstellen Sie für Ihren Zeitplan ein sog. „Gantt-Chart“ und definieren Sie
+dabei folgende Bausteine: Nr, Aufgaben und Teilaufgaben, Verantwortliche Person, Beginn und Ende, Dauer und tragen Sie die jeweiligen Balken in das
+Gantt-Chart ein. Legen Sie Meilensteine für den Fortschritt Ihrer Arbeit fest. Beschreiben Sie, mit welchen Methoden Sie Ihre Aussagen prüfen wollen und
+warum diese Methoden besonders gut geeignet sind. Beschreiben Sie, welche Ressourcen (z.B. experimentelle) Sie für Ihre Aufgabe benötigen.
+}
+
+\begin{figure*}[!htb]%
+   \centering%
+   \input{images/timeschedule.tikz}
+   \caption{Example of a time schedule}%
+\end{figure*}%
+
+
+\printbibliography[title=\nameCaReferences]
+
+
+
+\section{\nameCaStructure}
+
+The outline should provide an overview of the topics covered, the focus and the guiding thread of the work.
+
+\emph{(soweit möglich und zum jetzigen Zeitpunkt sinnvoll)
+Die Gliederung soll einen Überblick über die behandelten Themen, der Schwerpunktsetzung und dem roten Faden der Arbeit darstellen
+}
+
+
+
+
+
+
+% DO NOT EDIT THIS
+\reviewSection
+
+\end{document}

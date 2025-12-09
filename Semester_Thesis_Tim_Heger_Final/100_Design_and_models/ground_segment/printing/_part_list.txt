@@ -1,0 +1,10 @@
+bevel_gear x3
+bevel_gear_with_bearings x1
+spacing_ring_bevel x1
+spacing_ring_bevel_bearing x1
+gear_motor x2
+gear_middle x2
+gear_top x2
+spacing_ring x6
+bevel_mount_fixed x1
+bevel_mount x1

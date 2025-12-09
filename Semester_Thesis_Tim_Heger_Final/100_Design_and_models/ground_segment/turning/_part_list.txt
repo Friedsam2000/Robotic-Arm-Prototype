@@ -1,0 +1,4 @@
+bevel_shaft x1
+middle_shaft x2
+motor_shaft x2
+top_shaft x2

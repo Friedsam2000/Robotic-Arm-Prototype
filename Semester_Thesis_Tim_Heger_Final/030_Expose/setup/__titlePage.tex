@@ -1,0 +1,51 @@
+% This is an automatically configured file, please do not change it!
+
+\def\titlePageLeftMargin{    2.7 cm}
+\def\titlePageRightMargin{   2.7 cm}
+\def\titlePageUpperSpacing{ -3.00 cm}
+
+\IfLanguageName{english}{\def\nameCaDate{Date}}{}
+\IfLanguageName{british}{\def\nameCaDate{Date}}{}
+\IfLanguageName{ngerman}{\def\nameCaDate{Datum}}{}
+\IfLanguageName{german}{\def\nameCaDate{Datum}}{}
+
+
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay, inner sep = 0]
+  \pgfmathsetmacro{\titlePageWidth}{21 cm - \titlePageLeftMargin - \titlePageRightMargin}
+
+  %\input{./images/__titlePage/\titlePageLogo}
+
+  \node[anchor = north west, tum blue] (_title_page_chair_name)
+    at ([yshift = \titlePageUpperSpacing, xshift = \titlePageLeftMargin] current page.north west)
+    {\fontfamily{phv}\selectfont\scriptsize{}\nameCaChair};
+  \begin{scope}[shift=(_title_page_chair_name.north west), yshift = 0.36 cm, x = 0.9 cm, y = 0.9 cm]
+    \input{./images/__titlePage/logo-chair}
+  \end{scope}
+
+  \node[anchor = north east, tum blue] (_title_page_tum_name)
+    at ([yshift = \titlePageUpperSpacing, xshift = -\titlePageRightMargin] current page.north east)
+    {\fontfamily{phv}\selectfont\scriptsize{}\nameCaTUM};
+  \begin{scope}[shift=(_title_page_tum_name.north east), xshift = -1.6844 cm, yshift = 0.36 cm, x = 0.9 cm, y = 0.9 cm]
+    \input{./images/__titlePage/logo-tum}
+  \end{scope}
+\end{tikzpicture}
+
+
+\par\vspace*{0.5cm}%
+
+{\noindent\huge\fontseries{b}\fontfamily{phv}\selectfont\color{tum blue 3}\bfseries Exposé \exposeThesisType\\[0.2cm]}
+
+{\noindent\Large\fontfamily{phv}\selectfont\primaryTitle\\[0.2cm]}
+
+\noindent%
+\begin{tabular}{@{}lp{0.84\linewidth}@{}}% %Ensures linebreak for long titles
+   \nameCaSubPrefix:   & \thesisAuthor\\%
+   \nameCaSubDate:     & \exposeDate\\%
+   \nameCaSupervisors: & \thesisSupervisors\\ 
+                       & \nameCaChair\\ 
+   \nameCaAdvisors:    & \thesisAdvisors\\
+\end{tabular}\par%
+
+\vspace*{0.2cm}%
+\noindent\rule{\textwidth}{0.7pt}%

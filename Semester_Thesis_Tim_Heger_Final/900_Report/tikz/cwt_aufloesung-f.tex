@@ -1,0 +1,28 @@
+%cwt-f
+\begin{tikzpicture}[domain=0:3, scale=0.48]
+\centering
+		%KoordinatenSystem
+		\draw[->] (0,0) -- (17,0) node[right]{$t$};
+		\draw[->] (0,0) -- (0,17) node[left]{$f$};
+		
+		%-Rand vom Kasten
+		\draw[] (16,0) -- (16,16);
+		\draw[] (0,16) -- (16,16);
+		
+		%waagrechte Striche
+		\draw[] (0,1) -- (16,1);
+		\draw[] (0,2) -- (16,2);
+		\draw[] (0,4) -- (16,4);
+		\draw[] (0,8) -- (16,8);
+		\draw[] (0,16) -- (16,16);
+		
+		%senkrechte Striche		
+		\draw[] (2,16) -- (2,8);
+		\draw[] (4,16) -- (4,4);
+		\draw[] (6,16) -- (6,8);
+		\draw[] (8,16) -- (8,2);
+		\draw[] (10,16) -- (10,8);
+		\draw[] (12,16) -- (12,4);
+		\draw[] (14,16) -- (14,8);
+		
+\end{tikzpicture}

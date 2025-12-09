@@ -1,0 +1,63 @@
+%%%%%%%%%%%%%%%%%%%%%%% file template.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is a template file for the LaTeX package SVJour2 for the
+% Springer journal "Mathematics of Control, Signals, and Systems"
+%
+%                                    Springer Heidelberg 2004/12/03
+%
+% Copy it to a new file with a new name and use it as the basis
+% for your article. Delete % as needed.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% First comes an example EPS file -- just ignore it and
+% proceed on the \documentclass line
+% your LaTeX will extract the file if required
+%
+\documentclass[11pt]{article}
+
+\usepackage{ifthen}
+\newboolean{isTRAC}
+\setboolean{isTRAC}{false}
+\newcommand{\cstmHeader}{ %
+	\centering}
+
+
+\usepackage{graphicx,epstopdf,trac2016}
+\input{preamble.tex}
+
+\begin{document}
+	
+\title{Interpolation-based model reduction of nonlinear systems}
+
+\author{Maria Cruz Varona\\[0.1cm]{\footnotesize Lehrstuhl f\"ur Regelungstechnik, Technische Universit\"at M\"unchen}\\ {\footnotesize Boltzmannstr. 15, D-85748 Garching, Germany}\\{\footnotesize Tel: +49.89.289.15592, email: {\texttt maria.cruz@tum.de}}}
+
+\maketitle
+
+\begin{abstract}
+In diverse engineering domains accurate mathematical models are required for analysis, design and control of complex dynamical systems. The modeling of such systems often leads to a large number of ordinary differential equations, whose large dimension makes them hard to simulate and handle. This motivates the need of reduced-order models that capture the most dominant dynamics and preserve the relevant properties of the original model, thus keeping the computational expense and the storage requirements low.  
+
+Most dynamical systems are inherently \emph{nonlinear}. Although in some cases the behaviour can locally be well described by linear or linearized time-invariant (LTI) models, nonlinear systems generally exhibit complex behaviours that linear models are unfortunately not able to capture. For the reduction of LTI models, several well-established methods are available \cite{Antoulas_Book}, all having their advantages and disadvantages. The currently existing approaches for model reduction of nonlinear systems can be mainly classified in \emph{simulation-based} methods, \emph{Volterra-based} approaches and \emph{quadratic-bilinear-based} techniques \cite{Baur_2014_Survey}. 
+
+%Even though the model reduction of nonlinear systems has gained a lot of attention in the last ten years, it is still not as well developed as the linear model reduction. The currently existing nonlinear model reduction approaches can be classified in    
+
+The most widely used nonlinear model reduction approach is the \emph{Proper Orthogonal Decomposition} (POD), which requires the simulation of the full-order model for suitably chosen input signals to extract snapshots from the state trajectory. Another well-known simulation-based approach is the \emph{Trajectory Piecewise-Linear Approximation} (TPWL), which can deal with strongly nonlinear systems, but also has the drawback of training input dependency.\\
+On the other hand, Volterra theory \cite{rugh1981nonlinear} can be applied to approximate weakly nonlinear systems as e.g. \emph{bilinear systems}, which can subsequently be reduced by adapted model reduction approaches, such as \emph{bilinear Balanced Truncation}, \emph{bilinear Rational Krylov} or \emph{bilinear $\mathcal{H}_2$-optimal reduction (BIRKA)}. \\
+Another possibility relies on the exact transformation of strongly nonlinear systems into so-called \emph{quadratic-bilinear differential algebraic equations} (QBDAEs), for which extensions of the well-known linear model reduction approaches have also been recently developed. \\
+The main advantage of both latter techniques -- as opposed to POD or TPWL -- is that they aim at approximating the input-output behaviour of the underlying nonlinear system without expensive simulations for different training input signals.
+
+%Recently developed methods rely first on the polynomialization of strongly nonlinear systems and then on the \emph{exact} transformation of the polynomial system into an \emph{quadratic-bilinear}
+
+In this talk, state-of-the-art nonlinear model order reduction techniques will be first revised, whereby particular attention will be paid to the advantages and disadvantages as well as to the open problems of the various methods. Then, the talk will focus on the interpolation-based reduction of bilinear systems. 
+
+\textit{Keywords:} Nonlinear systems; Model order reduction; Krylov subspace methods
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliography{NLMOR}
+\bibliographystyle{abbrv} %plain
+
+
+\end{document}
+% end of file template.tex

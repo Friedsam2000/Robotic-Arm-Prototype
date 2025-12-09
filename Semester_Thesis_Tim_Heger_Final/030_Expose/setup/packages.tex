@@ -1,0 +1,106 @@
+% ======================================================================
+% Basic encoding and localisation packages
+% ======================================================================
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{iflang}
+% ======================================================================
+
+
+% ======================================================================
+% Fonts and symbols
+% ======================================================================
+\usepackage[scaled = 0.92]{helvet}
+\usepackage{lmodern}
+\usepackage{mathrsfs} % Adds \mathscr{}
+% ======================================================================
+
+
+% ======================================================================
+% TikZ and PGF tools
+% ======================================================================
+\usepackage{tikz,pgfplots}
+\usepackage{tikzscale} 
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{shapes,arrows,patterns}
+
+\pgfplotsset{compat=newest}
+\usepackage{pgfkeys}
+\usepackage{pgfgantt} % For the gantt chart
+
+% For MATLAB2TIKZ
+\newlength\figureheight
+\newlength\figurewidth
+% ======================================================================
+
+%% ======================================================================
+%% ToDo Notes
+%% ======================================================================
+\usepackage[colorinlistoftodos,prependcaption]{todonotes}
+
+\newcommand{\todoX}[1]{\todo[linecolor=tum dia red,backgroundcolor=tum dia red!25,bordercolor=tum dia red,inline]{#1}}
+\newcommand{\todoY}[1]{\todo[linecolor=tum blue,backgroundcolor=tum blue!25,bordercolor=tum blue,inline]{#1}}
+\newcommand{\todoZ}[1]{\todo[linecolor=tum green,backgroundcolor=tum green!25,bordercolor=tum green,inline]{#1}}
+
+% ======================================================================
+% Page layout, fine typography and fancy things
+% ======================================================================
+\usepackage{empheq}
+\usepackage{pdflscape}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage[bmargin=3cm, lmargin=2.7cm, rmargin=2.7cm]{geometry}
+\usepackage{setspace}
+\usepackage{csquotes}
+% ======================================================================
+
+
+% ======================================================================
+% Graphics, figures etc.
+% ======================================================================
+\usepackage{graphicx}
+\usepackage{import} %for importing pdf_tex-files
+\usepackage{pdfpages}
+
+\usepackage[font=small]{subfig}
+\usepackage{caption}
+\usepackage{epstopdf}
+% ======================================================================
+
+
+% ======================================================================
+% Math packages
+% ======================================================================
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{siunitx}
+\usepackage{xfrac}
+\usepackage{cancel}
+\usepackage{bm}
+% ======================================================================
+
+
+% ======================================================================
+% Tables
+% ======================================================================
+\usepackage{multirow}
+\usepackage{makecell}
+% ======================================================================
+
+
+% ======================================================================
+% Bibliography, glossary, acronyms
+% ======================================================================
+\usepackage[style=numeric]{biblatex}
+\usepackage{acro}
+\usepackage{thmtools}
+% ======================================================================
+
+
+% ======================================================================
+% Hyperref (always goes at the end)
+% ======================================================================
+\usepackage{hyperref}
+\usepackage[capitalise]{cleveref} % must be loaded after hyperref
+% ======================================================================

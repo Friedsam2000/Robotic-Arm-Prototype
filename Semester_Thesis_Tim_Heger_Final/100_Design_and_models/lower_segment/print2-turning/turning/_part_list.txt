@@ -1,0 +1,2 @@
+motor_axis x1
+motor_shaft x1

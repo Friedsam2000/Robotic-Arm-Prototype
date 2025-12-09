@@ -1,0 +1,100 @@
+\section{Torque-Based Control}
+As a starting point for torque control, several approaches for a PD-controller where implemented. These all relied on the current control mode of the servos,
+therefore some basic functions were implemented in the modular code structure to set the control mode of all servos to current control,
+as well as to set a target torque for all joints.
+
+\subsection{Joint Space PD-Control}
+The first approach was a simple PD-controller in joint space, which computes a target torque for each joint based on the current joint position and velocity,
+as well as a desired joint position. The desired torque for each joint is then set as calculated using the following formula
+\parencite{murrayMathematicalIntroductionRobotic2017}:
+\begin{equation}
+    \tau_{target} = - K_p \ \Delta q - K_d \ \dot{q}_{current}
+\end{equation}
+%\todoZ{cite mls94 chapter 5.3}
+Where $\tau_{target}$ is the vector of target torques for each joint, $K_p$ and $K_d$ are the proportional and derivative gain vectors, $\Delta q$ is the vector of joint position 
+errors and $\dot{q}_{current}$ is the vector of current joint velocities.
+The joint position errors are calculated as the difference between the positions at the beginning of the program and the current joint positions, normalized over the joint limits.
+The normalization is done to ensure balanced control across the joints with different motion ranges.
+The current joint positions and velocities are calculated from the servo readings.
+Finally, the gains $K_p$ and $K_d$ are set as constants in the program, which were manually tuned to achieve a stable behavior.
+
+This program makes the robot hold its initial position, while being compliant in each joint. If any joint of the robot is moved away from its initial position,
+this joint will snap back like a damped spring.
+
+\subsection{Cartesian Space PD-Control}
+The second approach was a PD-controller in cartesian space, which computes a target force for the end-effector based on the current end-effector position and velocity,
+as well as a desired end-effector position. The following formula is used to calculate the target force\parencite{murrayMathematicalIntroductionRobotic2017}:
+\begin{equation}
+    F_{target} = - K_p \ \Delta x - K_d \ \dot{x}_{current}
+\end{equation}
+%\todoZ{cite mls94 chapter 5.3}
+Where $F_{target}$ is the vector of target forces for the end-effector, $K_p$ and $K_d$ are the proportional and derivative gain vectors, $\Delta x$ is the vector of TCP
+position errors and $\dot{x}_{current}$ is the vector of current TCP velocities.
+The position errors are calculated as the difference between the position at the beginning of the program and the current position.
+The current position is calculated using forward kinematics\parencite{zeitlerDualArmAerialManipulation}, while the current velocity is calculated using the backward difference
+derivative\parencite{lohmannSkriptPraktikumReglerimplementierung2023}:
+\begin{equation}
+    \dot{x}_{current} = \frac{x_{current} - x_{previous}}{dt}
+\end{equation}
+%\todoZ{cite MC-script chapter 9.4.1}
+Where $x_{current}$ is the current TCP position, $x_{previous}$ is the TCP position from the previous iteration and $dt$ is the time difference between the two
+iterations.
+The gains $K_p$ and $K_d$ are again set as constants in the program, which were manually tuned to achieve a stable behavior.
+
+The target force is then converted to a target torque for each joint using a nullspace optimizer. This approach was used to utilize the redundancy of the robot to keep the arm as
+upright as possible. The nullspace optimizer calculates the target joint torques using the following formula\parencite{zeitlerDualArmAerialManipulation}:
+\begin{align}
+    \tau_{target} &= \tau_{task} + \tau_{null} \\
+    \tau_{task} &= J^T \ F_{target} \\
+    \tau_{null} &= k_{null} \ N \ \frac{\partial H}{\partial q}
+\end{align}
+Where $\tau_{target}$ is the vector of target torques for each joint, $F_{target}$ is the vector of target forces for the end-effector,and $J$ is the Jacobian matrix.
+$k_{null}$ is a constant gain for the nullspace control, $N$ is the nullspace projection matrix, $H$ is a cost function to keep the joints close to a
+desired position and $q$ is the vector of current joint positions.
+The nullspace projection matrix is calculated using the following formula:
+\begin{equation}
+    N = I - J^T \left( J \, J^T + \lambda_{damp}^2 \, I \right)^{-1} J
+\end{equation}
+Where $\lambda_{damp}$ is a damping factor to improve numerical stability and $I$ is the identity matrix. The cost function and its derivative are defined as:
+\begin{align}
+    H &= 0.5 \ (q - q_{des})^T \ W \ (q - q_{des}) \\
+    \frac{\partial H}{\partial q} &= W \ (q - q_{des})
+\end{align}
+Where $q_{des} = (0, 0, 0, 0)^T$ is the desired upright position and $q$ is the vector of current joint positions. 
+The weight matrix
+\begin{align}
+    W &= \operatorname{diag}\left(\frac{1}{q_{max}^2}\right)
+\end{align}
+is used to normalize the cost function over the joint limits $q_{max}$.
+
+This program makes the robot hold its initial end-effector position, while being compliant in cartesian space. If the end-effector is moved away from its initial position,
+the robot will snap back like a spring. however if the arm is moved along its degree of freedom while holding the end-effector position, it is quite easy to move.
+The arm will then only slowly return to the most upright position, due to the nullspace control.
+
+\subsection{TCP Force Control}
+The third approach was a force controller for the end-effector, which is similar to the cartesian space PD-controller, but instead of holding a position,
+it holds a constant force at the TCP. For this program to behave in a stable manner, a Cartesian space PD-controller is used,
+with the desired end-effector position not being set as a point in space, but rather a line defined by the starting point and the vector of the desired force as a direction vector.
+The target force is then calculated using the same formula as before, but the position error is calculated as the distance from the current TCP position to the closest point
+on the line:
+\begin{equation}
+    \Delta x_{line} = \Delta x - \frac{(\Delta x \cdot F_{des})}{\operatorname{norm}(F_{des})^2} \cdot F_{des}
+\end{equation}
+Similarly the end-effector velocity is calculated as the change in distance to the line over time:
+\begin{equation}
+    \dot{x}_{line} = \frac{\Delta x_{line, curr} - \Delta x_{line, prev}}{dt}
+\end{equation}
+Where $\Delta x_{line, curr}$ is the current distance to the line and $\Delta x_{line, prev}$ is the distance to the line from the previous iteration.
+The target force is then calculated using the same formula as before, but using the distance to the line and its derivative instead of the position and velocity and adding the
+desired force:
+\begin{align}
+    F_{target} &= F_{pd} + F_{des} \\
+    F_{pd} &= - K_p \ \Delta x_{line} - K_d \ \dot{x}_{line}
+\end{align}
+Where $F_{des}$ is the desired constant force at the TCP.
+The target force is then converted to a target torque for each joint using the same nullspace optimizer as before.
+
+The program makes the robot hold a constant force at the endeffector, while being compliant in cartesian space. The robot will move from the starting position in the direction
+of the desired force, until it meets a resisting force equal to the desired force, or the joint limits (or a singularity) are reached. If the TCP is moved away from the line
+of the desired force, the robot will resist the movement and try to return to the line. It can still be moved easily along the degree of freedom of the arm, as long as the end-effector
+is kept on the line of the desired force. It will only slowly return to the most upright position, due to the nullspace control.

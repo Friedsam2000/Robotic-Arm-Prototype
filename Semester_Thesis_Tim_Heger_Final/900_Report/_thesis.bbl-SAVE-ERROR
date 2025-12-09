@@ -1,0 +1,309 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global/global}
+    \entry{lohmannSkriptPraktikumReglerimplementierung2023}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=065bb8246f0f571781d839689404e610}{%
+           family={Lohmann},
+           familyi={L\bibinitperiod},
+           given={Prof.\bibnamedelimi Dr.-Ing.\bibnamedelimi habil.\bibnamedelimi B.},
+           giveni={P\bibinitperiod\bibinitdelim D\bibinithyphendelim I\bibinitperiod\bibinitdelim h\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {Technische Universität München - Lehrstuhl für Regelungstechnik}%
+      }
+      \strng{namehash}{065bb8246f0f571781d839689404e610}
+      \strng{fullhash}{065bb8246f0f571781d839689404e610}
+      \strng{fullhashraw}{065bb8246f0f571781d839689404e610}
+      \strng{bibnamehash}{065bb8246f0f571781d839689404e610}
+      \strng{authorbibnamehash}{065bb8246f0f571781d839689404e610}
+      \strng{authornamehash}{065bb8246f0f571781d839689404e610}
+      \strng{authorfullhash}{065bb8246f0f571781d839689404e610}
+      \strng{authorfullhashraw}{065bb8246f0f571781d839689404e610}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{day}{5}
+      \field{langid}{ngerman}
+      \field{month}{9}
+      \field{shorttitle}{MC\_Skript}
+      \field{title}{Skript zum Praktikum Reglerimplementierung auf Microcontrollern}
+      \field{year}{2023}
+      \field{dateera}{ce}
+      \verb{file}
+      \verb C:\Users\tbheg\Zotero\storage\VJJADYR7\MC_Skript.pdf
+      \endverb
+    \endentry
+    \entry{lynchModernRoboticsMechanics2017}{book}{}{}
+      \name{author}{2}{}{%
+        {{hash=ab9086b1452a1a9813fc6765151b4f61}{%
+           family={Lynch},
+           familyi={L\bibinitperiod},
+           given={Kevin\bibnamedelima M.},
+           giveni={K\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+        {{hash=66f19f2d439b6eb60c024ab622b0389f}{%
+           family={Park},
+           familyi={P\bibinitperiod},
+           given={Frank\bibnamedelima C.},
+           giveni={F\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{fullhash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{fullhashraw}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{bibnamehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{authorbibnamehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{authornamehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{authorfullhash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{authorfullhashraw}{8d01efb70f6cec86f711e78e22f97a48}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{abstract}{This introduction to robotics offers a distinct and unified perspective of the mechanics, planning and control of robots. Ideal for self-learning, or for courses, as it assumes only freshman-level physics, ordinary differential equations, linear algebra and a little bit of computing background. Modern Robotics presents the state-of-the-art, screw-theoretic techniques capturing the most salient physical features of a robot in an intuitive geometrical way. With numerous exercises at the end of each chapter, accompanying software written to reinforce the concepts in the book and video lectures aimed at changing the classroom experience, this is the go-to textbook for learning about this fascinating subject.}
+      \field{day}{25}
+      \field{edition}{1}
+      \field{isbn}{978-1-316-66123-9 978-1-107-15630-2 978-1-316-60984-2}
+      \field{langid}{english}
+      \field{month}{5}
+      \field{shorttitle}{Modern {{Robotics}}}
+      \field{title}{Modern {{Robotics}}: {{Mechanics}}, {{Planning}}, and {{Control}}}
+      \field{urlday}{17}
+      \field{urlmonth}{10}
+      \field{urlyear}{2025}
+      \field{year}{2017}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{doi}
+      \verb 10.1017/9781316661239
+      \endverb
+      \verb{file}
+      \verb C:\Users\tbheg\Zotero\storage\BVJEBJHF\MR-v2.pdf
+      \endverb
+      \verb{urlraw}
+      \verb https://www.cambridge.org/core/product/identifier/9781316661239/type/book
+      \endverb
+      \verb{url}
+      \verb https://www.cambridge.org/core/product/identifier/9781316661239/type/book
+      \endverb
+    \endentry
+    \entry{Makeblock86502Robotergreifer}{online}{}{}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labeltitlesource}{title}
+      \field{title}{Makeblock 86502 {{Robotergreifer}} Bis 1,5 Kg... Kaufen | {{mySWOOOP}}}
+      \field{urlday}{27}
+      \field{urlmonth}{10}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb C:\Users\tbheg\Zotero\storage\2DAET9YG\makeblock-86502-robotergreifer-bis-15-kg-mit-12-v-motor__247063.html
+      \endverb
+      \verb{urlraw}
+      \verb https://www.myswooop.de/kaufen/info/makeblock-86502-robotergreifer-bis-15-kg-mit-12-v-motor__247063?refID=googlemerch&srsltid=AfmBOorFgyESVDlFCJIkafOp0HfQAEEHm97ed-xa08sGtgCE5zr7UVx5qNw
+      \endverb
+      \verb{url}
+      \verb https://www.myswooop.de/kaufen/info/makeblock-86502-robotergreifer-bis-15-kg-mit-12-v-motor__247063?refID=googlemerch&srsltid=AfmBOorFgyESVDlFCJIkafOp0HfQAEEHm97ed-xa08sGtgCE5zr7UVx5qNw
+      \endverb
+    \endentry
+    \entry{murrayMathematicalIntroductionRobotic2017}{book}{}{}
+      \name{author}{3}{}{%
+        {{hash=22ec7dc3434ec7866e28d570204999f8}{%
+           family={Murray},
+           familyi={M\bibinitperiod},
+           given={Richard\bibnamedelima M.},
+           giveni={R\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+        {{hash=6add39ad0b25b0f40aff64937f444b3a}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Zexiang},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=d756b35e7b530d260e5a0807d1953354}{%
+           family={Sastry},
+           familyi={S\bibinitperiod},
+           given={S.\bibnamedelimi Shankar},
+           giveni={S\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {CRC Press}%
+      }
+      \strng{namehash}{adb744a4e5e7e0f8ac9032922b121530}
+      \strng{fullhash}{adb744a4e5e7e0f8ac9032922b121530}
+      \strng{fullhashraw}{adb744a4e5e7e0f8ac9032922b121530}
+      \strng{bibnamehash}{adb744a4e5e7e0f8ac9032922b121530}
+      \strng{authorbibnamehash}{adb744a4e5e7e0f8ac9032922b121530}
+      \strng{authornamehash}{adb744a4e5e7e0f8ac9032922b121530}
+      \strng{authorfullhash}{adb744a4e5e7e0f8ac9032922b121530}
+      \strng{authorfullhashraw}{adb744a4e5e7e0f8ac9032922b121530}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{14}
+      \field{edition}{1}
+      \field{isbn}{978-1-315-13637-0}
+      \field{langid}{english}
+      \field{month}{12}
+      \field{title}{A {{Mathematical Introduction}} to {{Robotic Manipulation}}}
+      \field{urlday}{17}
+      \field{urlmonth}{10}
+      \field{urlyear}{2025}
+      \field{year}{2017}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{doi}
+      \verb 10.1201/9781315136370
+      \endverb
+      \verb{file}
+      \verb C:\Users\tbheg\Zotero\storage\UL2XPJXM\Murray et al. - 2017 - A Mathematical Introduction to Robotic Manipulatio.pdf
+      \endverb
+      \verb{urlraw}
+      \verb https://www.taylorfrancis.com/books/9781351469791
+      \endverb
+      \verb{url}
+      \verb https://www.taylorfrancis.com/books/9781351469791
+      \endverb
+    \endentry
+    \entry{thingiverse.comCustomizablePlanetaryGearbox}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=049b1c514e889efbc23c2b720e55f885}{%
+           family={Thingiverse.com},
+           familyi={T\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {Thingiverse}%
+      }
+      \strng{namehash}{049b1c514e889efbc23c2b720e55f885}
+      \strng{fullhash}{049b1c514e889efbc23c2b720e55f885}
+      \strng{fullhashraw}{049b1c514e889efbc23c2b720e55f885}
+      \strng{bibnamehash}{049b1c514e889efbc23c2b720e55f885}
+      \strng{authorbibnamehash}{049b1c514e889efbc23c2b720e55f885}
+      \strng{authornamehash}{049b1c514e889efbc23c2b720e55f885}
+      \strng{authorfullhash}{049b1c514e889efbc23c2b720e55f885}
+      \strng{authorfullhashraw}{049b1c514e889efbc23c2b720e55f885}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{If you want this printed, please visit this link and ask for the special Thingiverse discount:https://www.3dhubs.com/eindhoven/hubs/cncreate/3dprintThis is a customizer to create your very own planetary gearbox. Keep these principles in mind while choosing your parameters. If you don't, your gearbox will be useless.R = amount of teeth in the ringP = amount of teeth in the planetsS = amount of teeth in the sunEquationsratio = incoming speed / outgoing speed = (R + S) / S =\&gt; R = (ratio - 1) * SP = (R - S) / 2 = whole numberUse the first equation to determine R and S, do this by fixing the ratio and find the smallest combitination of R and S that fits the second equation. Keep in mind that if R is even, S should also be even, else the second equation will never be satisfied. Another important tip is that when you set the ratio too high, the planets will become to big and the sun will be too small. Also, don't make the amount of teeth on the gears much lower than 10.Example:I require a ratio of 3.5. I choose S = 10, which gives me R = 25. According to equation 2, P = 7.5, which is not allowed. I try S = 12, which gives R = 30 and P = 9, which is allowed.}
+      \field{langid}{english}
+      \field{title}{Customizable Planetary Gearbox by {{Anteino}}}
+      \field{urlday}{27}
+      \field{urlmonth}{10}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb C\:\\Users\\tbheg\\Zotero\\storage\\RH4NIMJZ\\planetary_gearbox.scad;C\:\\Users\\tbheg\\Zotero\\storage\\H7GBFKCT\\thing1361044.html
+      \endverb
+      \verb{urlraw}
+      \verb https://www.thingiverse.com/thing:1361044
+      \endverb
+      \verb{url}
+      \verb https://www.thingiverse.com/thing:1361044
+      \endverb
+    \endentry
+    \entry{zeitlerDevelopmentRoboticArm}{thesis}{}{}
+      \name{author}{1}{}{%
+        {{hash=574c5c2f8de43c76cdd0cdd8a3e66d6b}{%
+           family={Zeitler},
+           familyi={Z\bibinitperiod},
+           given={Samuel},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Technical University Munich}%
+      }
+      \strng{namehash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{fullhash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{fullhashraw}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{bibnamehash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{authorbibnamehash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{authornamehash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{authorfullhash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{authorfullhashraw}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \field{extraname}{1}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Development of a Robotic Arm towards Aerial Manipulation}
+      \field{type}{Semester Thesis}
+      \field{urlday}{17}
+      \field{urlmonth}{10}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb C\:\\Users\\tbheg\\Zotero\\storage\\UCRHC8CE\\Zeitler - Development of a robotic arm towards aerial manipulation.pdf;C\:\\Users\\tbheg\\Zotero\\storage\\GT8HB444\\view.html
+      \endverb
+      \verb{urlraw}
+      \verb https://drive.google.com/file/d/1dWBh1wfczxxWWBpC3SAPJB6yhtB2ICUD/view?usp=sharing&usp=embed_facebook
+      \endverb
+      \verb{url}
+      \verb https://drive.google.com/file/d/1dWBh1wfczxxWWBpC3SAPJB6yhtB2ICUD/view?usp=sharing&usp=embed_facebook
+      \endverb
+    \endentry
+    \entry{zeitlerDualArmAerialManipulation}{thesis}{}{}
+      \name{author}{1}{}{%
+        {{hash=574c5c2f8de43c76cdd0cdd8a3e66d6b}{%
+           family={Zeitler},
+           familyi={Z\bibinitperiod},
+           given={Samuel},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Technical University Munich}%
+      }
+      \strng{namehash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{fullhash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{fullhashraw}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{bibnamehash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{authorbibnamehash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{authornamehash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{authorfullhash}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \strng{authorfullhashraw}{574c5c2f8de43c76cdd0cdd8a3e66d6b}
+      \field{extraname}{2}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Towards {{Dual-Arm Aerial Manipulation}}: {{An Exploration}} in {{Robotic Arm Design}}}
+      \field{type}{mathesis}
+      \field{urlday}{17}
+      \field{urlmonth}{10}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb C\:\\Users\\tbheg\\Zotero\\storage\\A44JQD7H\\Zeitler - Towards Dual-Arm Aerial Manipulation An Exploration in Robotic Arm Design.pdf;C\:\\Users\\tbheg\\Zotero\\storage\\PXTHRUPU\\view.html
+      \endverb
+      \verb{urlraw}
+      \verb https://drive.google.com/file/d/1dkpIT7GWSjuMRc1HQJWiLGVZ-38BACD-/view?usp=sharing&usp=embed_facebook
+      \endverb
+      \verb{url}
+      \verb https://drive.google.com/file/d/1dkpIT7GWSjuMRc1HQJWiLGVZ-38BACD-/view?usp=sharing&usp=embed_facebook
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

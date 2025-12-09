@@ -1,0 +1,64 @@
+% This is an automatically configured file, please do not change it!
+
+\def\titlePageLeftMargin{    2.10 cm}
+\def\titlePageRightMargin{   1.35 cm}
+\def\titlePageUpperSpacing{ -2.55 cm}
+
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay, inner sep = 0]
+  \pgfmathsetmacro{\titlePageWidth}{21 cm - \titlePageLeftMargin - \titlePageRightMargin}
+
+  \input{./images/__titlePage/\titlePageLogo}
+
+  \node[anchor = north west, tum blue] (_title_page_chair_name)
+    at ([yshift = \titlePageUpperSpacing, xshift = \titlePageLeftMargin] current page.north west)
+    {\fontfamily{phv}\selectfont\scriptsize{}\nameCaChair};
+  \begin{scope}[shift=(_title_page_chair_name.north west), yshift = 0.36 cm, x = 0.9 cm, y = 0.9 cm]
+    \input{./images/__titlePage/logo-chair}
+  \end{scope}
+
+  \node[anchor = north east, tum blue] (_title_page_tum_name)
+    at ([yshift = \titlePageUpperSpacing, xshift = -\titlePageRightMargin] current page.north east)
+    {\fontfamily{phv}\selectfont\scriptsize{}\nameCaTUM};
+  \begin{scope}[shift=(_title_page_tum_name.north east), xshift = -1.6844 cm, yshift = 0.36 cm, x = 0.9 cm, y = 0.9 cm]
+    \input{./images/__titlePage/logo-tum}
+  \end{scope}
+
+  \node[anchor = north west]
+    at ([yshift = -8 cm, xshift = \titlePageLeftMargin] current page.north west)
+    {{\fontfamily{phv}\selectfont\Large\thesisAuthor}};
+
+  \node[anchor = north west, text width = \titlePageWidth, align = left, tum blue]
+    at ([yshift = -9.5 cm, xshift = \titlePageLeftMargin] current page.north west) {{%
+      \fontseries{b}\fontfamily{phv}\selectfont\LARGE\primaryTitle\\[10 pt]%
+      \Large\primarySubtitle%
+    }};
+  \IfLanguageName{ngerman}{
+	  \node[anchor = north west, text width = \titlePageWidth, align = left, tum blue 1]
+	    at ([yshift = -11.5 cm, xshift = \titlePageLeftMargin] current page.north west) {{%
+	      \fontseries{b}\fontfamily{phv}\selectfont\LARGE\secondaryTitle\\[10 pt]%
+	      \Large\secondarySubtitle%
+	    }};
+	}{}
+
+  \node[anchor = north west, text width = \titlePageWidth, align = left,%
+    execute at begin node=\setlength{\baselineskip}{5ex}]
+    at ([yshift = -17 cm, xshift = \titlePageLeftMargin] current page.north west){{%
+    	\fontfamily{phv}\selectfont\Large\thesisType\newline%
+	  	\Large\nameCaMW%
+   	}}; 
+
+  \node[anchor = north west, text width = \titlePageWidth, align = left]
+    at ([yshift = -20 cm, xshift = \titlePageLeftMargin] current page.north west) {{%
+      \fontfamily{phv}\selectfont%
+      \bgroup
+      \def\arraystretch{3}
+      \begin{tabular}[t]{ l l }
+      	\nameCaSupervisors{}: & \makecell[tl]{\thesisSupervisors \\[2pt] \nameCaChair{}} \\
+      	\nameCaAdvisors{}:    & \makecell[tl]{\thesisAdvisors} \\[2pt]
+      	\nameCaSubPrefix{}:   & \thesisAuthor \\
+      	\nameCaSubDate{}:     & \nameDateTitlePage \ in Garching bei München    
+      \end{tabular}
+      \egroup
+    }};
+\end{tikzpicture}

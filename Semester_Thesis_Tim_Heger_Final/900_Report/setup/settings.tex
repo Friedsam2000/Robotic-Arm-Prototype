@@ -1,0 +1,227 @@
+% ======================================================================
+% SI units
+% ======================================================================
+% Setup locale (e.g. comma vs. dot etc.)
+\SISetupLocale
+
+\sisetup{
+  detect-all            = true,
+  per-mode              = symbol,
+  retain-zero-exponent  = true,
+  exponent-product      = \cdot,
+}
+
+% You can declare your units here:
+% \DeclareSIUnit\pixel{\text{px}}
+% ======================================================================
+
+
+% ======================================================================
+% hyperref
+% ======================================================================
+\hypersetup{
+  pdffitwindow    = false, % do not fit window to page when opened
+  pdfstartview    = {FitH}, % fit the width of the page to window
+  pdftitle        = {\thesisTitleEN},
+  pdfauthor       = {\thesisAuthor},
+  pdfkeywords     = {\thesisTitleEN, %
+                     \thesisTitleDE, %
+                     \thesisAuthor, %
+                     \thesisType, %
+                     Technical University of Munich, %
+                     Technische Universität München, %
+                     TUM, %
+                     Chair of Automatic Control, %
+                     Lehrstuhl für Regelungstechnik %
+                    }, % add your own the keywords (if any)
+  pdfnewwindow    = false, % do not open links in new window
+  colorlinks      = false, % use boxed links
+  allbordercolors = tum blue!20, % color of the link boxes
+}
+% ======================================================================
+
+
+% ======================================================================
+% acro
+% ======================================================================
+\acsetup{
+  list/display = all, % used | all
+  make-links = true,  % true | false
+}
+% ======================================================================
+
+
+% ======================================================================
+% algorithm2e
+% ======================================================================
+\SetAlFnt{\small} % set font size
+\SetKwComment{Comment}{$\triangleright$\ }{} % triangle comment
+% ======================================================================
+
+
+% ======================================================================
+% cleveref
+% ======================================================================
+\crefformat{equation}{{#2(#1)#3}}
+\Crefformat{equation}{{#2(#1)#3}}
+\crefname{chapter}{\S}{\S}
+\crefname{section}{\S}{\S}
+\crefname{subsection}{\S}{\S}
+\crefname{appendix}{\S}{\S}
+% ======================================================================
+
+
+% ======================================================================
+% Manual lengthes
+% ======================================================================
+\renewcommand{\arraystretch}{1.40}
+\setlength\parindent{0pt}
+\setlength{\parskip}{5pt}
+\setlength{\textheight}{235mm}
+% ======================================================================
+
+
+% ======================================================================
+% Set default paths
+% ======================================================================
+\graphicspath{{images/}}
+% ======================================================================
+
+
+% ======================================================================
+% Header & footer style
+% ======================================================================
+\pagestyle{fancy}
+
+% fancy style for twopage
+\lhead[\fancyplain{}{\thepage}]{\fancyplain{}{\nouppercase{\rightmark}}}
+\rhead[\fancyplain{}{\nouppercase{\leftmark}}]{\fancyplain{}{\thepage}}
+\cfoot{}
+
+% ======================================================================
+
+
+% ======================================================================
+% Manual penalties
+% ======================================================================
+\widowpenalty10000
+\clubpenalty10000
+\displaywidowpenalty10000
+% ======================================================================
+
+% ======================================================================
+% Setup listings
+% ======================================================================
+\lstset{
+  language          = Matlab, % primary code language
+  basicstyle        = \scriptsize\ttfamily, % the size of the fonts that are used for the code
+  keywordstyle      = \color{tum blue}\bfseries, % keyword style
+  commentstyle      = \color{tum green}, % comment style
+  stringstyle       = \color{tum orange}, % string literal style
+  numbers           = left, % where to put the line-numbers
+  numberstyle       = \tiny\color{gray}, % the style that is used for the line-numbers
+  stepnumber        = 1, % number each line
+  numbersep         = 5pt, % how far the line-numbers are from the code
+  backgroundcolor   = \color{white}, % choose the background color.
+  showspaces        = false, % show spaces adding particular underscores
+  showstringspaces  = false, % underline spaces within strings
+  showtabs          = false, % show tabs within strings adding particular underscores
+  frame             = tb, % adds top and bottom lines around the code
+  rulecolor         = \color{black}, % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize           = 2, % sets default tabsize to 2 spaces
+  captionpos        = b, % sets the caption-position to bottom
+  breaklines        = true, % sets automatic line breaking
+  breakatwhitespace = false, % sets if automatic breaks should only happen at whitespace
+  title             = \lstname, % show the filename of files included with \lstinputlisting; also try caption instead of title
+  escapeinside      = {@*}{*@}, % if you want to add a comment within your code
+  morekeywords      = {*,...} % if you want to add more keywords to the set
+}
+% ======================================================================
+
+
+% ======================================================================
+% Theorem-like environments
+% ======================================================================
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+\declaretheorem[style=plain, title=\nameThTheorem]{thm}
+\declaretheorem[style=plain, title=\nameThLemma]{lem}
+\declaretheorem[style=plain, title=\nameThProposition]{prp}
+\declaretheorem[style=plain, title=\nameThCorollary]{cor}
+
+\declaretheorem[style=remark, title=\nameThRemark, qed=$\vartriangle$]{rem}
+\declaretheorem[style=remark, title=\nameThExample, qed=$\vartriangle$]{exa}
+
+\declaretheorem[style=definition, title=\nameThDefinition, qed=$\blacktriangle$]{dfn}
+% ======================================================================
+
+
+% ======================================================================
+% Equations highlighting (empheq)
+% ======================================================================
+\newcommand*\bluebox[1]{%
+\colorbox{tum blue 1!10}{\hspace{1em}#1\hspace{1em}}}
+
+\newcommand*\greenbox[1]{%
+\colorbox{tum green!10}{\hspace{1em}#1\hspace{1em}}}
+
+\newcommand*\orangebox[1]{%
+\colorbox{tum orange!10}{\hspace{1em}#1\hspace{1em}}}
+% ======================================================================
+
+
+% ======================================================================
+% Bibliography settings
+% ======================================================================
+% Add bib file
+\addbibresource{bibtex/literature.bib}
+\addbibresource{bibtex/Semesterarbeit.bib}
+% Write last name (family name) first in the bibliography
+\DeclareNameAlias{default}{family-given}
+% Set other options
+\ExecuteBibliographyOptions{
+   isbn       = true,
+   doi        = true,
+   url        = true,
+   sortcites  = true
+   }
+% keep URLs only for @online entries
+\AtEveryBibitem{%
+  \ifentrytype{online}
+    {}
+    {\clearfield{urldate}\clearfield{url}}%
+}
+% ======================================================================
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION CUSTOMIZATION
+%----------------------------------------------------------------------------------------
+
+\usepackage{titling} % Required for customizing the title section
+
+\setlength{\droptitle}{-4\baselineskip} % Move the title up
+
+\pretitle{\begin{center}\huge\bfseries} % Article title pre-formatting
+\posttitle{\end{center}} % Article title post-formatting
+
+\setlength{\thanksmarkwidth}{3pt} % Left margin for the first \thanks line
+\setlength{\thanksmargin}{-3pt} % Left margin for the second and onwards \thanks line
+
+\patchcmd{\maketitle}{plain}{empty}{}{} % Set the headers and footers style for the first page to empty
+
+%----------------------------------------------------------------------------------------
+%	ABSTRACT CUSTOMIZATION
+%----------------------------------------------------------------------------------------
+
+\usepackage{abstract} % Allows abstract customization
+
+\renewcommand{\abstractnamefont}{\normalfont\bfseries\vspace{0.5\baselineskip}} % Set the "Abstract" text to bold
+\renewcommand{\abstracttextfont}{\vspace{-0.5\baselineskip}\normalfont\small\itshape} % Set the abstract itself to small italic text
+
+%----------------------------------------------------------------------------------------
+%	OTHER SETTINGS
+%----------------------------------------------------------------------------------------
+\setcounter{secnumdepth}{0} % Don't number sections at any level
+
+\usepackage[ruled,vlined]{algorithm2e}
+\renewcommand{\thealgocf}{\thesection.\arabic{algocf}}

@@ -1,0 +1,34 @@
+% ==================================================================
+% Front matter
+% ==================================================================
+\frontmatter
+\pagestyle{empty}
+
+\phantomsection
+\pdfbookmark[0]{\nameCaTitlePage}{titlePage}
+\input{auxfiles/__titlePage}
+\cleardoublepage
+\input{auxfiles/__titlePageBack}
+\cleardoublepage
+
+
+\pagestyle{plain}
+
+
+\chapter{\nameCaTaskDescription}
+\input{auxfiles/taskDescription}
+\cleardoublepage
+
+\include{auxfiles/__abstractWrapper}
+\cleardoublepage
+
+\phantomsection
+\pdfbookmark[0]{\nameCaAcknowledgments}{acknowledgments}
+\chapter*{\nameCaAcknowledgments}
+\input{auxfiles/acknowledgments}
+\cleardoublepage
+
+\phantomsection
+\pdfbookmark[0]{\contentsname}{toc}
+\tableofcontents
+% ==================================================================

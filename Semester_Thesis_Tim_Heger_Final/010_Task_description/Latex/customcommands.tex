@@ -1,0 +1,151 @@
+% ======================================================================
+% TUM-Farben
+% ======================================================================
+% TUM blue
+\definecolor{tum blue}{HTML}{0065BD}
+% Additional blue color tones
+% 1 is the lightest (light blue)
+% 5 is the darkest (deep navy)
+\definecolor{tum blue 1}{HTML}{98C6EA}
+\definecolor{tum blue 2}{HTML}{64A0C8}
+\definecolor{tum blue 3}{HTML}{0073CF}
+\definecolor{tum blue 4}{HTML}{005293}
+\definecolor{tum blue 5}{HTML}{003359}
+
+% TUM accent colors
+\definecolor{tum green}{HTML}{A2AD00}
+\definecolor{tum orange}{HTML}{E37222}
+\definecolor{tum ivory}{HTML}{DAD7CB}
+
+% TUM diagram colors
+\definecolor{tum dia violet}{HTML}{69085A}
+\definecolor{tum dia dark blue}{HTML}{0F1B5F}
+\definecolor{tum dia turquoise}{HTML}{00778A}
+\definecolor{tum dia dark green}{HTML}{007C30}
+\definecolor{tum dia light green}{HTML}{679A1D}
+\definecolor{tum dia light yellow}{HTML}{FFDC00}
+\definecolor{tum dia dark yellow}{HTML}{F9BA00}
+\definecolor{tum dia dark orange}{HTML}{D64C13}
+\definecolor{tum dia red}{HTML}{C4071B}
+\definecolor{tum dia dark red}{HTML}{9C0D16}
+% ======================================================================
+
+
+% ======================================================================
+% Überschrift
+% ======================================================================
+\newcommand{\Ueberschrift}{%
+  {\Large\bf%
+    \noindent\TypDerArbeit:\\[5 pt]%
+    \noindent\TitelDerArbeit}
+
+  \vspace*{14 pt}
+}
+% ======================================================================
+
+
+% ======================================================================
+% Einrückungen ein/aus
+% ======================================================================
+\newcommand{\EinrueckungEin}{\setlength\parindent{1.2 em}}
+\newcommand{\EinrueckungAus}{\setlength\parindent{0 em}}
+% ======================================================================
+
+
+
+% ======================================================================
+% Abschnitte ohne Nummerierung
+% ======================================================================
+\let\sectionold\section
+\let\subsectionold\subsection
+\let\subsubsectionold\subsubsection
+
+\renewcommand{\section}[2][\doSection]{%
+  \def\doSection{#2}
+  \phantomsection%
+  \sectionold*{#2}%
+  \addcontentsline{toc}{section}{#1}%
+}
+\renewcommand{\subsection}[2][\doSubsection]{%
+  \def\doSubsection{#2}
+  \phantomsection%
+  \subsectionold*{#2}%
+  \addcontentsline{toc}{subsection}{#1}%
+}
+\renewcommand{\subsubsection}[2][\doSubsubsection]{%
+  \def\doSubsubsection{#2}
+  \phantomsection%
+  \subsubsectionold*{#2}%
+  \addcontentsline{toc}{subsubsection}{#1}%
+}
+% ======================================================================
+
+% ======================================================================
+% Eigene Befehle
+% ======================================================================
+% 1) Symbols 
+\newcommand{\Reals}{\mathbb{R}}
+\newcommand{\Complex}{\mathbb{C}}
+\newcommand{\Htwo}{\mathcal{H}_2}
+\newcommand{\Hinf}{\mathcal{H}_\infty}
+\newcommand{\Ltwo}{\mathcal{L}_2}
+\newcommand{\Linf}{\mathcal{L}_\infty}
+\renewcommand{\th}{^{\text{th}}}
+\newcommand{\BigO}[1]{\mathcal{O}\left(#1\right)}
+
+\newcommand{\defeq}{\vcentcolon=}
+\newcommand{\logicand}{\wedge}
+\newcommand{\logicor}{\vee}
+
+% 2) Matrix operations
+\newcommand{\trans}[1]{#1^\top}
+\newcommand{\htrans}[1]{#1^H}
+\newcommand{\hermit}{^H}
+\newcommand{\inv}[1]{#1^{-1}}
+\newcommand{\invt}[1]{#1^{-\top}}
+\newcommand{\pinv}[1]{#1^{\dag}}
+\newcommand{\pd}{\succ}
+\newcommand{\nd}{\prec}
+
+
+
+% 3) Operators
+\newcommand\abs[1]{\left|#1\right|}
+\DeclareMathOperator{\vecspan}{span}
+\newcommand\vspan[1]{\vecspan\left(#1\right)}
+\newcommand\vecspace[1]{\mathcal{#1}}
+\DeclareMathOperator{\diagmat}{diag}
+\newcommand\diag[1]{\diagmat\left(#1\right)}
+\DeclareMathOperator{\matrixrank}{rank}
+\newcommand\rank[1]{\matrixrank #1}
+\DeclareMathOperator{\matrixrang}{rang}
+\newcommand\rang[1]{\matrixrang\left(#1\right)}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\diff}[2]{\frac{\mathrm{d}\, #1}{\mathrm{d}\, #2}}
+\newcommand{\innProd}[2]{\left\langle#1, \; #2\right\rangle}
+\newcommand{\range}[1]{\mathcal{R}\left(#1\right)}
+
+% 4) Formatting
+\newcommand{\ts}{\!} %negative space for formulas in text
+\newcommand{\nix}{\mbox{ }} %empty space
+
+
+
+%---- MOR comamnds
+\newcommand{\krylov}[3]{\vecspace{K}_{#1}\left(#2, #3\right)}
+%\newcommand{\shift}{\sigma}
+\newcommand{\As}{A_{\shift}}
+\newcommand{\Asx}{A-\shift E}
+\newcommand{\inputkrylov}{\krylov{n}{\inv{\As} E}{\inv{\As}B}}
+\newcommand{\outputkrylov}{\krylov{n}{\invt{\As} \trans{E}}{\invt{\As} \trans{C}}}
+\newcommand{\moment}{C\left(\inv{\As}E\right)^i \inv{\As} B}
+
+\newcommand{\pencil}{\mu E - A}
+
+\newcommand{\GramC}{\mathcal{W}_c}
+\newcommand{\GramO}{\mathcal{W}_o}
+
+\newcommand{\fo}{n}
+\newcommand{\ro}{q}
+% ======================================================================

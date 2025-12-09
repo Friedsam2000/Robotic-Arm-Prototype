@@ -1,0 +1,7 @@
+connector_brace x1
+connector_brace_tubes x2
+gear_ring_v2 x1
+gearbox_lid x1
+planetary_axis_top x1
+side_brace_torque_wheel x1
+sun_gear_v2 x1

@@ -1,0 +1,77 @@
+\chapter{Notation}
+\section{Special operators and symbols}
+\subsection*{Matrix diagonal extraction}
+Operator $\diag$ extracts the elements on the
+main diagonal of a matrix, i.e.\
+$\diag\T{A} = a_{ii}$.
+
+\subsection*{Matrix direct sum}
+A direct sum of two matrices is defined as
+\begin{equation}
+  \T{A} \oplus \T{B} =
+  \begin{bmatrix}
+    \T{A} & \T{0} \\
+    \T{0} & \T{B}
+  \end{bmatrix}.
+\end{equation}
+Furthermore, a sum of $n$ elements is defined as
+\begin{equation}
+  \bigoplus_{i = 1}^n \T{A}_i =
+  \begin{bmatrix}
+    \T{A}_1 & \T{0}   & \cdots & \T{0}   \\
+    \T{0}   & \T{A}_2 & \cdots & \T{0}   \\
+    \vdots  & \vdots  & \ddots & \vdots  \\
+    \T{0}   & \T{0}   & \cdots & \T{A}_n
+  \end{bmatrix}.
+\end{equation}
+
+\subsection*{Inner product}
+A bilinear form $\iprd[\T{A}]{\,\cdot\,}{\,\cdot\,}  : \Complex^n \times \Complex^n \to \Complex$
+named $\T{A}$-inner product is defined as $\iprd[\T{A}]{\T{u}}{\T{v}} = \T{u}^* \T{A} \T{v}$.
+In the special case of $\T{A} = \T{I}$, which is denoted by simply
+$\iprd{\,\cdot\,}{\,\cdot\,}$, the
+inner product is equivalent to the dot product of two vectors:
+$\iprd[\T{I}]{\T{u}}{\T{v}} = \iprd{\T{u}}{\T{v}} = \T{u}^* \T{v}$.
+
+\section{\nameCaSymbols}
+
+\subsubsection*{Typographical symbols}
+\S\ chapter, section, subsection
+
+$\blacksquare$ end of a proof
+
+$\vartriangle$ end of a remark or example
+
+$\blacktriangle$ end of a definition
+
+\subsubsection*{Mathematical symbols}
+
+$j$ imaginary unit
+
+$\T{I}$ identity matrix
+
+$\T{0}$ zero matrix
+
+$\T{P}$ permutation matrix
+
+$\T{Q}$, $\T{U}$ unitary (orthogonal) matrix
+
+$\T{T}$ transformation matrix
+
+$\T{\mathit{R}}(\phi)$ rotation matrix
+
+$\cond{(\T{A})}$ condition number of $\T{A}$
+
+$\lambda(\T{A})$ eigenvalue of $\T{A}$
+
+$\sigma(\T{A})$ singular value of $\T{A}$
+
+$\mathscr{H}_p$ Hardy $p$-norm
+
+$\mathscr{L}_p$ Lebesgue $p$-norm
+
+\section{\nameCaAcronyms}
+\label{sc:abbreviationsAndAcronyms}
+%\vspace{-1 cm}
+%\printacronyms[name = {}]
+\printacronyms[name={}, heading=none]

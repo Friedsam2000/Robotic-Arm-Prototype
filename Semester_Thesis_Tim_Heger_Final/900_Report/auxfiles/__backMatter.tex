@@ -1,0 +1,36 @@
+% ==================================================================
+% Appendices and back matter
+% ==================================================================
+\appendix
+
+\include{auxfiles/notation}
+
+
+\renewcommand{\listtheoremname}{\nameLoTheorems}
+\listoftheorems
+\addcontentsline{toc}{chapter}{\nameLoTheorems}
+
+
+\renewcommand{\listalgorithmcfname}{\nameLoAlgorithms}
+\listofalgorithms
+\addcontentsline{toc}{chapter}{\nameLoAlgorithms}
+
+
+\renewcommand{\listfigurename}{\nameLoFigures}
+\listoffigures
+\addcontentsline{toc}{chapter}{\nameLoFigures}
+
+
+\renewcommand{\listtablename}{\nameLoTables}
+\listoftables
+\addcontentsline{toc}{chapter}{\nameLoTables}
+
+
+\renewcommand{\lstlistlistingname}{\nameLoListings}
+\lstlistoflistings
+\addcontentsline{toc}{chapter}{\nameLoListings}
+
+\printbibliography[title=\nameCaReferences]
+\addcontentsline{toc}{chapter}{\nameCaReferences}
+
+% ==================================================================

@@ -1,0 +1,44 @@
+\begin{tikzpicture}
+    \foreach \i in {0,1,...,15} \draw[thick] (0.0, \i/7.5) -- +(-0.1, 0.1);
+    \draw[thick] (0, 0) -- +(0, 2);
+
+    \draw[tum green, -latex'] (2.0, 3) -- +(1, 0) node[midway, above] {$x$};
+    \draw[tum green] (3, 1.8) -- +(0, 1.3);
+    \draw[tum green] (2.0, 3) +(0, -0.2) -- +(0, 0.2);
+    \foreach \i in {0,1,...,3} \draw[tum green] (2.0, 2.8 + \i/7.5) -- +(-0.1, 0.1);
+
+    \def\dampY{0.60}
+    \def\dampLX{0}
+    \def\dampRX{3}
+    \def\dampLRod{1.25}
+    \def\dampRRod{1.2}
+    \def\dampWPiston{0.14}
+    \def\dampWCylinder{0.20}
+    \def\dampLCylinder{0.6}
+
+    \draw[thick] (\dampLX, \dampY) -- +(\dampLRod, 0); % Left rod to the piston
+    \draw[thick] (\dampLX + \dampLRod, \dampY + \dampWPiston/2) -- +(0, -\dampWPiston); % Piston
+    \draw[thick] (\dampRX - \dampRRod - \dampWCylinder/2, \dampY - \dampWCylinder/2) arc (-90:+90:\dampWCylinder/2); % Cylinder head
+    \draw[thick] (\dampRX - \dampRRod - \dampWCylinder/2, \dampY + \dampWCylinder/2) -- +(-\dampLCylinder, 0);  % Upper cylinder
+    \node[above] at (\dampRX - \dampRRod - \dampWCylinder/2 - \dampLCylinder/2, \dampY + \dampWCylinder/2) {$d$};
+    \draw[thick] (\dampRX - \dampRRod - \dampWCylinder/2, \dampY - \dampWCylinder/2) -- +(-\dampLCylinder, 0); % Lower cylinder
+    \draw[thick] (\dampRX, \dampY) -- +(-\dampRRod, 0); % Right rod to the cylinder head
+
+    \def\springY{1.4}
+    \def\springLX{0}
+    \def\springRX{3}
+    \def\springLRod{0.5}
+    \def\springRRod{0.5}
+    \def\springWCoil{0.20}
+    \def\springNCoil{12}
+    \pgfmathsetmacro{\springLCoil}{(\springRX - \springRRod - \springLX - \springLRod)/\springNCoil}
+
+    \draw[thick] (\springLX, \springY) -- ++(\springLRod + 0.01, 0); % Left rod
+    \draw[thick] (\springRX, \springY) -- ++(-\springRRod - 0.01, 0); % Right rod
+    \foreach \i in {1, 2, ..., \springNCoil} %
+        \draw[thick] (\springLX + \springLRod + \i*\springLCoil - \springLCoil, \springY) -- %
+        ++(\springLCoil/4, -\springWCoil/2) -- ++(\springLCoil/2, +\springWCoil) -- ++(\springLCoil/4, -\springWCoil/2);
+    \node[above] at ( \springLX/2 + \springLRod/2 + \springRX/2 - \springRRod/2, \springY + \springWCoil/2) {$c$};
+
+    \draw[thick] (3, 0.2) rectangle +(2, 1.6) node[midway] {$m$};
+\end{tikzpicture}

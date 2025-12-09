@@ -1,0 +1,341 @@
+% ======================================================================
+% Math commands
+% ======================================================================
+% Big Oh
+\newcommand{\bigOh}{\mathcal{O}}
+% Programming assign symbol
+\newcommand{\assign}{:=}
+% Scalable triple vertical bars (for norms)
+\newcommand{\III}[1]{{\left\vert\kern-0.25ex\left\vert\kern-0.25ex\left\vert #1 \right\vert\kern-0.25ex\right\vert\kern-0.25ex\right\vert}}
+% Fixed height triple vertical bars (for norms)
+\newcommand{\IIIf}[1]{{\vert\kern-0.25ex\vert\kern-0.25ex\vert #1 \vert\kern-0.25ex\vert\kern-0.25ex\vert}}
+% European Phi
+\renewcommand{\phi}{\varphi}
+% European Epsilon
+\let\epsilonAm\epsilon
+\renewcommand{\epsilon}{\varepsilon}
+% Capital zeta
+\newcommand{\Zeta}{Z}
+% Real numbers
+\newcommand{\Real}{\mathbb{R}}
+% Strictly positive real numbers
+\newcommand{\RealPos}{\Real^{{}+{}}}
+% Strictly negative real numbers
+\newcommand{\RealNeg}{\Real^{{}-{}}}
+% Non-negative real numbers
+\newcommand{\RealNonNeg}{\RealPos \cup \lbrace 0 \rbrace}
+% Non-positive real numbers
+\newcommand{\RealNonPos}{\RealNeg \cup \lbrace 0 \rbrace}
+% Set of complex numbers (blackboard typesetting)
+\newcommand{\Complex}{\mathbb{C}}
+% Pseudoinverse
+\newcommand{\pinv}{{{}+{}}}
+% Transpose operator
+\newcommand{\tran}{\mathrm{T}}
+% Tensor / Matrix
+\newcommand{\T}[1]{\bm{#1}}
+% Diagonal
+\DeclareMathOperator{\diag}{diag}
+% Span
+\DeclareMathOperator{\spn}{span}
+% Signum
+\DeclareMathOperator{\sgn}{sgn}
+% Rank of a matrix
+\DeclareMathOperator{\rank}{rank}
+% Trace
+\DeclareMathOperator{\trace}{tr}
+% Norm
+\newcommand{\norm}[2]{\lVert #1 \rVert_{#2}}
+% Condition number
+\newcommand{\cond}{\kappa}
+% Inner product
+\newcommand{\iprd}[3][]{\left\langle #2, #3 \right\rangle_{#1}}
+% Unit vector
+\newcommand{\e}[1]{\T{e}_{#1}}
+% Real part
+\renewcommand{\Re}{\mathrm{Re}}
+% Imaginary part
+\renewcommand{\Im}{\mathrm{Im}}
+% Distance between subspaces
+\DeclareMathOperator{\dist}{dist}
+% Machine epsilon
+\newcommand{\macheps}{\epsilonAm}
+
+% %
+\renewcommand{\vec}[1]{\bm{#1}} % für Vektoren 
+\newcommand{\mat}[1]{\bm{#1}} % für Matrizen 
+\newcommand{\vecn}[1]{\bm{#1}} % für Vektoren = Anordnung von Zahlen 
+\newcommand{\matn}[1]{\bm{#1}} % für Matrizen = Anordnung von Zahlen z.B. Einheitsmatrix
+\newcommand{\pd}{\partial}                      % Partielle Differenziation
+\newcommand{\tsum}{{\textstyle\sum\limits}}     % kleine Summe
+\newcommand{\abs}[1]{| #1 |}                    % Betrag
+
+\providecommand*{\eu}{\ensuremath{\mathrm{e}}}% Euler
+\providecommand*{\iu}{\ensuremath{\mathrm{i}}}% The imaginary unit
+\providecommand*{\ju}{\ensuremath{\mathrm{j}}}% The imaginary unit
+\providecommand*{\ru}{\ensuremath{\mathrm{r}}}% reduziert
+\providecommand*{\Su}{\ensuremath{\mathrm{S}}}% großes S (upright)
+\providecommand*{\Bu}{\ensuremath{\mathrm{B}}}% großes B (upright)
+\providecommand*{\blin}{\ensuremath{\mathrm{blin}}}% großes B (upright)
+
+%\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+%\renewcommand{\algorithmicensure}{\textbf{Output:}}
+% ======================================================================
+
+
+% ======================================================================
+% Typesetting commands
+% ======================================================================
+% Emphasise with colour
+\newcommand{\emphCol}[1]{{\color{tum blue}#1}}
+% Ugly to do box
+\newcommand{\TODO}[1]{\colorbox{red!50!white!50}{#1}}
+% Find better wording
+\newcommand{\WORD}[1]{\colorbox{blue!50!white!50}{#1}}
+% Change typeface
+\newcommand{\changetypeface}[3]{\fontfamily{#1} \fontseries{#2} \fontshape{#3} \selectfont}
+% Centre the cell
+\newcommand{\TABC}[1]{\multicolumn{1}{c}{#1}}
+% ======================================================================
+
+
+% ======================================================================
+% TUM colors
+% ======================================================================
+% TUM blue
+\definecolor{tum blue}{HTML}{0065BD}
+% Additional blue color tones
+% 1 is the lightest (light blue)
+% 5 is the darkest (deep navy)
+\definecolor{tum blue 1}{HTML}{98C6EA}
+\definecolor{tum blue 2}{HTML}{64A0C8}
+\definecolor{tum blue 3}{HTML}{0073CF}
+\definecolor{tum blue 4}{HTML}{005293}
+\definecolor{tum blue 5}{HTML}{003359}
+
+% TUM accent colors
+\definecolor{tum green}{HTML}{A2AD00}
+\definecolor{tum orange}{HTML}{E37222}
+\definecolor{tum ivory}{HTML}{DAD7CB}
+
+% TUM diagram colors
+\definecolor{tum dia violet}{HTML}{69085A}
+\definecolor{tum dia dark blue}{HTML}{0F1B5F}
+\definecolor{tum dia turquoise}{HTML}{00778A}
+\definecolor{tum dia dark green}{HTML}{007C30}
+\definecolor{tum dia light green}{HTML}{679A1D}
+\definecolor{tum dia light yellow}{HTML}{FFDC00}
+\definecolor{tum dia dark yellow}{HTML}{F9BA00}
+\definecolor{tum dia dark orange}{HTML}{D64C13}
+\definecolor{tum dia red}{HTML}{C4071B}
+\definecolor{tum dia dark red}{HTML}{9C0D16}
+% ======================================================================
+
+
+% ======================================================================
+% English/German counterparts: Theorem-like environments
+% ======================================================================
+
+% Define theorem name
+\IfLanguageName{english}{\def\nameThTheorem{Theorem}}{}
+\IfLanguageName{british}{\def\nameThTheorem{Theorem}}{}
+\IfLanguageName{ngerman}{\def\nameThTheorem{Satz}}{}
+\IfLanguageName{german}{\def\nameThTheorem{Satz}}{}
+% Define lemma name
+\IfLanguageName{english}{\def\nameThLemma{Lemma}}{}
+\IfLanguageName{british}{\def\nameThLemma{Lemma}}{}
+\IfLanguageName{ngerman}{\def\nameThLemma{Lemma}}{}
+\IfLanguageName{german}{\def\nameThLemma{Lemma}}{}
+% Define proposition name
+\IfLanguageName{english}{\def\nameThProposition{Proposition}}{}
+\IfLanguageName{british}{\def\nameThProposition{Proposition}}{}
+\IfLanguageName{ngerman}{\def\nameThProposition{Behauptung}}{}
+\IfLanguageName{german}{\def\nameThProposition{Behauptung}}{}
+% Define corollary name
+\IfLanguageName{english}{\def\nameThCorollary{Corollary}}{}
+\IfLanguageName{british}{\def\nameThCorollary{Corollary}}{}
+\IfLanguageName{ngerman}{\def\nameThCorollary{Korollar}}{}
+\IfLanguageName{german}{\def\nameThCorollary{Korollar}}{}
+% Define remark name
+\IfLanguageName{english}{\def\nameThRemark{Remark}}{}
+\IfLanguageName{british}{\def\nameThRemark{Remark}}{}
+\IfLanguageName{ngerman}{\def\nameThRemark{Anmerkung}}{}
+\IfLanguageName{german}{\def\nameThRemark{Anmerkung}}{}
+% Define example name
+\IfLanguageName{english}{\def\nameThExample{Example}}{}
+\IfLanguageName{british}{\def\nameThExample{Example}}{}
+\IfLanguageName{ngerman}{\def\nameThExample{Beispiel}}{}
+\IfLanguageName{german}{\def\nameThExample{Beispiel}}{}
+% Define definition name
+\IfLanguageName{english}{\def\nameThDefinition{Definition}}{}
+\IfLanguageName{british}{\def\nameThDefinition{Definition}}{}
+\IfLanguageName{ngerman}{\def\nameThDefinition{Definition}}{}
+\IfLanguageName{german}{\def\nameThDefinition{Definition}}{}
+
+% ======================================================================
+
+
+% ======================================================================
+% English/German counterparts: Captions
+% ======================================================================
+
+% Define date for the title page
+\IfLanguageName{english}{\def\nameDateTitlePage{\thesisDateEN}}{}
+\IfLanguageName{british}{\def\nameDateTitlePage{\thesisDateEN}}{}
+\IfLanguageName{ngerman}{\def\nameDateTitlePage{\thesisDateDE}}{}
+\IfLanguageName{german}{\def\nameDateTitlePage{\thesisDateDE}}{}
+
+% Define primary thesis title for the title page
+\IfLanguageName{english}{\def\primaryTitle{\thesisTitleEN}}{}
+\IfLanguageName{british}{\def\primaryTitle{\thesisTitleEN}}{}
+\IfLanguageName{ngerman}{\def\primaryTitle{\thesisTitleDE}}{}
+\IfLanguageName{german}{\def\primaryTitle{\thesisTitleDE}}{}
+
+% Define secondary thesis title for the title page
+\IfLanguageName{english}{\def\secondaryTitle{\thesisTitleDE}}{}
+\IfLanguageName{british}{\def\secondaryTitle{\thesisTitleDE}}{}
+\IfLanguageName{ngerman}{\def\secondaryTitle{\thesisTitleEN}}{}
+\IfLanguageName{german}{\def\secondaryTitle{\thesisTitleEN}}{}
+
+% Define primary thesis subtitle for the subtitle page
+\IfLanguageName{english}{\def\primarySubtitle{\thesisSubtitleEN}}{}
+\IfLanguageName{british}{\def\primarySubtitle{\thesisSubtitleEN}}{}
+\IfLanguageName{ngerman}{\def\primarySubtitle{\thesisSubtitleDE}}{}
+\IfLanguageName{german}{\def\primarySubtitle{\thesisSubtitleDE}}{}
+
+% Define secondary thesis subtitle for the subtitle page
+\IfLanguageName{english}{\def\secondarySubtitle{\thesisSubtitleDE}}{}
+\IfLanguageName{british}{\def\secondarySubtitle{\thesisSubtitleDE}}{}
+\IfLanguageName{ngerman}{\def\secondarySubtitle{\thesisSubtitleEN}}{}
+\IfLanguageName{german}{\def\secondarySubtitle{\thesisSubtitleEN}}{}
+
+% Define chair name
+\IfLanguageName{english}{\def\nameCaChair{Chair of Automatic Control}}{}
+\IfLanguageName{british}{\def\nameCaChair{Chair of Automatic Control}}{}
+\IfLanguageName{ngerman}{\def\nameCaChair{Lehrstuhl für Regelungstechnik}}{}
+\IfLanguageName{german}{\def\nameCaChair{Lehrstuhl für Regelungstechnik}}{}
+
+% Define TUM name
+\IfLanguageName{english}{\def\nameCaTUM{Technical University of Munich}}{}
+\IfLanguageName{british}{\def\nameCaTUM{Technical University of Munich}}{}
+\IfLanguageName{ngerman}{\def\nameCaTUM{Technische Universität München}}{}
+\IfLanguageName{german}{\def\nameCaTUM{Technische Universität München}}{}
+
+% Define Faculty addition for title page
+\IfLanguageName{english}{\def\nameCaMW{at the TUM School of Engineering and Design}}{}
+\IfLanguageName{british}{\def\nameCaMW{at the TUM School of Engineering and Design}}{}
+\IfLanguageName{ngerman}{\def\nameCaMW{an der TUM School of Engineering and Design}}{}
+\IfLanguageName{german}{\def\nameCaMW{an der TUM School of Engineering and Design}}{}
+
+
+% Define supervisor(s)
+\IfLanguageName{english}{\def\nameCaSupervisors{Supervisor}}{}
+\IfLanguageName{british}{\def\nameCaSupervisors{Supervisor}}{}
+\IfLanguageName{ngerman}{\def\nameCaSupervisors{Themensteller/in}}{}
+\IfLanguageName{german}{\def\nameCaSupervisors{Themensteller/in}}{}
+
+% Define advisor(s)
+\IfLanguageName{english}{\def\nameCaAdvisors{Advisor}}{}
+\IfLanguageName{british}{\def\nameCaAdvisors{Advisor}}{}
+\IfLanguageName{ngerman}{\def\nameCaAdvisors{Betreuer/in}}{}
+\IfLanguageName{german}{\def\nameCaAdvisors{Betreuer/in}}{}
+
+% Define submission prefix
+\IfLanguageName{english}{\def\nameCaSubPrefix{Submitted by}}{}
+\IfLanguageName{british}{\def\nameCaSubPrefix{Submitted by}}{}
+\IfLanguageName{ngerman}{\def\nameCaSubPrefix{Eingereicht von}}{}
+\IfLanguageName{german}{\def\nameCaSubPrefix{Eingereicht von}}{}
+
+% Define submission date
+\IfLanguageName{english}{\def\nameCaSubDate{Submission date}}{}
+\IfLanguageName{british}{\def\nameCaSubDate{Submission date}}{}
+\IfLanguageName{ngerman}{\def\nameCaSubDate{Eingereicht am}}{}
+\IfLanguageName{german}{\def\nameCaSubDate{Eingereicht am}}{}
+
+% Define title page
+\IfLanguageName{english}{\def\nameCaTitlePage{Title Page}}{}
+\IfLanguageName{british}{\def\nameCaTitlePage{Title Page}}{}
+\IfLanguageName{ngerman}{\def\nameCaTitlePage{Titelseite}}{}
+\IfLanguageName{german}{\def\nameCaTitlePage{Titelseite}}{}
+
+% Define acknowledgments
+\IfLanguageName{english}{\def\nameCaAcknowledgments{Acknowledgments}}{}
+\IfLanguageName{british}{\def\nameCaAcknowledgments{Acknowledgements}}{}
+\IfLanguageName{ngerman}{\def\nameCaAcknowledgments{Danksagung}}{}
+\IfLanguageName{german}{\def\nameCaAcknowledgments{Danksagung}}{}
+
+% Define acronyms
+\IfLanguageName{english}{\def\nameCaAcronyms{Abbreviations and acronyms}}{}
+\IfLanguageName{british}{\def\nameCaAcronyms{Abbreviations and acronyms}}{}
+\IfLanguageName{ngerman}{\def\nameCaAcronyms{Liste der Abkürzungen}}{}
+\IfLanguageName{german}{\def\nameCaAcronyms{Liste der Abkürzungen}}{}
+
+% Define symbols
+\IfLanguageName{english}{\def\nameCaSymbols{List of symbols}}{}
+\IfLanguageName{british}{\def\nameCaSymbols{List of symbols}}{}
+\IfLanguageName{ngerman}{\def\nameCaSymbols{Liste der Symbole}}{}
+\IfLanguageName{german}{\def\nameCaSymbols{Liste der Symbole}}{}
+
+% Define task description
+\IfLanguageName{english}{\def\nameCaTaskDescription{Task Description}}{}
+\IfLanguageName{british}{\def\nameCaTaskDescription{Task Description}}{}
+\IfLanguageName{ngerman}{\def\nameCaTaskDescription{Aufgabenstellung}}{}
+\IfLanguageName{german}{\def\nameCaTaskDescription{Aufgabenstellung}}{}
+
+% Define list of theorems
+\IfLanguageName{english}{\def\nameLoTheorems{List of Theorems and Other Statements}}{}
+\IfLanguageName{british}{\def\nameLoTheorems{List of Theorems and Other Statements}}{}
+\IfLanguageName{ngerman}{\def\nameLoTheorems{Satzverzeichnis}}{}
+\IfLanguageName{german}{\def\nameLoTheorems{Satzverzeichnis}}{}
+% Define list of algorithms
+\IfLanguageName{english}{\def\nameLoAlgorithms{List of Algorithms}}{}
+\IfLanguageName{british}{\def\nameLoAlgorithms{List of Algorithms}}{}
+\IfLanguageName{ngerman}{\def\nameLoAlgorithms{Algorithmenverzeichnis}}{}
+\IfLanguageName{german}{\def\nameLoAlgorithms{Algorithmenverzeichnis}}{}
+% Define list of figures
+\IfLanguageName{english}{\def\nameLoFigures{List of Figures}}{}
+\IfLanguageName{british}{\def\nameLoFigures{List of Figures}}{}
+\IfLanguageName{ngerman}{\def\nameLoFigures{Abbildungsverzeichnis}}{}
+\IfLanguageName{german}{\def\nameLoFigures{Abbildungsverzeichnis}}{}
+% Define list of tables
+\IfLanguageName{english}{\def\nameLoTables{List of Tables}}{}
+\IfLanguageName{british}{\def\nameLoTables{List of Tables}}{}
+\IfLanguageName{ngerman}{\def\nameLoTables{Tabellenverzeichnis}}{}
+\IfLanguageName{german}{\def\nameLoTables{Tabellenverzeichnis}}{}
+% Define list of listings
+\IfLanguageName{english}{\def\nameLoListings{List of Listings}}{}
+\IfLanguageName{british}{\def\nameLoListings{List of Listings}}{}
+\IfLanguageName{ngerman}{\def\nameLoListings{Listingsverzeichnis}}{}
+\IfLanguageName{german}{\def\nameLoListings{Listingsverzeichnis}}{}
+
+% Define references' name
+\IfLanguageName{english}{\def\nameCaReferences{References}}{}
+\IfLanguageName{british}{\def\nameCaReferences{References}}{}
+\IfLanguageName{ngerman}{\def\nameCaReferences{Literaturverzeichnis}}{}
+\IfLanguageName{german}{\def\nameCaReferences{Literaturverzeichnis}}{}
+% ======================================================================
+
+
+% ======================================================================
+% English/German counterparts: Locale
+% ======================================================================
+
+% Define locale (esp. for siunitx)
+\IfLanguageName{english}{\def\SISetupLocale{\sisetup{locale=US}}}{}
+\IfLanguageName{british}{\def\SISetupLocale{\sisetup{locale=UK}}}{}
+\IfLanguageName{ngerman}{\def\SISetupLocale{\sisetup{locale=DE}}}{}
+\IfLanguageName{german}{\def\SISetupLocale{\sisetup{locale=DE}}}{}
+% ======================================================================
+
+
+
+% ======================================================================
+% English/German: Workaround for `algorithm2e`
+% ======================================================================
+
+% Define bibliography style
+\IfLanguageName{english}{\renewcommand{\algorithmcfname}{Algorithm}}{}
+\IfLanguageName{british}{\renewcommand{\algorithmcfname}{Algorithm}}{}
+\IfLanguageName{ngerman}{\renewcommand{\algorithmcfname}{Algorithmus}}{}
+\IfLanguageName{german}{\renewcommand{\algorithmcfname}{Algorithmus}}{}
+% ======================================================================

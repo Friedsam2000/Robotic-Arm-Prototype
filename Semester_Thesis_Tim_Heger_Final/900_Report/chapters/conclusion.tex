@@ -1,0 +1,46 @@
+\section{Conclusion}
+This paper presented a comprehensive study on the design and implementation of a robotic arm for lab testing and education. It discussed the hardware components,
+control algorithms, and the integration of sensors for feedback. The results demonstrate the effectiveness of the proposed system in performing complex tasks with high precision
+and reliability.
+
+\subsection{Contributions}
+In summary, the hardware improvements made to the robotic arm include:
+
+\begin{itemize}
+    \item Replacement of 3D-printed axes with aluminum axes for increased durability.
+    \item Introduction of ball bearings to support the axes and reduce friction.
+    \item Implementation of a clamping mechanism for better modularity and easier assembly.
+    \item Modification of the yaw joint to include a 8:1 planetary gearbox to increase available torque.
+    \item Enhancement of the tensioning mechanism for the elbow joint to improve reliability.
+    \item Integration of a gripper with manual control, with potential for future software control.
+\end{itemize}
+
+The software contributions include:
+
+\begin{itemize}
+    \item Development of a torque measurement method using the current sensing capabilities of the servo motors and the results from extensive experiments.
+    \item Extension of the existing robot control framework to support current control mode and torque commands.
+    \item Implementation of various torque-based control strategies, namely joint space PD-control, Cartesian space PD-control, and end-effector force control.
+\end{itemize}
+
+\subsection{Limitations}
+Despite the significant improvements made, there are still some limitations to the current design.
+Mainly, the stiffness of the robotic arm is still limited by the use of 3D-printed components in some areas. Therefore, the maximum load the arm can handle is still relatively low
+if the precision of the end-effector position is to be maintained.
+
+Additionally, the torque measurement method relies on the measured current of the servo motors, which leads to inaccuracies due to unmodeled gearbox friction and other factors.
+To be precise, the torque measuremt is ambiguous in the static case, as the same current can correspond to different torques depending on the previous movement and friction.
+This limitation could affect the performance of future torque-based control strategies relying on this measurement.
+
+\subsection{Future Work}
+Future work could focus on further improving the hardware design to increase the stiffness and load capacity of the robotic arm.
+Concrete ideas for further hardware improvements can be found in the Chapter~\nameref{ch:hardware}.
+
+On the software side, future work could focus on refining the torque measurement method to improve accuracy. This could involve developing a more sophisticated model of the motor and
+gearbox dynamics or including additional sensors for direct torque measurement.
+
+Furthermore, advanced control strategies using torque sensor data could be explored, such as model-based control or learning-based approaches, to enhance the performance and
+adaptability of the robotic arm in various tasks. Specifically, implementing advanced impedance control or admittance control could be beneficial for tasks involving interaction with
+the environment.
+
+Lastly, advanced path planning and motion planning algorithms could be integrated into the control framework to enable more complex and dynamic tasks for the robotic arm.

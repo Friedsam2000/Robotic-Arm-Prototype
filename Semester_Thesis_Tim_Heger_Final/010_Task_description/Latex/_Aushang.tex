@@ -1,0 +1,77 @@
+% !TeX spellcheck = en_US
+\documentclass[a4paper, 12pt, english]{article}
+
+% ======================================================================
+% Packages
+% ======================================================================
+\input{./packages}
+
+% Bibliography
+\usepackage[backend=bibtex,autolang=none]{biblatex}
+
+% Paths/Hilfsfiles
+\graphicspath{{./pics/}}
+\addbibresource{./lit/studArbeit.bib}
+
+% ======================================================================
+% Angaben zur Arbeit
+% ======================================================================
+\def\TypDerArbeit{Semesterarbeit}
+\def\TitelDerArbeit{Development and Enhancement of a Lightweight Robotic Arm with Exploration of Control and Planning Strategies}
+
+% ======================================================================
+% Betreuerspezifische Angaben
+% ======================================================================
+\def\BetreuerWort{Betreuer}
+\def\BetreuerName{Samuel Zeitler, M.Sc.}
+\def\BetreuerBuero{MW0225}
+\def\BetreuerDurchwahl{15677}
+\def\BetreuerEMail{samuel.zeitler@tum.de}
+
+% ======================================================================
+\input{./settings}
+\input{./customcommands}
+
+\begin{document}
+	
+	% ======================================================================
+	% Erste Seite - Ausschreibung
+	% ======================================================================
+	
+	\Ueberschrift
+	
+
+	\begin{minipage}{0.65\textwidth}
+		\paragraph{Introduction:}
+		Previous works by J. Sindermann and S. Zeitler established a functional initial prototype, including Blueprints, Software and Documentation. This semester thesis focuses on rebuilding and enhancing the robotic arm to reach an application-ready state, enabling future use for educational purposes at the chair of control theory at TUM.
+		\newline
+		\paragraph{Problem description:}
+		Currently, the Chair of Automatic Control Theory lacks a lightweight and safe-to-handle robotic arm suitable for practical control experiments. The existing prototype includes a MATLAB-based software suite with a basic velocity controller and simplistic trajectory planning. This setup should be extended with more advanced control and planning algorithms, accompanied by theoretical considerations and evaluation. The servo motors employed feature indirect torque measurement, enabling control methods such as torque control. Ultimately, the goal is to establish a reliable and modular experimental platform, facilitating low-overhead implementation of robotic arm control strategies at the chair.
+		
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.32\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{RoboticArmVisualisationInit.png}
+		\captionof{figure}{Current Arm Design}
+	\end{minipage}
+	
+
+	
+	\paragraph{Tasks:}
+	\begin{itemize}
+		\item Building a 3D-printed lightweight robotic arm based on previous works by Zeitler and Sindermann.
+		\item Enhancing and advancing the existing mechanical design.
+		\item Extending the software stack for robotic arm control.
+		\item Developing, implementing, and analyzing advanced control and planning strategies such as torque control and optimization based path planning.
+		\item Transitioning the robotic arm from its current prototype stage into a robust experimental platform for educational purposes at the Chair of Automatic Control.
+	\end{itemize}
+	
+	\paragraph{Prerequisites:}
+	\begin{itemize}
+		\item Good skills in MATLAB.
+		\item Solid background in linear algebra as well as systems \& control theory.
+		\item Analytical problem-solving skills.
+	\end{itemize}
+	
+\end{document}

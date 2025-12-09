@@ -1,0 +1,119 @@
+% ======================================================================
+% SI units
+% ======================================================================
+% Setup locale (e.g. comma vs. dot etc.)
+\SISetupLocale
+
+\sisetup{
+  detect-all            = true,
+  per-mode              = symbol,
+  retain-zero-exponent  = true,
+  exponent-product      = \cdot,
+}
+
+% You can declare your units here:
+% \DeclareSIUnit\pixel{\text{px}}
+% ======================================================================
+
+
+% ======================================================================
+% hyperref
+% ======================================================================
+\hypersetup{
+  pdffitwindow    = false, % do not fit window to page when opened
+  pdfstartview    = {FitH}, % fit the width of the page to window
+  pdftitle        = {\thesisTitleEN},
+  pdfauthor       = {\thesisAuthor},
+  pdfkeywords     = {\thesisTitleEN, %
+                     \thesisTitleDE, %
+                     \thesisAuthor, %
+                     \thesisType, %
+                     Technical University of Munich, %
+                     Technische Universität München, %
+                     TUM, %
+                     Chair of Automatic Control, %
+                     Lehrstuhl für Regelungstechnik %
+                    }, % add your own the keywords (if any)
+  pdfnewwindow    = false, % do not open links in new window
+  colorlinks      = false, % use boxed links
+  allbordercolors = tum blue!20, % color of the link boxes
+}
+% ======================================================================
+
+
+
+% ======================================================================
+% cleveref
+% ======================================================================
+\crefformat{equation}{{#2(#1)#3}}
+\Crefformat{equation}{{#2(#1)#3}}
+\crefname{chapter}{\S}{\S}
+\crefname{section}{\S}{\S}
+\crefname{subsection}{\S}{\S}
+\crefname{appendix}{\S}{\S}
+% ======================================================================
+
+
+% ======================================================================
+% Manual lengthes
+% ======================================================================
+\renewcommand{\arraystretch}{1.40}
+\setlength\parindent{0pt}
+\setlength{\parskip}{5pt}
+\setlength{\textheight}{235mm}
+% ======================================================================
+
+
+% ======================================================================
+% Set default paths
+% ======================================================================
+\graphicspath{{images/}}
+% ======================================================================
+
+
+% ======================================================================
+% Header & footer style
+% ======================================================================
+\pagestyle{fancy}
+\fancyhf{}  % Clear all headers and footers
+
+\renewcommand{\headrulewidth}{0pt}  % Remove the horizontal line
+
+% Define the footer content
+\fancyfoot[L,RO]{\thepage}
+\fancyfoot[LO]{\textit{\thesisAuthor, \nameCaChair, \exposeDate}}
+% ======================================================================
+
+
+
+
+% ======================================================================
+% Equations highlighting (empheq)
+% ======================================================================
+\newcommand*\bluebox[1]{%
+\colorbox{tum blue 1!10}{\hspace{1em}#1\hspace{1em}}}
+
+\newcommand*\greenbox[1]{%
+\colorbox{tum green!10}{\hspace{1em}#1\hspace{1em}}}
+
+\newcommand*\orangebox[1]{%
+\colorbox{tum orange!10}{\hspace{1em}#1\hspace{1em}}}
+% ======================================================================
+
+
+% ======================================================================
+% Bibliography settings
+% ======================================================================
+% Add bib file
+\addbibresource{bibtex/literature.bib}
+% Write last name (family name) first in the bibliography
+\DeclareNameAlias{default}{family-given}
+% Set other options
+\ExecuteBibliographyOptions{
+   isbn       = true,
+   doi        = true,
+   url        = true,
+   sortcites  = true
+   }
+
+% ======================================================================

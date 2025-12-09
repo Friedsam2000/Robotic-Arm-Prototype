@@ -1,0 +1,10 @@
+1x upper_segment_base
+2x upper_segment_base_clamp
+2x ball_bearing_brace
+2x tentioner_tube
+2x tensioner_tube_holder
+1x tube_endeffector1
+1x tube_endeffector2
+1x endeffector_plate
+1x endeffector_brace1
+1x endeffector_brace2

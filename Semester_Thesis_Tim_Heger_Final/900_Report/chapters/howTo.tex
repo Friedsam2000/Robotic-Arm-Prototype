@@ -1,0 +1,474 @@
+\section{How to Use This Template}
+
+
+\subsection{Personalizing the template}
+Edit file \verb|./setup/metadata.tex| to personalize the document. Here
+you can enter your name and the title of the thesis, as well as the submission
+date. Refer to \cref{sc:changingMainDocumentLanguage} for customizing the main
+document language.
+
+To select an appropriate logo, modify \verb|\titlePageLogo|. Following options
+are currently available:
+\begin{itemize}
+  \item \verb|logo-none| : no logo;
+  \item \verb|logo-mor| : MOR Lab logo;
+  \item \verb|logo-mpc| : MPC Lab logo.
+\end{itemize}
+
+
+\subsection{Equations}
+\subsubsection{Basics}
+A simple equation:
+\begin{equation}
+  \label{eq:simple}
+  2 + 2 = 4.
+\end{equation}
+
+Align and number separately:
+\begin{align}
+  \label{eq:align:separate1}
+  2 + 2 &= 4; \\
+  \label{eq:align:separate2}
+  20 + 20 &= 40.
+\end{align}
+
+Align and number as subequations:
+\begin{subequations}
+  \label{eq:subequations}
+  \begin{align}
+    \label{eq:subequations:part1}
+    2 + 2 &= 4; \\
+    \label{eq:subequations:part2}
+    20 + 20 &= 40.
+  \end{align}
+\end{subequations}
+
+Referencing: \cref{eq:subequations} is the same as
+\cref{eq:align:separate1} and \cref{eq:align:separate2},
+but we can also reference the subequations:
+\cref{eq:subequations:part1} and \cref{eq:subequations:part2}.
+
+\subsubsection{Highlighting equations}
+You can also highlight equations using the \verb|empheq| package.
+Although the usage syntax is quite complex, you will get used to it
+quickly:
+\begin{empheq}[box = \bluebox]{equation}
+  \pi \approx \frac{22}{7}.
+\end{empheq}
+By the way, notice that you can typeset bold Greek letters using the \verb|\T{}| macro:
+\begin{empheq}[box = \orangebox]{align}
+  \dot{\T{x}} &= \T{A} \T{x} + \T{B} \T{u}; \\[2 pt]
+  \dot{\T{\xi}} &= \T{\Lambda} \T{\xi} + \T{B}_{\T{\xi}} \T{u}.
+\end{empheq}
+And, of course, \verb|empheq| supports subequations:
+\begin{subequations}
+  \begin{empheq}[box = \greenbox]{align}
+    \dot{\T{x}} &= \T{A} \T{x} + \T{B} \T{u}; \\[2 pt]
+    \T{y} &= \T{C} \T{x} + \T{D} \T{u}.
+  \end{empheq}
+\end{subequations}
+
+\subsubsection{Units}
+Use the \verb|siunitx| package for typesetting units:
+\begin{subequations}
+  \begin{align}
+    c &= \SI{2.9979e8}{\metre\per\second}; \\
+    \hbar &= \SI{6.63e-34}{\joule\second}; \\
+    Z_\text{0} &= \SI{376.3}{\ohm}; \\
+    \alpha^{-1} &\approx \num{137}.
+  \end{align}
+\end{subequations}
+\verb|siunitx| also allows typesetting of numbers (\verb|\num{}|)
+and units only (\verb|\si{}|). Trailing zeros are preserved; this
+is very useful for typesetting tables (cf.\ \cref{tab:nums}).
+\begin{table}
+  \centering
+  \caption[Example for nice number formatting]{%
+    Example for nice number formatting (iteration %
+    $x_{i+1} = x_i - \tan{x_i}$)}
+  \label{tab:nums}
+  \begin{tabular}{cr}
+    \hline
+    Iteration &      \TABC{Value} \\ \hline
+      0     & \num{2.000000000} \\
+      1     & \num{4.185039863} \\
+      2     & \num{2.467893675} \\
+      3     & \num{3.266186286} \\
+      4     & \num{3.140943912} \\
+      5     & \num{3.141592654} \\ \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Theorems and other statements}
+\begin{dfn}[Optional definition description]
+  This is a simple definition.
+\end{dfn}
+
+\begin{prp}[Optional proposition description]
+  This is a simple proposition.
+\end{prp}
+
+\begin{lem}[Optional lemma description]
+  This is a simple lemma.
+\end{lem}
+
+\begin{thm}[Optional theorem name]
+  This is a simple theorem.
+\end{thm}
+\begin{proof}
+  And this is its proof.
+\end{proof}
+
+\begin{cor}[Optional corollary description]
+  This is a simple corollary.
+\end{cor}
+
+\begin{rem}[Optional remark description]
+  This is a simple remark.
+\end{rem}
+
+\begin{exa}[Optional example description]
+  This is a simple example.
+\end{exa}
+
+
+\subsection{Algorithms}
+\cref{al:thesis} describes a method for writing high-quality theses.
+You can reference a line in an algorithm by adding a \verb|\label{}|
+after it, e.g.\ \cref{al:thesis:workMore} is essential.
+
+\begin{algorithm}
+  \setstretch{1.30}
+  \KwData{task description, project duration $N$ (days)}
+  \KwResult{thesis}
+  \Begin{
+    read literature\;
+    \For{$i = 1\;:\;1\;:\;N$}{
+      drink coffee\Comment*[r]{very important!}
+      \While{problems unsolved}{
+        solve problems\;
+      }
+      \eIf{tired}{
+        go home\;
+      }{
+        work more\;\label{al:thesis:workMore}
+      }
+    }
+    write paper\;
+    submit paper\;
+  }
+  \caption{How to write a thesis}
+  \label{al:thesis}
+\end{algorithm}
+
+
+\subsection{Figures}
+You can reference the whole figure (\cref{fig:cuteAnimals})
+as well as each subfigure separately:
+\begin{itemize}
+  \item \cref{fig:cuteAnimals:kitten1} was downloaded from \url{https://commons.wikimedia.org/wiki/File:Green_eyes_kitten.jpg}
+  \item \cref{fig:cuteAnimals:kitten2} was downloaded from \url{https://commons.wikimedia.org/wiki/File:Golden_tabby_and_white_kitten_n03.jpg}
+  \item \cref{fig:cuteAnimals:puppy1} was downloaded from \url{https://commons.wikimedia.org/wiki/File:Westie_pups.jpg}
+  \item \cref{fig:cuteAnimals:puppy1} was downloaded from \url{https://commons.wikimedia.org/wiki/File:St._Bernard_puppy.jpg}
+\end{itemize}
+
+\begin{figure}[p]
+  \centering
+	\subfloat[green-eyed kitten]{\centering
+	    \includegraphics[width = 0.45\linewidth]{./images/kitten1}
+	    \label{fig:cuteAnimals:kitten1}}
+	\subfloat[golden tabby and white kitten]{\centering
+	    \includegraphics[width = 0.45\linewidth]{./images/kitten2}
+	    \label{fig:cuteAnimals:kitten2}}\\[2em]
+	\subfloat[Westie puppies]{\centering
+	    \includegraphics[width = 0.45\linewidth]{./images/puppy1}
+	    \label{fig:cuteAnimals:puppy1}}
+	\subfloat[St.\ Bernard puppy]{\centering
+	    \includegraphics[width = 0.45\linewidth]{./images/puppy2}
+	    \label{fig:cuteAnimals:puppy2}}
+   \caption[Cute animals]{This is an example for subfigures and cute animals}
+  \label{fig:cuteAnimals}
+\end{figure}
+
+\subsection{Tikz}
+
+\subsubsection{Drawing with Tikz}
+
+You can also add and resize TikZ figures, e.g.\ \cref{fig:tikzExample}.
+
+\begin{figure}[p]
+	\centering
+	\resizebox{0.4\linewidth}{!}{\input{./tikz/oscillator}}
+	\caption{Example for a TikZ figure}
+	\label{fig:tikzExample}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\input{./tikz/ableitung_V}
+	\caption{Illustration der verschiedenen Parameterstuetzstellen und deren lokalen Basen}
+	\label{fig:ableitung_V}
+\end{figure} 
+
+\begin{figure}[hbp]
+	\centering
+	\input{./tikz/fotoWagen}
+	\caption{Wagen in der Schienenfuehrung}
+	\label{fig:aufbau:wagen}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\begin{minipage}[c]{\textwidth}
+		\centering
+		\input{./tikz/cwt_aufloesung-a}
+		\caption{Zeit-Skalierungsebene bei der Wavelet-Transformation}
+		\label{fig:cwt_a}
+	\end{minipage}\\[1em]
+	\begin{minipage}[c]{\textwidth}
+		\centering
+		\input{./tikz/cwt_aufloesung-f}
+		\caption{Zeit-Frequenzebene bei der Wavelet-Transformation}
+		\label{fig:cwt_f}
+	\end{minipage}
+\end{figure}
+
+%===================================================
+\subsubsection{Matlab2Tikz}
+You can download matlab2tikz from \url{https://de.mathworks.com/matlabcentral/fileexchange/22022-matlab2tikz-matlab2tikz}.
+
+\begin{figure}[t!]
+	\centering
+	\begin{minipage}{0.95\linewidth}
+		\centering
+		\setlength\figureheight{3.3cm}
+		\setlength\figurewidth{0.88\textwidth}
+		\input{images/matlab/prbs.tikz}
+	\end{minipage}
+	\\[0.6em]
+	\begin{minipage}{0.95\linewidth}
+		\centering
+		\setlength\figureheight{3.3cm}
+		\setlength\figurewidth{0.88\textwidth}
+		\input{images/matlab/prbs_LDS_nicht_dB.tikz}
+	\end{minipage}
+	\\[0.3em]
+	\caption[PRBS-Anregungssignal mit zugehoerigem Leistungsdichtespektrum]{Darstellung des PRBS-Anregungssignals mit zugehoerigem Leistungsdichtespektrum.}
+	\label{fig:prbs}
+\end{figure}
+
+\begin{figure}[tp!]
+	\centering
+	\setlength\figureheight{4cm}
+	\setlength\figurewidth{0.8\textwidth}
+	\input{images/matlab/aufloesung_fft.tikz}
+	\caption[Aufloesung im Zeitbereich und im Frequenzbereich]{Aufloesung im Zeitbereich (oben) und im Frequenzbereich (unten)}
+	\label{fig:aufloesung_fft}
+\end{figure}
+
+\begin{figure}[hbp!]
+	\centering
+	\subfloat[$v = 1 \frac{m}{s}$]{\centering
+		\setlength\figureheight{5cm}
+		\setlength\figurewidth{6.3cm}
+		\input{images/matlab/L_1_v_1_r_10.tikz}		
+		\label{fig:L_1_v_1_r_10}}
+	\subfloat[$v = 5 \frac{m}{s}$]{\centering
+		\setlength\figureheight{5cm}
+		\setlength\figurewidth{6.3cm}
+		\input{images/matlab/L_1_v_5_r_10.tikz}		
+		\label{fig:L_1_v_5_r_10}}\\
+	\subfloat[$v = 10 \frac{m}{s}$]{\centering
+		\setlength\figureheight{5cm}
+		\setlength\figurewidth{6.3cm}
+		\input{images/matlab/L_1_v_10_r_10.tikz}		
+		\label{fig:L_1_v_10_r_10}}
+	\subfloat[$v = 20 \frac{m}{s}$]{\centering
+		\setlength\figureheight{5cm}
+		\setlength\figurewidth{6.3cm}
+		\input{images/matlab/L_1_v_20_r_10.tikz}		
+		\label{fig:L_1_v_20_r_10}}
+	\caption{Simulationsergebnisse bei einseitiger Reduktion mit Eingangs-Krylow-Raum}
+	\label{fig:red_r_10_input_Krylov}
+\end{figure}
+
+%===================================================
+\subsubsection{Inkscape}
+
+\subsubsection{Inkscape documents saved as .eps}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{images/inkscape/circuits/12V_Bordnetz}
+	\caption{Prinzipschaltbild des bereits etablierten 12V-Bordnetzes}
+	\label{fig:12V_Bordnetz}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{images/inkscape/circuits/48V_12V_Bordnetz}
+	\caption{Prinzipschaltbild des zukünftigen 48V/12V-Bordnetzes mit UltraCap-Modul und DC/DC-Wandler}
+	\label{fig:48V_12V_Bordnetz}
+\end{figure}
+
+\subsubsection{Inkscape document with pdf-tex}
+Just save the inkscape document as pdf and choose the option \emph{PDF+LaTeX: Text in PDF weglassen und LaTeX Datei erstellen}.
+
+\begin{figure}[ht]
+	\begin{center}
+		\def\svgwidth{\linewidth}\small
+		\import{./images/inkscape/charts/}{flowchart.pdf_tex}
+		\caption{Overview of work packages and assignments}
+		\label{fig:assignment_wp}
+	\end{center}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\def\svgwidth{\linewidth}\footnotesize
+	\import{./images/inkscape/charts/}{gantt_chart.pdf_tex}
+	\caption{Gantt chart of the proposed work program}
+	\label{fig:Gantt}
+\end{figure}
+
+%===================================================
+\subsection{Blockschaltbilder}
+You can draw block diagrams with Tikz. For this, you can use the commands defined in the TeX-File \emph{blockschaltbilder} (setup/blockschaltbilder). Some examples follow now: see Fig.~\ref{fig:zwei-freiheitsgrade-regelung}, Fig,~\ref{fig:zwei-freiheitsgrade-regelung-zustand}.
+
+\begin{figure}[tp]
+	\centering
+	\scalebox{0.95}{
+		\input{tikz/zwei-freiheitsgrade-regelung}}
+	\caption{Something interesting.}
+	\label{fig:zwei-freiheitsgrade-regelung}
+\end{figure}
+
+\begin{figure}[tp]
+	\centering
+	\scalebox{0.95}{
+		\input{tikz/zwei-freiheitsgrade-regelung-zustand}}
+	\caption{Something interesting.}
+	\label{fig:zwei-freiheitsgrade-regelung-zustand}
+\end{figure}
+
+	
+
+%===================================================
+\subsection{ToDo Notes}
+%\tikzexternaldisable
+\todoX{Read the newspaper and the magazine}
+
+\todoY{Make the breakfast}
+
+\listoftodos
+%\tikzexternalenable
+
+
+%===================================================
+\subsection{Tables}
+\LaTeX{} tables are trivial! Cf.\ \cref{tab:example}.
+
+\begin{table}
+  \centering
+  \caption{Funny webcomics}
+  \label{tab:example}
+  \begin{tabular}{llll}
+    \hline
+    Title                    & Author     & Date         & Link                                                    \\
+    \hline
+    Highway Engineer Pranks  & R.\ Munroe & 2007-04-25   & \href{http://xkcd.com/253/}{xkcd.com}                   \\
+    Stop Being Engineers!    & S.\ Adams  & 2014-02-02   & \href{http://dilbert.com/strip/2014-02-02}{dilbert.com} \\
+    The Typographical Terror & D.\ Malki  & 2010--08--20 & \href{http://wondermark.com/650/}{wondermark.com}       \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Listings}
+Quine in \cref{lst:quine:c} was found \href{https://www.nyx.net/~gthompso/self_c.txt}{here} (search for Jeff Hollingsworth's quine),
+quine in \cref{lst:quine:matlab} \href{http://blog.garritys.org/2009/10/quines.html}{here}. The code in
+\cref{lst:sierpinski} was found \href{http://rosettacode.org/wiki/Sierpinski_carpet#Python}{here}.
+
+\begin{lstlisting}[language = C, label = lst:quine:c, caption = {An elegant C quine}]
+#define Z(q)q,#q
+main()printf(Z("#define Z(q)q,#q\nmain()printf(Z(%s));\n"));
+\end{lstlisting}
+
+\begin{lstlisting}[label = lst:quine:matlab, caption = {An elegant MATLAB quine}]
+a=['ns}z2e1kGe1116k6111gE16;:6ek7;:61gg3E1'];
+disp(['a=[''',a,'''];',10,[a-10,']]);']]);
+\end{lstlisting}
+
+\lstinputlisting[language = Python, label = lst:sierpinski, caption = {Sierpinski carpet in Python}]{./sources/sierpinski.py}
+
+
+\subsection{Languages support}
+\subsubsection{Typesetting non-English texts}
+Use the \verb|otherlanguage| environment to typeset non-English texts:
+\begin{center}
+  \fbox{%
+    \begin{minipage}{0.7\linewidth}
+      \begin{otherlanguage}{ngerman}
+        Franz jagt im komplett verwahrlosten
+        Taxi quer durch Bayern. Zwölf Boxkämpfer jagen Viktor
+        quer über den großen Sylter Deich. Vogel Quax zwickt
+        Johnys Pferd Bim. Sylvia wagt quick den Jux bei
+        Pforzheim. Polyfon zwitschernd aßen Mäxchens Vögel
+        Rüben, Joghurt und Quark. \glqq Fix, Schwyz!\grqq\ quäkt
+        Jürgen blöd vom Paß. Victor jagt zwölf Boxkämpfer quer
+        über den großen Sylter Deich. Falsches Üben von
+        Xylophonmusik quält jeden größeren Zwerg.
+        Heizölrückstoßabdämpfung.
+      \end{otherlanguage}
+    \end{minipage}
+  }
+\end{center}
+
+\subsubsection{Changing the main document language}
+\label{sc:changingMainDocumentLanguage}
+To use German as a default language, edit the first line in \verb|_thesis.tex|:
+Change\\
+\verb|\documentclass[<...>, ngerman, english]{book}|\\
+to\\
+\verb|\documentclass[<...>, english, ngerman]{book}|.
+
+You can also use \verb|british| instead of \verb|english| if you prefer BrE.
+
+
+\subsection{Abbreviations and acronyms}
+Abbreviations and acronyms are defined in \verb|auxfiles/abbreviationsAndAcronyms.tex|.
+You can typeset them using the \verb|\ac{}| command. Refer to \texttt{acro} package
+documentation for specialized commands (\verb|\acs{}|, \verb|\acl{}|, \verb|\acp{}|,
+\verb|\iac{}|, \verb|\Iac{}|, \ldots).
+
+Usage example:
+\begin{itemize}
+  \item An abbreviation is explained if used for the first time: \ac{MPC};
+  \item subsequently, only the short version is used: \ac{MPC};
+  \item however, you can force \texttt{acro} to use the long version anytime: \acl{MPC}.
+\end{itemize}
+
+\emph{Important:} If you want to have only the actually used abbreviations and acronyms
+in the list (\cref{sc:abbreviationsAndAcronyms}), edit \verb|setup/settings.tex|: Find
+the \verb|\acsetup{}| command and set \verb|list/display| to \texttt{used}.
+
+
+\subsection{References}
+\subsubsection{Hyperlinks}
+See \url{https://en.wikibooks.org/wiki/LaTeX/Hyperlinks}.
+
+Also, always use \verb|\cref{}| for referencing equations, tables or other things!
+
+\subsubsection{Literature}
+Cite multiple references:
+\textcite{Bronstein2012,Follinger2013,Gamma2004,Gantmacher2000a,Gantmacher2000b,%
+  Golub2013,Horn2013,LaSalle1961,Mehlhorn2008,Sontag1998,Adamy2009,Horn1994,Watkins2002}.
+
+If you want to have only the reference number:
+\cite{Bronstein2012,Follinger2013,Gamma2004,Gantmacher2000a,Gantmacher2000b,Golub2013,%
+  Horn2013,LaSalle1961,Mehlhorn2008,Sontag1998,Adamy2009,Horn1994,Watkins2002}.
+
+If you want to reference a specific section: \cite[\S~5.2.2, pp.~248--250]{Golub2013}.
+
+If you want to reference a specific equation: \cite[Eq.~(13.22), p.~721]{Bronstein2012}.

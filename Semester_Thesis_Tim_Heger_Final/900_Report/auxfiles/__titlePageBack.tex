@@ -1,0 +1,76 @@
+% This is an automatically configured file, please do not change it!
+
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay, inner sep = 0]
+
+  \pgfmathsetmacro{\titlePageWidth}{21 cm - \titlePageLeftMargin - \titlePageRightMargin}
+
+
+  \node[anchor = north west, text width = \titlePageWidth, align = left]
+    at ([yshift = -5 cm, xshift = \titlePageLeftMargin] current page.north west)
+    {{\fontfamily{phv}\selectfont%
+    \begin{otherlanguage}{ngerman}
+      \large\textbf{Erklärung}\normalsize\\[8 pt]
+      %
+      Ich versichere hiermit, dass ich die von mir eingereichte Arbeit selbstständig verfasst
+      und keine anderen als die angegebenen Quellen und Hilfsmittel benutzt habe.\\[20 pt]
+      Garching bei München, den \thesisDateDE \hspace{3 cm} \hrulefill \quad (\thesisAuthor)
+    \end{otherlanguage}%
+    }};
+  
+  \node[anchor = north west, text width = \titlePageWidth, align = left]
+	at ([yshift = -9 cm, xshift = \titlePageLeftMargin] current page.north west)
+	{{\fontfamily{phv}\selectfont%
+		\begin{otherlanguage}{ngerman}
+		\large\textbf{Freiwillige ergänzende Erklärungen}\normalsize\\[8 pt]
+		\end{otherlanguage}%
+	}};
+
+  \draw[ultra thick] %
+    ([yshift = -10 cm, xshift = \titlePageLeftMargin] current page.north west)
+    rectangle +(5 mm, -5 mm);
+  \node[anchor = north west, text width = \titlePageWidth - 7 mm, align = left]
+    at ([yshift = -10 cm, xshift = \titlePageLeftMargin + 7 mm] current page.north west)
+    {{\fontfamily{phv}\selectfont%
+    \begin{otherlanguage}{ngerman}
+      Mit der zeitlich unbefristeten Aufbewahrung meiner Arbeit im elektronischen Lehrstuhlarchiv erkläre ich mich einverstanden.\\[20 pt]
+    \end{otherlanguage}%
+    }};
+
+  \draw[ultra thick] %
+	([yshift = -11.5 cm, xshift = \titlePageLeftMargin] current page.north west)
+	rectangle +(5 mm, -5 mm);
+  \node[anchor = north west, text width = \titlePageWidth - 7 mm, align = left]
+	at ([yshift = -11.5 cm, xshift = \titlePageLeftMargin + 7 mm] current page.north west)
+	{{\fontfamily{phv}\selectfont%
+	\begin{otherlanguage}{ngerman}
+	  Ich stelle die Software, die ich im Rahmen dieser Arbeit entwickelt habe,
+	  dem Lehrstuhl für Regelungstechnik unter den Bedingungen der 3-Klausel-BSD-Lizenz zur Verfügung.
+	  Ich behalte dabei die sämtlichen Urheber- sowie Nutzungsrechte und werde als Autor namentlich genannt.\\[20 pt]
+	  Garching bei München, den \thesisDateDE \hspace{2.3 cm} \hrulefill \quad (\thesisAuthor)
+	\end{otherlanguage}%
+	}};
+
+  \node[anchor = south west, text width = \titlePageWidth, align = left]
+    at ([yshift = 8 cm, xshift = \titlePageLeftMargin] current page.south west)
+    {{\fontfamily{phv}\selectfont%
+      Chair of Automatic Control (Prof.\ Dr.-Ing.\ habil.\ Boris Lohmann)\\[2 pt]
+      Technical University of Munich\\[2 pt]
+      Boltzmannstraße 15\\[2 pt]
+      85748 Garching bei München\\[2 pt]
+      Germany
+    }};
+
+
+  \node[anchor = south west, text width = 15 cm, align = left]
+    at ([yshift = 4 cm, xshift = \titlePageLeftMargin] current page.south west)
+    {{\fontfamily{phv}\selectfont%
+    \begin{otherlanguage}{ngerman}%
+      Lehrstuhl für Regelungstechnik (Prof.\ Dr.-Ing.\ habil.\ Boris Lohmann)\\[2 pt]
+      Technische Universität München\\[2 pt]
+      Boltzmannstraße 15\\[2 pt]
+      85748 Garching bei München\\[2 pt]
+      Deutschland
+      \end{otherlanguage}
+    }};
+\end{tikzpicture}

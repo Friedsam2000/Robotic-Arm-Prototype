@@ -1,0 +1,212 @@
+%--------------------------------------------
+% PREAMBLE (to be loaded before each paper)
+%--------------------------------------------
+
+
+% -------------------------------------PACKAGES
+%\usepackage{graphicx}      % include this line if your document contains figures
+%\usepackage[square, comma, numbers]{natbib}        % required for bibliography
+%\bibliographystyle{alphadin}
+%\usepackage{bibtex}
+
+
+%user added
+%	a) basic
+\usepackage{amsmath, amssymb, amsfonts, mathtools}%amsthm, ... symbols & Co. %%TO INSTALL mathtools, bbding, csquotes, ulem, xparse
+%\usepackage{pifont, bbding}  %symbols
+%	\let\theoremstyle\relax
+\usepackage{csquotes}
+\usepackage[normalem]{ulem} %underlying, without replacing em
+\usepackage[ngerman,english]{babel}
+%\usepackage[]{mcode} %matlab
+\usepackage{enumerate}
+\usepackage{xparse} %define fancy commands (http://stackoverflow.com/questions/1812214/latex-optional-arguments)
+
+
+%\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+
+%	b) nice to haves
+
+\usepackage{color}
+\definecolor{TUMblau}		{RGB}{0, 101, 189}
+\definecolor{TUMgruen}		{RGB}{162, 173, 0}
+\definecolor{TUMorange}		{RGB}{227, 114, 34}
+\definecolor{TUMdunkelrot}	{RGB}{156,013,022}
+\definecolor{gray}			{RGB}{140,140,140}
+
+
+\usepackage[hyperfootnotes=false,
+pdffitwindow=false,						% do not resize document window to fit document size
+pdftitle={},							% title
+pdfauthor={Maria Cruz Varona},			% author
+%pdfcreator={LaTeX},					% creator of the document
+linktocpage=true,						% true: only pages in the table of contents is made into a link
+colorlinks=true,						% false: boxed links; true: colored links
+linkcolor=TUMblau,						% color of internal links
+citecolor=TUMdunkelrot,					% color of links to bibliography
+urlcolor=TUMgruen,						% color of external links
+draft = true
+]{hyperref}
+
+\hypersetup{
+	pdfinfo={
+		Keywords={}
+	}
+}
+
+
+\usepackage{todonotes} %[colorinlistoftodos, disable]
+\usepackage{booktabs,units} %pmat
+%\usepackage[justification=centering]{caption}
+%\usepackage{url}
+
+\usepackage{algorithm, algpseudocode} %algpseudocode
+	\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+	\renewcommand{\algorithmicensure}{\textbf{Output:}}
+	
+
+%	c) TIKZ
+\usepackage{pgfplots}
+	% and optionally (as of Pgfplots 1.3):
+	\pgfplotsset{compat=newest} %newest
+%	\pgfplotsset{compat=1.10} %previously 1.9
+	\pgfplotsset{plot coordinates/math parser=false}
+	\pgfplotsset{yticklabel style={text width=2.5em,align=right}}
+	\pgfplotsset{/pgf/number format/.cd, fixed,precision=3}
+	
+	%	TIKZ-EXTERNALIZE
+%	\usepgfplotslibrary{external}
+%		\tikzexternalize[prefix=./pics/externaltikz/] %shell escape=-enable-write18] %optimize=false,
+		
+	%	---- README TIKZ -----
+	%
+	%	In order to get tikzexternalize to work, make sure that
+	%	- your main file name has no empty spaces
+	%	- the conflict with todonotes is resolved!
+	%	----------------------
+			
+	%	Remove compatibility issues with todonotes!
+%	\newcommand{\todos}[1]{\tikzexternaldisable\todo[inline]{#1}\tikzexternalenable}
+		%	\makeatletter		
+		%	\makeatother
+			\newcommand{\todos}[1]{\todo[inline]{#1}}
+		
+	% use the following lines to produce pdf and png with ImageMagick (install Ghostscript and ImageMagick for this to work)
+%	\tikzset{
+%		png export/.style={
+%			external/system call={
+%				pdflatex \tikzexternalcheckshellescape -halt-on-error -interaction=batchmode -jobname "\image" "\texsource"&&
+%				convert -density 300 -transparent white "\image.pdf" "\image.png"
+%			}
+%		}
+%	}
+%	\tikzset{png export}
+		
+	%	Remake all pictures
+%			\tikzset{external/force remake}
+	
+	\newlength\myheight
+	\newlength\mywidth
+%		\setlength\mywidth{85 mm}
+%		\setlength\myheight{35 mm} 
+	
+
+	%	\usetikzlibrary{plotmarks}
+	%	Define standardized lengths for tikz plots throughout the thesis
+%	\newlength{\subplotsfheight}
+%	\newlength{\subplotsfwidth}
+%	\newlength{\plotsfheight}
+%	\newlength{\plotsfwidth}
+%	\newlength{\appsubplotsfheight}
+%	\newlength{\appsubplotsfwidth}
+%	\setlength{\appsubplotsfheight}{4cm}
+%	\setlength{\appsubplotsfwidth}{6.5cm}
+%	\setlength{\subplotsfheight}{3cm}
+%	\setlength{\subplotsfwidth}{5cm} 
+%	\setlength{\plotsfheight}{5cm}
+%	\setlength{\plotsfwidth}{6.5cm} 
+	
+
+
+
+
+% *********************** USER DEFINED ENVIRONMENTS (amsthm package)**************************************
+\newtheorem{df}{\bf Definition}
+%\newtheorem{lm}{Lemma}
+%\newtheorem{remark}{Remark}
+%\newtheorem{thm1}{Theorem}
+%\newtheorem{crl}{Corollary}
+%\newtheorem{propos}{Proposition}
+
+
+% % USER DEFINED FUNCTIONS
+% 1) Symbols 
+\newcommand{\Reals}{\mathbb{R}}
+\newcommand{\Complex}{\mathbb{C}}
+\newcommand{\Htwo}{\mathcal{H}_2}
+\newcommand{\Hinf}{\mathcal{H}_\infty}
+\renewcommand{\th}{^{\text{th}}}
+\newcommand{\BigO}[1]{\mathcal{O}\left(#1\right)}
+
+\newcommand{\defeq}{\vcentcolon=}
+\newcommand{\logicand}{\wedge}
+\newcommand{\logicor}{\vee}
+
+% 2) Matrix operations
+\newcommand{\trans}[1]{#1^\top}
+\newcommand{\htrans}[1]{#1^H}
+\newcommand{\hermit}{^H}
+\newcommand{\inv}[1]{#1^{-1}}
+\newcommand{\invt}[1]{#1^{-\top}}
+\newcommand{\pd}{\succ}
+\newcommand{\nd}{\prec}
+
+
+% 3) Operators
+\newcommand\abs[1]{\left|#1\right|}
+\DeclareMathOperator{\vecspan}{span}
+	\newcommand\vspan[1]{\vecspan\left(#1\right)}
+	\newcommand\vecspace[1]{\mathcal{#1}}
+\DeclareMathOperator{\diagmat}{diag}
+	\newcommand\diag[1]{\diagmat\left(#1\right)}
+\DeclareMathOperator{\matrixrank}{rank}
+	\newcommand\rank[1]{\matrixrank #1}
+\DeclareMathOperator{\matrixrang}{rang}
+	\newcommand\rang[1]{\matrixrang\left(#1\right)}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\diff}[2]{\frac{\mathrm{d}\, #1}{\mathrm{d}\, #2}}
+\newcommand{\innProd}[2]{\left\langle#1, \; #2\right\rangle}
+
+% 4) Formatting
+\newcommand{\ts}{\!} %negative space for formulas in text
+\newcommand{\nix}{\mbox{ }} %empty space
+
+
+
+%---- MOR comamnds
+\newcommand{\krylov}[3]{\vecspace{K}_{#1}\left(#2, #3\right)}
+\newcommand{\shift}{\sigma}
+\newcommand{\As}{A_{\shift}}
+\newcommand{\Asx}{A-\shift E}
+\newcommand{\inputkrylov}{\krylov{n}{\inv{\As} E}{\inv{\As}B}}
+\newcommand{\outputkrylov}{\krylov{n}{\invt{\As} \trans{E}}{\invt{\As} \trans{C}}}
+\newcommand{\moment}{C\left(\inv{\As}E\right)^i \inv{\As} B}
+
+\newcommand{\pencil}{\mu E - A}
+
+\newcommand{\GramC}{\mathcal{W}_c}
+\newcommand{\GramO}{\mathcal{W}_o}
+
+%----- theorems
+%\newtheorem{thm}{Theorem}[section]
+%\newtheorem{lemma}{Lemma}
+%%\newtheorem{corollary}{Corollary}
+%\newtheorem{proposition}{Proposition}
+
+%\theoremstyle{definition}
+%\newtheorem{definition}{Definition}
+
+%\theoremstyle{remark}
+%\newtheorem{remark}{Remark}

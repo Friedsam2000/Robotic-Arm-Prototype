@@ -1,0 +1,9 @@
+\begin{tikzpicture}
+	 \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width = 10 cm]{./images/wagen}};
+	    \begin{scope}[x={(image.south east)},y={(image.north west)}]
+	        \draw[white, thick, latex'-] (0.63, 0.74) -- +(0.1, 0.1) node[right] {Wagen};
+	        \draw[white, thick, latex'-] (0.25, 0.58) -- +(-0.05, 0.1) node[left] {Schiene};
+	        \draw[white, thick, latex'-] (0.32, 0.42) -- +(-0.05, -0.15) node[left, fill=black] {Sensorrad};
+	        \draw[white, thick, latex'-] (0.49, 0.37) -- +(0.05, -0.15) node[right, fill=black] {Antriebsrad};
+	    \end{scope}
+\end{tikzpicture}
