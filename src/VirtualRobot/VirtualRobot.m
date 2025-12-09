@@ -4,8 +4,8 @@ classdef VirtualRobot < handle
 
         JOINT_ANGLE_LIMITS = [-pi/4, pi/4;
             -pi/4, pi/4;
-            -(14/8)*pi, (14/8)*pi;
-            -(5/6)*pi, (5/6)*pi];
+            -2*pi, 2*pi;
+            -(4/6)*pi, (4/6)*pi];
 
          % Define a condition number for the Jacobian above when the
          % configuration is considered a singularity configuraion
@@ -39,11 +39,11 @@ classdef VirtualRobot < handle
 
             %% Setup Frames and Joints of the simulated robot
             orig_frame = Frame([0; 0; 0], [], 'Origin', []);
-            joint1 = Frame([0; 0; 94.5127], orig_frame, 'Joint 1', 'y');
+            joint1 = Frame([0; 0; 83.5127], orig_frame, 'Joint 1', 'y');
             joint2 = Frame([0;0;0], joint1, 'Joint 2', 'x');
-            joint3 = Frame([0;0;150.0277], joint2, 'Joint 3', 'z');
-            joint4 = Frame([0;0;157.8995], joint3, 'Joint 4', 'x');
-            endeffector_frame = Frame([0;0;220.40], joint4, 'Endeffector', []);
+            joint3 = Frame([0;0;155.53], joint2, 'Joint 3', 'z');
+            joint4 = Frame([0;0;150.8995], joint3, 'Joint 4', 'x');
+            endeffector_frame = Frame([0;0;222.00], joint4, 'Endeffector', []);
 
             %% Setup Links of the simulated robot
             numLinks = 4; % Number of links
@@ -128,6 +128,13 @@ classdef VirtualRobot < handle
             singularityWarning = false;
             if cond(obj.getJacobian) > obj.singularityCondition
                 singularityWarning = true;
+            end
+        end
+
+        function limitWarning = checkJointLimits(obj)
+            limitWarning = false;
+            if ~all(obj.q >= obj.JOINT_ANGLE_LIMITS(:,1) & obj.q <= obj.JOINT_ANGLE_LIMITS(:,2))
+                limitWarning = true;
             end
         end
 

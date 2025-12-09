@@ -8,9 +8,10 @@ classdef RealRobot < handle
         % ID 3 : YawServo
         % ID 4 : ElbowServo
 
-        JOINT_VELOCITY_LIMITS = [0.6;0.6;2;2];
+        JOINT_VELOCITY_LIMITS = [inf;inf;inf;inf];
         SHOULDER_GEAR_RATIO = 5;
-        ELBOW_GEAR_RATIO = 2.5;
+        ELBOW_GEAR_RATIO = 4;
+        JAW_GEAR_RATIO = 8;
 
     end
 
@@ -80,6 +81,7 @@ classdef RealRobot < handle
                 end
             end
 
+
             % Convert joint velocities q_dot to servo velocities omega
             servoVelocities = obj.convertJointVelocitiesToServoVelocites(jointVelocities);
 
@@ -89,9 +91,13 @@ classdef RealRobot < handle
 
         end
 
+        function jointVelocities = getJointVelocities(obj)
+            servoVelocities = obj.servoChain.getServoVelocities;
+            jointVelocities = obj.convertServoVelocitiesToJointVelocities(servoVelocities);
+        end
+
         function setRobotTorque(obj, state)
     
-            
             % Enable / Disable the torque of the whole robot.
             for ID = 1:4
                 obj.servoChain.setServoTorque(ID,state);
@@ -114,7 +120,33 @@ classdef RealRobot < handle
             obj.checkConnection();
         end
 
-        %% Conversio between Joint Angles and Servo Angles (from Thesis Zeitler 2023)
+        function setRobotOperationMode(obj, mode)
+
+            % change operation mode of the whole robot.
+            for ID = 1:4
+                obj.servoChain.setServoOperationMode(ID,mode);
+                if ~obj.checkConnection()
+                    return;
+                end
+            end
+        end
+        function setJointTorques(obj, jointTorques)
+
+            desiredServoTorques = obj.convertJointTorquesToServoTorques(jointTorques);
+            obj.servoChain.setServoAppliedTorques(desiredServoTorques);
+            obj.checkConnection();
+        end
+
+        function jointTorques = getJointTorques(obj)
+
+            measuredServoTorques = obj.servoChain.getServoMeasuredTorques;
+            jointTorques = obj.convertServoTorquesToJointTorques(measuredServoTorques);
+            obj.checkConnection();
+        end
+
+
+
+        %% Conversion between Joint Angles and Servo Angles (from Thesis Zeitler 2023)
 
         function jointAngles = convertServoAnglesToJointAngles(obj,servoAngles)
 
@@ -135,7 +167,7 @@ classdef RealRobot < handle
             q_1 = (delta_phi_1 - delta_phi_2)/obj.SHOULDER_GEAR_RATIO;
             q_2 = -(delta_phi_1 + delta_phi_2)/obj.SHOULDER_GEAR_RATIO;
 
-            q_3 = phi_3 - phi_3_0;
+            q_3 = (phi_3 - phi_3_0)/obj.JAW_GEAR_RATIO;
             q_4 = (phi_4 - phi_4_0)/obj.ELBOW_GEAR_RATIO;
 
             jointAngles = [q_1;q_2;q_3;q_4];
@@ -150,7 +182,7 @@ classdef RealRobot < handle
             q_4_dot = jointVelocities(4);
 
             % Calculation according to Thesis
-            omega_3 = q_3_dot;
+            omega_3 = q_3_dot*obj.JAW_GEAR_RATIO;
             omega_4 = q_4_dot*obj.ELBOW_GEAR_RATIO;
 
             omega_1 = 0.5*(q_2_dot-q_1_dot) * obj.SHOULDER_GEAR_RATIO;
@@ -162,6 +194,57 @@ classdef RealRobot < handle
             % Convert rad/s to rev/min
             servoVelocities = 60*(servoVelocities_rad_s)/(2*pi);
 
+        end
+
+        function jointVelocities = convertServoVelocitiesToJointVelocities(obj,servoVelocities)
+
+            omega_1 = servoVelocities(1);
+            omega_2 = servoVelocities(2);
+            omega_3 = servoVelocities(3);
+            omega_4 = servoVelocities(4);
+
+            % Calculation according to Thesis
+            q_3_dot = omega_3 / obj.JAW_GEAR_RATIO;
+            q_4_dot = omega_4 / obj.ELBOW_GEAR_RATIO;
+            
+            q_1_dot = -(omega_1 - omega_2) / obj.SHOULDER_GEAR_RATIO;
+            q_2_dot = (omega_1 + omega_2) / obj.SHOULDER_GEAR_RATIO;
+
+            jointVelocities = [q_1_dot; q_2_dot; q_3_dot; q_4_dot];
+        end
+
+        function servoTorques = convertJointTorquesToServoTorques(obj,jointTorques)
+
+            t_1 = jointTorques(1);
+            t_2 = jointTorques(2);
+            t_3 = jointTorques(3);
+            t_4 = jointTorques(4);
+
+            % Calculation according to Thesis
+            m_3 = t_3/obj.JAW_GEAR_RATIO;
+            m_4 = t_4/obj.ELBOW_GEAR_RATIO;
+
+            m_1 = 0.5*(t_2-t_1) / obj.SHOULDER_GEAR_RATIO;
+            m_2 = 0.5*(t_2+t_1) / obj.SHOULDER_GEAR_RATIO;
+
+            servoTorques = [m_1;m_2;m_3;m_4];
+        end
+
+        function jointTorques = convertServoTorquesToJointTorques(obj,servoTorques)
+
+            m_1 = servoTorques(1);
+            m_2 = servoTorques(2);
+            m_3 = servoTorques(3);
+            m_4 = servoTorques(4);
+
+            % Calculation according to Thesis
+            t_3 = m_3 * obj.JAW_GEAR_RATIO;
+            t_4 = m_4 * obj.ELBOW_GEAR_RATIO;
+
+            t_1 = (m_2-m_1) * obj.SHOULDER_GEAR_RATIO;
+            t_2 = +(m_2+m_1) * obj.SHOULDER_GEAR_RATIO;
+
+            jointTorques = [t_1;t_2;t_3;t_4];
         end
     
     end

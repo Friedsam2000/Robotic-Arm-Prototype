@@ -5,7 +5,7 @@ classdef ServoChain < handle
         PROTOCOL_VERSION            = 2;
         ADDR_PRO_PRESENT_POSITION   = 132;
         ADDR_PRO_GOAL_VELOCITY      = 104;
-        BAUDRATE                    = 2000000;
+        BAUDRATE                    = 3000000;
         ADDR_PRO_TORQUE_ENABLE      = 64;
         COMM_SUCCESS                = 0;
         ADDR_PRO_VELOCITY_I_GAIN    = 76;
@@ -14,12 +14,22 @@ classdef ServoChain < handle
 
         ADDR_PRO_PRESENT_CURRENT    = 126;
         ADDR_PRO_GOAL_CURRENT       = 102;
+        ADDR_PRO_PRESENT_VELOCITY   = 128;
+        ADDR_PRO_GOAL_POSITION      = 116;
         ADDR_PRO_LED                = 65;
+
+        ADDR_PRO_CURRENT_LIMIT      = 38;
+        ADDR_PRO_VELOCITY_LIMIT     = 44;
 
         ADDR_PRO_DRIVE_MODE             = 10;  % Address for the Drive Mode
         TIME_BASED_PROFILE              = 4;   % Value to set for Time-Based Profile (Bit 2 set)
         ADDR_PRO_PROFILE_ACCELERATION   = 108; % Address for Profile Acceleration
 
+        M_RESISTING = 1/762.8; %from experiments (applied Torque and measured current)
+        M_ASSISTING = 1/238.1;
+        %M_RESTING = (1/762.8+1/238.1)/2; %-+ 0.6 tolerance
+        %M_RESTING = 1/238.1;
+        M_RESTING =1/762.8;
     end
 
     properties
@@ -32,8 +42,14 @@ classdef ServoChain < handle
         % Group number for sync operations
         groupwrite_num = [];
         groupwrite_cur = [];
+        groupwrite_pos = [];
         groupread_num = [];
         groupread_cur = [];
+        groupread_vel = [];
+        groupread_cmax = [];
+        groupread_vmax = [];
+
+        vmax;
     end
 
     methods (Static)
@@ -99,13 +115,17 @@ classdef ServoChain < handle
             % Get Port Num
             obj.port_num = calllib(obj.lib_name, 'portHandler', port);
 
-            % Initialize groupSyncWrite Struct
+            % Initialize groupSyncWrite Structs
             obj.groupwrite_num = calllib(obj.lib_name, 'groupSyncWrite', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_GOAL_VELOCITY, 4);
             obj.groupwrite_cur = calllib(obj.lib_name, 'groupSyncWrite', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_GOAL_CURRENT, 2);
+            obj.groupwrite_pos = calllib(obj.lib_name, 'groupSyncWrite', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_GOAL_POSITION,4);
 
             % Initialize groupSyncRead Structs
             obj.groupread_num = calllib(obj.lib_name, 'groupSyncRead', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_PRESENT_POSITION,4);
             obj.groupread_cur = calllib(obj.lib_name, 'groupSyncRead', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_PRESENT_CURRENT,2);
+            obj.groupread_vel = calllib(obj.lib_name, 'groupSyncRead', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_PRESENT_VELOCITY,4);
+            obj.groupread_cmax = calllib(obj.lib_name, 'groupSyncRead', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_CURRENT_LIMIT,2);
+            obj.groupread_vmax = calllib(obj.lib_name, 'groupSyncRead', obj.port_num, obj.PROTOCOL_VERSION, obj.ADDR_PRO_VELOCITY_LIMIT,4);
 
             % Open port
             if (calllib(obj.lib_name, 'openPort', obj.port_num))
@@ -162,7 +182,11 @@ classdef ServoChain < handle
             for ID = obj.availableIDs
                 if ~ (calllib(obj.lib_name,'groupSyncReadAddParam', obj.groupread_num, ID) ...
                         && calllib(obj.lib_name,'groupSyncReadAddParam', obj.groupread_cur, ID) ...
+                        && calllib(obj.lib_name,'groupSyncReadAddParam', obj.groupread_vel, ID) ...
+                        && calllib(obj.lib_name,'groupSyncReadAddParam', obj.groupread_cmax, ID) ...
+                        && calllib(obj.lib_name,'groupSyncReadAddParam', obj.groupread_vmax, ID) ...
                         && calllib(obj.lib_name,'groupSyncWriteAddParam', obj.groupwrite_num, ID, 0, 4) ...
+                        && calllib(obj.lib_name,'groupSyncWriteAddParam', obj.groupwrite_pos, ID, 0, 4) ...
                         && calllib(obj.lib_name,'groupSyncWriteAddParam', obj.groupwrite_cur, ID, 0, 2))
 
                     fprintf('ServoChain: groupSyncRead addparam failed');
@@ -170,6 +194,7 @@ classdef ServoChain < handle
                     return
                 end
             end
+            obj.vmax = obj.getVelocityLimits;
         end
     end
 
@@ -187,6 +212,18 @@ classdef ServoChain < handle
                     % Clear syncread parameter storage
                     calllib(obj.lib_name, 'groupSyncReadClearParam', obj.groupread_cur);
                 end
+                if ~isempty(obj.groupread_vel)
+                    % Clear syncread parameter storage
+                    calllib(obj.lib_name, 'groupSyncReadClearParam', obj.groupread_vel);
+                end
+                if ~isempty(obj.groupread_cmax)
+                    % Clear syncread parameter storage
+                    calllib(obj.lib_name, 'groupSyncReadClearParam', obj.groupread_cmax);
+                end
+                if ~isempty(obj.groupread_vmax)
+                    % Clear syncread parameter storage
+                    calllib(obj.lib_name, 'groupSyncReadClearParam', obj.groupread_vmax);
+                end
                 if ~isempty(obj.groupwrite_num)
                     % Clear syncread parameter storage
                     calllib(obj.lib_name, 'groupSyncWriteClearParam', obj.groupwrite_num);
@@ -194,6 +231,10 @@ classdef ServoChain < handle
                 if ~isempty(obj.groupwrite_cur)
                     % Clear syncread parameter storage
                     calllib(obj.lib_name, 'groupSyncWriteClearParam', obj.groupwrite_cur);
+                end
+                if ~isempty(obj.groupwrite_pos)
+                    % Clear syncread parameter storage
+                    calllib(obj.lib_name, 'groupSyncWriteClearParam', obj.groupwrite_pos);
                 end
                 % Try to close the port
                 try
@@ -271,11 +312,11 @@ classdef ServoChain < handle
                 fprintf("Error setting servo velocities: \nSize of servoVelocities does not match number of available IDs!\n");
                 return;
             end
-            for i = 1:num_servos
-                if ~(obj.getServoOperationMode(i) == 1)
-                    fprintf("Warning: \nServo %.0f not set to correct operation mode\n", i);
-                end
-            end
+            % for i = 1:num_servos
+            %     if ~(obj.getServoOperationMode(obj.availableIDs(i)) == 1)
+            %         fprintf("Warning: \nServo %.0f not set to correct operation mode\n", i);
+            %     end
+            % end
 
             % Convert desired rev/min to dynamixel decimal
             VELOCITIES_VAL = (servoVelocities)/0.229; % Convert rev/min to decimal
@@ -286,18 +327,27 @@ classdef ServoChain < handle
             % VELOCITY_VAL is a value in 4 byte (256^4) continuous range
             % A value of (256^4) / 2 is zero, values bigger are positive,
             % values smaller are negative.
-            maxrange = 2^(4*8)-1; % 4-byte range
+            maxrange = 2^(4*8); % 4-byte range
 
             % Change goal velocities of all available servos in groupSyncWrite struct
             for i = 1:num_servos
                 % Add parameter storage for present position value
                 VEL = VELOCITIES_VAL(i);
+                % Take limit into account
+                if VEL > obj.vmax(i)
+                    VEL = obj.vmax(i);
+                    fprintf("Warning: \nVelocity limit for joint %.0f exceeded, driving at max velocity\n",i);
+                elseif VEL < -obj.vmax(i)
+                    VEL = -obj.vmax(i);
+                    fprintf("Warning: \nVelocity limit for joint %.0f exceeded, driving at max velocity\n",i);
+                end
+
                 if VEL < 0
                     VEL = maxrange+VEL;
                 end
                 calllib(obj.lib_name,'groupSyncWriteChangeParam', obj.groupwrite_num, obj.availableIDs(i), VEL, 4,0);
             end
-
+            
             % Syncwrite goal position
             calllib(obj.lib_name,'groupSyncWriteTxPacket',obj.groupwrite_num);
             obj.checkConnection();
@@ -312,8 +362,12 @@ classdef ServoChain < handle
         
         function setServoOperationMode(obj, ID, operationMode)
 
-            % mode = 1: velocity control
-            % mode = 0: current control
+            % operationMode = 0: current control
+            % operationMode = 1: velocity control
+            % operationMode = 3: position control
+            % operationMode = 4: extended position control
+            % operationMode = 5: current-based position control
+            % operationMode = 16: PWM control
 
             if obj.getServoTorque(ID)
                 fprintf('Error setting operation mode: disable torque first!\n');
@@ -331,7 +385,7 @@ classdef ServoChain < handle
 
         end
 
-        function servoCurrents = getServoCurrents(obj) %doesnt work yet!
+        function servoCurrents = getServoCurrents(obj)
             
             % Syncread present currents
             calllib(obj.lib_name,'groupSyncReadTxRxPacket', obj.groupread_cur);
@@ -364,7 +418,8 @@ classdef ServoChain < handle
                 return;
             end
             for i = 1:num_servos
-                if ~(obj.getServoOperationMode(i) == 0)
+                mode = obj.getServoOperationMode(obj.availableIDs(i));
+                if ~(mode == 0 || mode == 5)
                     fprintf("Warning: \nServo %.0f not set to correct operation mode\n", i);
                 end
             end
@@ -375,7 +430,7 @@ classdef ServoChain < handle
             %Round CURRENTS_VAL since dynamixel accepts only integers here
             CURRENTS_VAL = round(CURRENTS_VAL);
 
-            % VELOCITY_VAL is a value in 2 byte (256^2) continuous range
+            % CURRENTS_VAL is a value in 2 byte (256^2) continuous range
             % A value of (256^2) / 2 is zero, values bigger are positive,
             % values smaller are negative.
             maxrange = 2^(2*8)-1; % 2-byte range
@@ -393,6 +448,114 @@ classdef ServoChain < handle
             % Syncwrite goal position
             calllib(obj.lib_name,'groupSyncWriteTxPacket',obj.groupwrite_cur);
             obj.checkConnection();
+        end
+
+        function servoVelocities = getServoVelocities(obj)
+            
+            % Syncread present currents
+            calllib(obj.lib_name,'groupSyncReadTxRxPacket', obj.groupread_vel);
+
+            num_servos = length(obj.availableIDs);
+            servoVelocities = zeros(num_servos,1);
+
+            conversionFactor = 0.229; % (see Dynamixel Wizard)
+            maxrange = 2^(4*8); % 4-byte range
+            midpoint = maxrange/2;
+
+            for i = 1:num_servos
+                raw_velocity = calllib(obj.lib_name, 'groupSyncReadGetData', obj.groupread_vel, obj.availableIDs(i), obj.ADDR_PRO_PRESENT_VELOCITY, 4);
+                if raw_velocity > midpoint
+                    raw_velocity = raw_velocity - maxrange;
+                end
+                %disp(raw_velocity)
+                servoVelocities(i) = raw_velocity * conversionFactor;
+            end
+            obj.checkConnection();
+        end
+
+        function setServoPositions(obj, servoPositions)
+
+            % The servo positions will be set with the same order as the
+            % available IDs
+            num_servos = length(obj.availableIDs);
+
+            if ~(length(servoPositions) == num_servos)
+                fprintf("Error setting servo currents: \nSize of servoCurrents does not match number of available IDs!\n");
+                return;
+            end
+            for i = 1:num_servos
+                mode = obj.getServoOperationMode(obj.availableIDs(i));
+                if ~(mode == 3 || mode == 4 || mode == 5)
+                    fprintf("Warning: \nServo %.0f not set to correct operation mode\n", i);
+                end
+            end
+
+            % Convert desired rad to dynamixel decimal
+            POSITIONS_VAL = rad2deg(servoPositions)/0.087891; % Convert rad to decimal
+
+            %Round CURRENTS_VAL since dynamixel accepts only integers here
+            POSITIONS_VAL = round(POSITIONS_VAL);
+
+            % VELOCITY_VAL is a value in 4 byte (256^4) continuous range
+            % A value of (256^4) / 2 is zero, values bigger are positive,
+            % values smaller are negative.
+            maxrange = 2^(4*8)-1; % 4-byte range
+
+            % Change goal currents of all available servos in groupSyncWrite struct
+            for i = 1:num_servos
+                % Add parameter storage for present position value
+                POS = POSITIONS_VAL(i);
+                if POS < 0
+                    POS = maxrange+POS;
+                end
+                calllib(obj.lib_name,'groupSyncWriteChangeParam', obj.groupwrite_pos, obj.availableIDs(i), POS, 4,0);
+            end
+
+            % Syncwrite goal position
+            calllib(obj.lib_name,'groupSyncWriteTxPacket',obj.groupwrite_pos);
+            obj.checkConnection();
+        end
+
+        function servoMeasuredTorques = getServoMeasuredTorques(obj)
+
+            num_servos = length(obj.availableIDs);
+            vel = obj.getServoVelocities;
+            cur = obj.getServoCurrents;
+
+            servoMeasuredTorques = zeros(num_servos,1);
+
+            for i=1:num_servos
+                if (vel(i)*cur(i) > 0)
+                    servoMeasuredTorques(i) = obj.M_RESISTING * cur(i);
+                    disp("resisting")
+                elseif (vel(i)*cur(i) < 0)
+                    servoMeasuredTorques(i) = obj.M_ASSISTING * cur(i);
+                    disp("assisting")
+                else
+                    servoMeasuredTorques(i) = obj.M_RESTING * cur(i);
+                    disp("resting (=assisting)")
+                end
+            end
+        end
+
+        function setServoAppliedTorques(obj, servoAppliedTorques)
+            
+            num_servos = length(obj.availableIDs);
+            vel = obj.getServoVelocities;
+
+            servoAppliedCurrents = zeros(num_servos,1);
+
+            for i=1:num_servos
+                if (vel(i)*servoAppliedTorques(i) > 0)
+                    servoAppliedCurrents(i) = servoAppliedTorques(i) / obj.M_RESISTING;
+                elseif (vel(i)*servoAppliedTorques(i) < 0)
+                    servoAppliedCurrents(i) = servoAppliedTorques(i) / obj.M_ASSISTING;
+                else
+                    servoAppliedCurrents(i) = servoAppliedTorques(i) / obj.M_RESTING;
+                end
+            end
+
+            obj.setServoCurrents(servoAppliedCurrents);
         end
 
 
@@ -460,6 +623,20 @@ classdef ServoChain < handle
 
             obj.checkConnection();
         end
+
+        function velocityLimits = getVelocityLimits(obj)
+
+            calllib(obj.lib_name,'groupSyncReadTxRxPacket', obj.groupread_vmax);
+
+            num_servos = length(obj.availableIDs);
+            velocityLimits = zeros(num_servos,1);
+
+            for i = 1:num_servos
+                velocityLimits(i) = calllib(obj.lib_name, 'groupSyncReadGetData', obj.groupread_vmax, obj.availableIDs(i), obj.ADDR_PRO_VELOCITY_LIMIT, 4);
+            end
+            obj.checkConnection();
+        end
+        
     
     end
 end

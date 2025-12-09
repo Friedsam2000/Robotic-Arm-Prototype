@@ -8,6 +8,11 @@ classdef Launcher < handle
 
         % An optional reference to a matlab app which controls the launcher
         matlabApp = [];
+
+        %performance checks (measure loop frequency)
+        freqAvg = 0;
+        freqNum = 0;
+        freqTimer = 0;
     end
 
 
@@ -129,6 +134,7 @@ classdef Launcher < handle
 
             % Start the Program
             fprintf('Launcher: Program %s starting...\n', class(obj.activeProgram));
+            obj.freqTimer = tic;
             obj.activeProgram.start(varargin{:});
         end
 
@@ -150,13 +156,20 @@ classdef Launcher < handle
             end
 
             % Stop any Motion
-            obj.realRobot.setJointVelocities([0;0;0;0])
+            r = obj.realRobot;
+            r.setRobotTorque(0)
+            r.setRobotOperationMode(1)
+            r.setRobotTorque(1)
+            r.setJointVelocities([0;0;0;0])
 
             % Restart the plotting timer
             fprintf("Launcher: Starting Plotting Timer. \n");
             start(obj.jointSyncTimer);
 
-
+            % Reset performance checks
+            obj.freqAvg = 0;
+            obj.freqNum = 0;
+            obj.freqTimer = 0;
         end
 
         function syncJointsAndPlot(obj)
@@ -195,7 +208,7 @@ classdef Launcher < handle
             argsInfo = feval([programName '.getArgumentsInfo']);
             
             % Use the validation pattern from argsInfo
-            if regexp(arguments, argsInfo.validationPattern)
+            if regexp(arguments, argsInfo.validationPattern, 'emptymatch')
                 % Continue with your existing validation logic here,
                 % potentially customizing it based on additional info from argsInfo if necessary
                 is_valid = true;
@@ -242,6 +255,15 @@ classdef Launcher < handle
             addpath(fullfile(parentDir, 'DynamixelLib'));
 
             dynamixel_lib_path = fullfile(parentDir, 'DynamixelLib');
+        end
+
+        function avgFreq = getAvgLoopFreq(obj)
+            f = 1 / toc(obj.freqTimer);
+            obj.freqTimer = tic;
+            n = obj.freqNum + 1;
+            avgFreq = (obj.freqAvg * obj.freqNum + f) / n;
+            obj.freqNum = n;
+            obj.freqAvg = avgFreq;
         end
     end
 
